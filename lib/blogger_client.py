@@ -73,13 +73,14 @@ class BloggerClient:
                 return None
             raise BloggerError(f"Error fetching post by path: {e}")
 
-    def get_post_by_id(self, blog_id: str, post_id: str) -> Optional[Dict[str, Any]]:
+    def get_post_by_id(self, blog_id: str, post_id: str, view: str = 'READER') -> Optional[Dict[str, Any]]:
         """
         Get post by ID
 
         Args:
             blog_id: Blogger blog ID
             post_id: Post ID
+            view: View type ('READER' for published, 'AUTHOR' for drafts)
 
         Returns:
             Post dict if found, None otherwise
@@ -90,7 +91,8 @@ class BloggerClient:
         try:
             result = self.service.posts().get(
                 blogId=blog_id,
-                postId=post_id
+                postId=post_id,
+                view=view
             ).execute()
 
             return result
@@ -173,9 +175,9 @@ class BloggerClient:
         Raises:
             BloggerError: On API errors
         """
-        # Fetch current post to get full data
+        # Fetch current post to get full data (use AUTHOR view to include drafts)
         try:
-            current = self.get_post_by_id(blog_id, post_id)
+            current = self.get_post_by_id(blog_id, post_id, view='AUTHOR')
             if not current:
                 raise BloggerError(f"Post not found: {post_id}")
 
@@ -187,14 +189,12 @@ class BloggerClient:
             if labels is not None:
                 current['labels'] = labels
 
-            # Use PATCH to update
+            # Use PUT (update) for more reliable updates
             result = self._retry_api_call(
-                lambda: self.service.posts().patch(
+                lambda: self.service.posts().update(
                     blogId=blog_id,
                     postId=post_id,
-                    body=current,
-                    revert=False,  # Don't revert to draft
-                    publish=(not is_draft) if is_draft is not None else None
+                    body=current
                 ).execute()
             )
 
@@ -223,16 +223,16 @@ class BloggerClient:
         Raises:
             BloggerError: On API errors
         """
-        # Fast path: Try cached ID
+        # Fast path: Try cached ID with AUTHOR view (includes drafts)
         if cached_blogger_id:
             try:
-                post = self.get_post_by_id(blog_id, cached_blogger_id)
+                post = self.get_post_by_id(blog_id, cached_blogger_id, view='AUTHOR')
                 if post:
                     return ('UPDATE', cached_blogger_id)
             except BloggerError:
                 pass  # Fall through to path lookup
 
-        # Authoritative: Check by path
+        # Authoritative: Check by path (only works for published posts)
         post = self.get_post_by_path(blog_id, blogger_path)
         if post:
             return ('UPDATE', post['id'])
