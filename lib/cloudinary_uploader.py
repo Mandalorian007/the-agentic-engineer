@@ -46,7 +46,7 @@ class CloudinaryUploader:
         Args:
             image_path: Local path to image
             public_id: Public ID for the image (without extension)
-            folder: Cloudinary folder
+            folder: Cloudinary folder (will be auto-created if it doesn't exist)
             format: Output format (webp, jpg, png, auto)
             quality: Quality setting (auto, auto:low, auto:good, auto:best, or 1-100)
 
@@ -57,13 +57,12 @@ class CloudinaryUploader:
             CloudinaryError: On upload failure
         """
         try:
-            # Build full public ID with folder
-            full_public_id = f"{folder}/{public_id}"
-
             # Upload with transformations
+            # The 'folder' parameter both creates the folder AND sets the public_id prefix
             result = cloudinary.uploader.upload(
                 str(image_path),
-                public_id=full_public_id,
+                folder=folder,
+                public_id=public_id,
                 format=format,
                 quality=quality,
                 overwrite=True,
@@ -134,10 +133,14 @@ class CloudinaryUploader:
 
             print(f"   → Uploading {img_ref}...")
 
+            # Build folder path: base_folder/post_slug (e.g., "agentic-engineer-blog/hello-world")
+            base_folder = self.config.get('folder', 'blog-posts')
+            folder_path = f"{base_folder}/{post_slug}"
+
             result = self.upload_image(
                 image_path=img_path,
                 public_id=img_name,
-                folder=f"blog-posts/{post_slug}",
+                folder=folder_path,
                 format=self.config.get('format', 'webp'),
                 quality=self.config.get('quality', 'auto:good')
             )

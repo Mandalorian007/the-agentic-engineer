@@ -11,9 +11,9 @@ image_optimization:
 
 # Cloudinary Upload Settings
 cloudinary:
-  folder: "blog-posts"   # Base folder for uploads
-  format: "webp"         # Final format (webp, auto)
-  quality: "auto:good"   # auto, auto:low, auto:good, auto:best, or 1-100
+  folder: "agentic-engineer-blog"   # Base folder for uploads (will auto-create if doesn't exist)
+  format: "webp"                     # Final format (webp, auto)
+  quality: "auto:good"               # auto, auto:low, auto:good, auto:best, or 1-100
 
 # Markdown Processing
 markdown:

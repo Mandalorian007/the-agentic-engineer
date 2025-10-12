@@ -55,11 +55,14 @@ def load_config() -> Dict[str, Any]:
         'refresh_token': os.getenv('BLOGGER_REFRESH_TOKEN')
     }
 
-    config['cloudinary'] = {
+    # Merge Cloudinary credentials with existing config from YAML
+    cloudinary_config = config.get('cloudinary', {})
+    cloudinary_config.update({
         'cloud_name': os.getenv('CLOUDINARY_CLOUD_NAME'),
         'api_key': os.getenv('CLOUDINARY_API_KEY'),
         'api_secret': os.getenv('CLOUDINARY_API_SECRET')
-    }
+    })
+    config['cloudinary'] = cloudinary_config
 
     # Validate configuration
     validate_config(config)
