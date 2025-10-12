@@ -159,6 +159,32 @@ Create a complete blog post following this project's structure:
    - Recommended: Additional images for major sections, diagrams, or examples
    - **Prompt tips**: Be specific about style (minimalist, modern, flat design), colors, perspective, subject details, and mood
 
+## Saving the Post to Disk
+
+**CRITICAL**: Always save posts using Write tool to `posts/YYYY-MM-DD-slug/post.md`
+
+### File Structure
+```
+posts/YYYY-MM-DD-slug/
+├── post.md                      # Write tool saves here
+├── hero-blog-automation.png     # Descriptive slug-style names
+└── diagram-oauth-flow.png       # Makes images findable later
+```
+
+### Frontmatter (Required at top of post.md)
+```yaml
+---
+title: "Post Title"
+date: 2025-10-12T10:00:00Z
+tags: [python, automation]
+status: draft
+---
+```
+
+### Image References & Naming
+- Use relative paths: `![Alt text](./hero-blog-automation.png)`
+- Name images with descriptive slugs: `hero-topic-name.png`, `diagram-what-it-shows.png`, `screenshot-feature-name.png`
+
 ## Process
 
 1. **Ask clarifying questions** if the writeup is unclear:
