@@ -112,6 +112,94 @@ def is_alternative_deletion_method(command):
     return False
 
 
+def is_dangerous_git_command(command):
+    """
+    Protect against dangerous git operations that could cause data loss or
+    break collaboration workflows.
+    """
+    normalized = ' '.join(command.lower().split())
+
+    # Dangerous git patterns
+    git_patterns = [
+        r'\bgit\s+push\s+.*--force',            # Force push (breaks others' work)
+        r'\bgit\s+push\s+.*-f\b',               # Force push shorthand
+        r'\bgit\s+reset\s+.*--hard',            # Hard reset (loses work)
+        r'\bgit\s+clean\s+.*-[dfx]',            # Clean with force (deletes files)
+        r'\bgit\s+branch\s+.*-D',               # Force delete branch
+        r'\bgit\s+config\s+--global',           # Global config changes (system-wide)
+        r'\bgit\s+config\s+--system',           # System config changes
+        r'\bgit\s+filter-branch',               # Rewrite history (dangerous)
+        r'\bgit\s+filter-repo',                 # Rewrite history (modern)
+        r'\bgit\s+rebase\s+.*-i',               # Interactive rebase (requires terminal input)
+        r'\bgit\s+reflog\s+expire',             # Expire reflog (loses recovery points)
+        r'\bgit\s+gc\s+.*--prune=now',          # Aggressive garbage collection
+        r'\bgit\s+remote\s+remove\s+origin',    # Remove origin remote
+        r'\bgit\s+remote\s+rm\s+origin',        # Remove origin remote (alias)
+    ]
+
+    for pattern in git_patterns:
+        if re.search(pattern, normalized):
+            return True
+
+    return False
+
+
+def is_dangerous_permission_change(command):
+    """
+    Detect dangerous permission changes.
+    Allows chmod +x for making scripts executable (common development need).
+    Blocks other dangerous permission patterns.
+    """
+    normalized = ' '.join(command.lower().split())
+
+    # Allow chmod +x for making scripts executable (common and safe)
+    if re.search(r'\bchmod\s+\+x\b', normalized):
+        return False
+
+    # Block dangerous permission patterns
+    perm_patterns = [
+        r'\bchmod\s+777',                       # World-writable (major security risk)
+        r'\bchmod\s+.*-R\s+777',                # Recursive 777
+        r'\bchmod\s+.*a\+rwx',                  # All read/write/execute
+        r'\bchmod\s+.*o\+w',                    # Others can write
+        r'\bchmod\s+.*-R.*[67][67][67]',        # Recursive permissive modes
+        r'\bchown\s+.*-R\s+root',               # Recursive root ownership
+        r'\bchown\s+.*-R\s+.*:.*',              # Recursive ownership change (risky)
+        r'\bsudo\s+chmod\s+(?!\+x)',            # Sudo chmod (except +x)
+        r'\bsudo\s+chown',                      # Sudo chown (system changes)
+    ]
+
+    for pattern in perm_patterns:
+        if re.search(pattern, normalized):
+            return True
+
+    return False
+
+
+def is_unauthorized_brew_command(command):
+    """
+    Block Homebrew commands to prevent unauthorized system-level package installation.
+    """
+    normalized = ' '.join(command.lower().split())
+
+    brew_patterns = [
+        r'\bbrew\s+install',                    # Install packages
+        r'\bbrew\s+uninstall',                  # Uninstall packages
+        r'\bbrew\s+reinstall',                  # Reinstall packages
+        r'\bbrew\s+upgrade',                    # Upgrade packages
+        r'\bbrew\s+tap',                        # Add repositories
+        r'\bbrew\s+untap',                      # Remove repositories
+        r'\bbrew\s+link',                       # Link packages
+        r'\bbrew\s+unlink',                     # Unlink packages
+    ]
+
+    for pattern in brew_patterns:
+        if re.search(pattern, normalized):
+            return True
+
+    return False
+
+
 def is_env_file_access(tool_name, tool_input):
     """
     Check if any tool is trying to access .env files containing sensitive data.
@@ -170,6 +258,9 @@ def main():
     Protections:
     - Block dangerous rm -rf commands (direct, chained, and alternative methods)
     - Block .env file access (all variants except .env.sample/.env.example)
+    - Block dangerous git operations (force push, config changes, history rewriting)
+    - Block dangerous permission changes (allow chmod +x, block chmod 777 etc)
+    - Block unauthorized brew commands (install, uninstall, upgrade, tap)
     """
     try:
         # Read JSON input from stdin
@@ -184,7 +275,7 @@ def main():
             print("Use .env.sample or .env.example for template files.", file=sys.stderr)
             sys.exit(2)
 
-        # Protection 2: Block dangerous deletion commands
+        # Protection 2-6: Block dangerous bash commands
         if tool_name == "Bash":
             command = tool_input.get("command", "")
 
@@ -204,6 +295,27 @@ def main():
             if is_alternative_deletion_method(command):
                 print("BLOCKED: Alternative deletion method detected", file=sys.stderr)
                 print("Using find -delete, xargs rm, or embedded rm commands is not allowed.", file=sys.stderr)
+                sys.exit(2)
+
+            # Check git operations
+            if is_dangerous_git_command(command):
+                print("BLOCKED: Dangerous git operation detected", file=sys.stderr)
+                print("Operations like force push, hard reset, and global config changes are not allowed.", file=sys.stderr)
+                print("If you need to perform this operation, run it manually outside of Claude Code.", file=sys.stderr)
+                sys.exit(2)
+
+            # Check permission changes
+            if is_dangerous_permission_change(command):
+                print("BLOCKED: Dangerous permission change detected", file=sys.stderr)
+                print("Commands like chmod 777 and recursive chown are not allowed.", file=sys.stderr)
+                print("Note: chmod +x is allowed for making scripts executable.", file=sys.stderr)
+                sys.exit(2)
+
+            # Check brew commands
+            if is_unauthorized_brew_command(command):
+                print("BLOCKED: Unauthorized brew command detected", file=sys.stderr)
+                print("Package installation and system changes via brew are not allowed.", file=sys.stderr)
+                print("Please install packages manually or add them to your project dependencies.", file=sys.stderr)
                 sys.exit(2)
 
         # Allow tool execution
