@@ -85,7 +85,8 @@ When using Claude Code, you can use these convenient slash commands:
 - **`/create-post <idea>`**: Create a blog post from voice/text input (generates content + images automatically)
 - **`/quality-check <path>`**: Run SEO analysis and Vale prose linting
 - **`/build <path>`**: Validate and generate preview (no external changes)
-- **`/publish <path>`**: Upload images, create/update post on Blogger
+- **`/publish <path>`**: Upload images, create/update post on Blogger (supports scheduling)
+- **`/sync`**: Sync post status from Blogger to local frontmatter
 
 ### Python Scripts
 
@@ -117,6 +118,63 @@ Result: Post **UPDATED** (detected via `blogger_id` or path)
 ### Publish Live
 
 Change `status: draft` to `status: published`, then republish.
+
+### Schedule Posts
+
+To schedule a post for future publishing, simply set the `date` field in frontmatter to a future date:
+
+```yaml
+---
+title: "My Future Post"
+date: 2025-12-25T10:00:00Z  # Future date
+tags: [tutorial]
+status: published  # Will be scheduled, not published immediately
+---
+```
+
+When you run `/publish` (or `uv run publish.py`):
+- If `date` is in the **future**: Post is **scheduled** on Blogger
+- If `date` is in the **past or present**: Post publishes immediately
+
+**Batch scheduling workflow:**
+```bash
+# Write 30 posts with future dates
+mkdir posts/2025-10-13-post-1
+mkdir posts/2025-10-14-post-2
+# ... (all with future dates in frontmatter)
+
+# Publish all at once - they'll be scheduled!
+uv run publish.py posts/2025-10-13-post-1/
+uv run publish.py posts/2025-10-14-post-2/
+# ... now relax! Blogger will publish them automatically
+
+```
+
+### Sync Post Status
+
+If you've been away or made changes in Blogger's UI, sync your local files with actual published status:
+
+```bash
+# Sync all posts
+uv run tools/sync_publish_status.py
+# Or use slash command: /sync
+
+# Sync specific post
+uv run tools/sync_publish_status.py --post-dir posts/2025-10-12-my-post/
+```
+
+**When to sync:**
+- You manually changed post status in Blogger's UI
+- Scheduled posts went live while you were away
+- You're returning to the project after a break
+- You want to verify local state matches Blogger
+
+The sync tool updates:
+- Post status (draft → published or vice versa)
+- Published date
+- Updated timestamp
+
+**Note:** Setup check automatically runs sync if you have published posts.
 
 ## Configuration
 

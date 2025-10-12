@@ -2,16 +2,16 @@
 title: Voice-to-Blog Automation with AI and Python
 description: Automation pipeline converting voice notes to blog posts with AI-generated
   images, automated SEO checks, and one-command publishing to Google Blogger.
-date: '2025-10-12T14:30:00Z'
+date: '2025-10-12T15:49:00-04:00'
 tags:
 - ai-agents
 - python
 - workflow-automation
 - openai
 - anthropic
-status: draft
+status: published
 blogger_id: '5381606141212975823'
-updated: '2025-10-12T20:05:51.161342'
+updated: '2025-10-12T16:08:01-04:00'
 images:
   hero-voice-to-blog-pipeline.png:
     url: https://res.cloudinary.com/drdtiykkg/image/upload/v1760298543/agentic-engineer-blog/voice-to-blog-automation/hero-voice-to-blog-pipeline.webp

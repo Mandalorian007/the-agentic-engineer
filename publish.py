@@ -126,17 +126,37 @@ def publish_post(post_dir_str: str) -> int:
         labels = frontmatter.get('tags', [])
         is_draft = frontmatter.get('status', 'draft') == 'draft'
 
+        # Check if post should be scheduled
+        post_date_str = frontmatter.get('date')
+        published_date = None
+        is_scheduled = False
+
+        if post_date_str:
+            from dateutil import parser as date_parser
+            post_date = date_parser.isoparse(post_date_str)
+            now = datetime.now(post_date.tzinfo) if post_date.tzinfo else datetime.utcnow()
+
+            if post_date > now:
+                # Future date - schedule the post
+                published_date = post_date_str
+                is_scheduled = True
+                print(f"   📅 Scheduling post for: {post_date_str}")
+
         if post_status == 'CREATE':
             result = blogger_client.create_post(
                 blog_id=blog_id,
                 title=title,
                 content=html_content,
                 labels=labels,
-                is_draft=is_draft
+                is_draft=is_draft,
+                published=published_date
             )
             post_id = result['id']
             post_url = result['url']
-            print(f"   ✅ Post created successfully!")
+            if is_scheduled:
+                print(f"   ✅ Post created and scheduled!")
+            else:
+                print(f"   ✅ Post created successfully!")
 
         else:  # UPDATE
             result = blogger_client.update_post(
@@ -145,10 +165,14 @@ def publish_post(post_dir_str: str) -> int:
                 title=title,
                 content=html_content,
                 labels=labels,
-                is_draft=is_draft
+                is_draft=is_draft,
+                published=published_date
             )
             post_url = result['url']
-            print(f"   ✅ Post updated successfully!")
+            if is_scheduled:
+                print(f"   ✅ Post updated and rescheduled!")
+            else:
+                print(f"   ✅ Post updated successfully!")
 
         # Step 7: Update frontmatter
         print("\n💾 Updating frontmatter...")
@@ -180,7 +204,10 @@ def publish_post(post_dir_str: str) -> int:
         print("✅ PUBLISH SUCCESSFUL!")
         print("="*60)
         print(f"Title:        {title}")
-        print(f"Status:       {'DRAFT' if is_draft else 'PUBLISHED'}")
+        if is_scheduled:
+            print(f"Status:       SCHEDULED for {published_date}")
+        else:
+            print(f"Status:       {'DRAFT' if is_draft else 'PUBLISHED'}")
         print(f"Post ID:      {post_id}")
         print(f"URL:          {post_url}")
         print(f"Images:       {len(image_mappings)} uploaded")

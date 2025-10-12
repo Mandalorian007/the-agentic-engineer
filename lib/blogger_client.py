@@ -108,7 +108,8 @@ class BloggerClient:
         title: str,
         content: str,
         labels: list = None,
-        is_draft: bool = True
+        is_draft: bool = True,
+        published: str = None
     ) -> Dict[str, Any]:
         """
         Create a new blog post
@@ -119,6 +120,7 @@ class BloggerClient:
             content: Post HTML content
             labels: List of tags/labels
             is_draft: Whether post is a draft
+            published: ISO 8601 datetime string for scheduled publishing
 
         Returns:
             Created post dict
@@ -134,6 +136,9 @@ class BloggerClient:
 
         if labels:
             post_body['labels'] = labels
+
+        if published:
+            post_body['published'] = published
 
         try:
             result = self._retry_api_call(
@@ -156,7 +161,8 @@ class BloggerClient:
         title: str = None,
         content: str = None,
         labels: list = None,
-        is_draft: bool = None
+        is_draft: bool = None,
+        published: str = None
     ) -> Dict[str, Any]:
         """
         Update an existing blog post
@@ -168,6 +174,7 @@ class BloggerClient:
             content: New HTML content (optional)
             labels: New list of tags/labels (optional)
             is_draft: Whether post is a draft (optional)
+            published: ISO 8601 datetime string for scheduled publishing (optional)
 
         Returns:
             Updated post dict
@@ -188,6 +195,8 @@ class BloggerClient:
                 current['content'] = content
             if labels is not None:
                 current['labels'] = labels
+            if published is not None:
+                current['published'] = published
 
             # Use PUT (update) for more reliable updates
             result = self._retry_api_call(

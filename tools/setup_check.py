@@ -360,8 +360,57 @@ class SetupChecker:
             self.issues.append("Cloudinary configuration issue")
             print_action("Verify credentials at: https://cloudinary.com/console")
 
+    def sync_published_posts(self):
+        """Sync published post status from Blogger by calling the sync script"""
+        if self.issues:
+            return  # Skip if there are configuration issues
+
+        posts_dir = Path('posts')
+        if not posts_dir.exists():
+            return  # No posts to sync
+
+        # Check if there are any posts with blogger_id (quick check to avoid unnecessary subprocess call)
+        has_published = False
+        for post_dir in posts_dir.iterdir():
+            if post_dir.is_dir() and (post_dir / 'post.md').exists():
+                with open(post_dir / 'post.md', 'r') as f:
+                    content = f.read()
+                    if 'blogger_id:' in content:
+                        has_published = True
+                        break
+
+        if not has_published:
+            return  # No published posts to sync
+
+        try:
+            import subprocess
+            result = subprocess.run(
+                ['uv', 'run', 'tools/sync_publish_status.py'],
+                capture_output=True,
+                text=True,
+                timeout=60
+            )
+
+            # Show the sync output directly
+            if result.stdout:
+                print(result.stdout, end='')
+
+            if result.returncode != 0 and result.stderr:
+                print_warning("Sync had issues:")
+                print(result.stderr, end='')
+
+        except subprocess.TimeoutExpired:
+            print_warning("Sync timed out (you can run manually later)")
+            print_action("Run manually: uv run tools/sync_publish_status.py")
+        except Exception as e:
+            print_warning(f"Could not run sync: {e}")
+            print_action("Run manually: uv run tools/sync_publish_status.py")
+
     def print_summary(self):
         """Print final summary"""
+        # Try to sync posts if setup is complete
+        self.sync_published_posts()
+
         print_header("📊 Summary")
 
         if not self.issues:
