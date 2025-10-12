@@ -26,7 +26,8 @@ Follow the complete setup guide: [`specs/blog-google-auth.md`](specs/blog-google
 4. Generate refresh token: `uv run tools/generate_refresh_token.py`
 5. Get Cloudinary credentials from cloudinary.com
 6. Configure `blog-config.yaml` and `.env.local`
-7. Verify setup: `uv run tools/test_auth.py`
+7. Install Vale prose linter: `brew install vale` (optional but recommended)
+8. Verify setup: `uv run tools/setup_check.py`
 
 ### 2. Create a Post
 
@@ -52,6 +53,9 @@ EOF
 ### 3. Build and Publish
 
 ```bash
+# Lint prose (optional)
+vale posts/2025-10-12-my-first-post/post.md
+
 # Validate and preview
 uv run build.py posts/2025-10-12-my-first-post/
 
@@ -137,6 +141,39 @@ status: draft                    # draft or published
 ```
 
 After publishing, `blogger_id`, `updated`, and `images` fields are added automatically.
+
+## Prose Linting with Vale
+
+Vale is a prose linter that checks your writing style, catches common errors, and ensures readability.
+
+### Installation
+
+```bash
+brew install vale
+vale sync  # Download style packages
+```
+
+### Usage
+
+```bash
+# Lint a single post
+vale posts/2025-10-12-my-first-post/post.md
+
+# Lint all posts
+vale posts/*/post.md
+```
+
+### Configuration
+
+Vale is configured in `.vale.ini` with:
+- **write-good** rules for clear, concise writing
+- Relaxed settings for technical content
+- Ignores code blocks and frontmatter
+
+Alerts levels:
+- 💡 **Suggestion**: Consider but not required (passive voice, weasel words)
+- ⚠️ **Warning**: Should fix (too wordy, clichés)
+- ❌ **Error**: Must fix (currently none configured)
 
 ## Tag Management
 

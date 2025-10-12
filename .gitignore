@@ -27,3 +27,6 @@ Thumbs.db
 
 # Build artifacts
 *.log
+
+# Vale (prose linter)
+.vale/styles/

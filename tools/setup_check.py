@@ -78,6 +78,8 @@ class SetupChecker:
 
     def check_dependencies(self):
         """Check if required Python packages are installed"""
+        import subprocess
+
         required_packages = [
             ('google.auth', 'google-auth'),
             ('google_auth_oauthlib', 'google-auth-oauthlib'),
@@ -103,7 +105,39 @@ class SetupChecker:
             self.issues.append("Missing Python dependencies")
             print_action("Run: uv sync")
         else:
-            print_success("All dependencies installed")
+            print_success("All Python dependencies installed")
+
+        # Check for Vale prose linter
+        try:
+            result = subprocess.run(['vale', '--version'],
+                                  capture_output=True,
+                                  text=True,
+                                  timeout=5)
+            if result.returncode == 0:
+                version = result.stdout.strip().split('\n')[0]
+                print_success(f"Vale prose linter installed ({version})")
+
+                # Sync Vale styles to ensure they're up to date
+                print_info("   Syncing Vale style packages...")
+                sync_result = subprocess.run(['vale', 'sync'],
+                                            capture_output=True,
+                                            text=True,
+                                            timeout=30)
+                if sync_result.returncode == 0:
+                    print_success("   Vale styles synced")
+                else:
+                    print_warning("   Vale sync had issues (may be okay if styles already exist)")
+            else:
+                print_warning("Vale installed but version check failed")
+                self.warnings.append("Vale may not be properly configured")
+        except FileNotFoundError:
+            print_warning("Vale prose linter not found")
+            self.warnings.append("Vale not installed - prose linting unavailable")
+            print_action("Install Vale: brew install vale")
+            print_info("   Then run: vale sync")
+        except subprocess.TimeoutExpired:
+            print_warning("Vale check timed out")
+            self.warnings.append("Vale may not be working correctly")
 
     def check_config_files(self):
         """Check if required config files exist"""
