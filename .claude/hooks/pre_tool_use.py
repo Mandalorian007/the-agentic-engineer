@@ -200,21 +200,39 @@ def is_unauthorized_brew_command(command):
     return False
 
 
-def is_env_file_access(tool_name, tool_input):
+def is_credential_file_access(tool_name, tool_input):
     """
-    Check if any tool is trying to access .env files containing sensitive data.
-    Enhanced to catch all .env variants (.env.local, .env.production, etc.)
-    and additional access methods (editors, encoding tools, streaming, scripting).
+    Check if any tool is trying to access credential files containing sensitive data.
+
+    Protected files:
+    - .env* files (all variants except .env.sample/.env.example)
+    - client_secret.json (Google OAuth credentials)
+    - .credentials.json (alternative credential storage)
+    - token.pickle (pickled authentication tokens)
+
+    Enhanced to catch all access methods (editors, encoding tools, streaming, scripting).
     """
     if tool_name in ['Read', 'Edit', 'MultiEdit', 'Write', 'Bash']:
         # Check file paths for file-based tools
         if tool_name in ['Read', 'Edit', 'MultiEdit', 'Write']:
             file_path = tool_input.get('file_path', '')
+
             # Block all .env variants except .env.sample and .env.example
             if re.search(r'\.env(?!\.sample|\.example)', file_path):
                 return True
 
-        # Check bash commands for .env file access
+            # Block JSON and pickle credential files
+            credential_files = [
+                r'client_secret\.json',
+                r'\.credentials\.json',
+                r'token\.pickle',
+            ]
+
+            for pattern in credential_files:
+                if re.search(pattern, file_path):
+                    return True
+
+        # Check bash commands for credential file access
         elif tool_name == 'Bash':
             command = tool_input.get('command', '')
 
@@ -248,6 +266,35 @@ def is_env_file_access(tool_name, tool_input):
                 if re.search(pattern, command):
                     return True
 
+            # Patterns for JSON/pickle credential files
+            credential_file_patterns = [
+                # Direct access
+                r'client_secret\.json',
+                r'\.credentials\.json',
+                r'token\.pickle',
+
+                # With commands
+                r'(cat|less|more|head|tail|grep)\s+.*client_secret\.json',
+                r'(cat|less|more|head|tail|grep)\s+.*\.credentials\.json',
+                r'(cat|less|more|head|tail|grep)\s+.*token\.pickle',
+
+                # Editors
+                r'(vim|vi|nano|emacs|code)\s+.*client_secret\.json',
+                r'(vim|vi|nano|emacs|code)\s+.*\.credentials\.json',
+
+                # Modifications
+                r'>\s*client_secret\.json',
+                r'>\s*\.credentials\.json',
+                r'>\s*token\.pickle',
+                r'(rm|mv|cp)\s+.*client_secret\.json',
+                r'(rm|mv|cp)\s+.*\.credentials\.json',
+                r'(rm|mv|cp)\s+.*token\.pickle',
+            ]
+
+            for pattern in credential_file_patterns:
+                if re.search(pattern, command):
+                    return True
+
     return False
 
 
@@ -256,8 +303,8 @@ def main():
     Hook logic with safety protections.
 
     Protections:
+    - Block credential file access (.env*, client_secret.json, .credentials.json, token.pickle)
     - Block dangerous rm -rf commands (direct, chained, and alternative methods)
-    - Block .env file access (all variants except .env.sample/.env.example)
     - Block dangerous git operations (force push, config changes, history rewriting)
     - Block dangerous permission changes (allow chmod +x, block chmod 777 etc)
     - Block unauthorized brew commands (install, uninstall, upgrade, tap)
@@ -269,9 +316,10 @@ def main():
         tool_name = input_data.get("tool_name", "unknown")
         tool_input = input_data.get("tool_input", {})
 
-        # Protection 1: Block .env file access (enhanced for all variants)
-        if is_env_file_access(tool_name, tool_input):
-            print("BLOCKED: Access to .env files is prohibited", file=sys.stderr)
+        # Protection 1: Block credential file access
+        if is_credential_file_access(tool_name, tool_input):
+            print("BLOCKED: Access to credential files is prohibited", file=sys.stderr)
+            print("Protected files: .env*, client_secret.json, .credentials.json, token.pickle", file=sys.stderr)
             print("Use .env.sample or .env.example for template files.", file=sys.stderr)
             sys.exit(2)
 
