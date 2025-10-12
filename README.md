@@ -4,15 +4,15 @@ Automated blog publishing system for Google Blogger with Cloudinary CDN integrat
 
 ## Features
 
-✅ **Automated Publishing**: Write in Markdown, publish to Blogger with one command
-✅ **Image CDN**: Automatic upload and optimization via Cloudinary
-✅ **AI Image Generation**: Generate blog images with OpenAI's GPT-Image-1
-✅ **Idempotent**: Safe to run multiple times, no duplicates
-✅ **Smart Updates**: Detects existing posts, updates instead of duplicating
-✅ **Path-Based Identity**: Directory name determines post URL
-✅ **Hash-Based Deduplication**: Only uploads changed images
-✅ **Syntax Highlighting**: Code blocks with Pygments
-✅ **Markdown Extensions**: Tables, strikethrough, task lists
+- ✅ **Automated Publishing**: Write in Markdown, publish to Blogger with one command
+- ✅ **Image CDN**: Automatic upload and optimization via Cloudinary
+- ✅ **AI Image Generation**: Generate blog images with OpenAI's GPT-Image-1
+- ✅ **Idempotent**: Safe to run multiple times, no duplicates
+- ✅ **Smart Updates**: Detects existing posts, updates instead of duplicating
+- ✅ **Path-Based Identity**: Directory name determines post URL
+- ✅ **Hash-Based Deduplication**: Only uploads changed images
+- ✅ **Syntax Highlighting**: Code blocks with Pygments
+- ✅ **Markdown Extensions**: Tables, strikethrough, task lists
 
 ## Quick Start
 
