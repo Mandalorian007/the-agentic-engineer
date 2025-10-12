@@ -28,5 +28,6 @@ Thumbs.db
 # Build artifacts
 *.log
 
-# Vale (prose linter)
-.vale/styles/
+# Vale (prose linter) - exclude only downloaded packages
+.vale/styles/write-good/
+.vale/styles/Vale/

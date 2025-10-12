@@ -142,38 +142,55 @@ status: draft                    # draft or published
 
 After publishing, `blogger_id`, `updated`, and `images` fields are added automatically.
 
-## Prose Linting with Vale
+## Quality Checks
 
-Vale is a prose linter that checks your writing style, catches common errors, and ensures readability.
+### SEO Analysis
 
-### Installation
+Check your posts for SEO best practices:
 
+```bash
+uv run tools/seo_check.py posts/2025-10-12-my-first-post/
+```
+
+**Checks:**
+- ✅ Title length (30-60 characters optimal for Google)
+- ✅ Meta description (150-160 characters)
+- ✅ Heading structure (single H1, proper hierarchy)
+- ✅ Content length (300+ words recommended)
+- ✅ Image alt text
+- ✅ Internal/external links
+
+### Prose Linting with Vale
+
+Vale checks writing style, catches common errors, and ensures readability.
+
+**Installation:**
 ```bash
 brew install vale
 vale sync  # Download style packages
 ```
 
-### Usage
-
+**Usage:**
 ```bash
 # Lint a single post
 vale posts/2025-10-12-my-first-post/post.md
 
-# Lint all posts
-vale posts/*/post.md
+# Run full quality check (SEO + Vale)
+# Use /quality-check command in Claude Code
 ```
 
-### Configuration
+**Configuration:**
 
 Vale is configured in `.vale.ini` with:
 - **write-good** rules for clear, concise writing
+- **SEO** custom rules for search optimization
 - Relaxed settings for technical content
 - Ignores code blocks and frontmatter
 
-Alerts levels:
+Alert levels:
 - 💡 **Suggestion**: Consider but not required (passive voice, weasel words)
-- ⚠️ **Warning**: Should fix (too wordy, clichés)
-- ❌ **Error**: Must fix (currently none configured)
+- ⚠️ **Warning**: Should fix (too wordy, clichés, title length)
+- ❌ **Error**: Must fix (multiple H1 headings)
 
 ## Tag Management
 

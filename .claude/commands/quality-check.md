@@ -1,37 +1,33 @@
 # Quality Check Command
 
-Run quality checks on blog posts including prose linting with Vale.
+Run quality checks on blog posts: prose linting with Vale and SEO analysis.
 
 ## Instructions
 
 When the user runs `/quality-check <path>`:
 
 1. **Validate the path:**
-   - If path is a directory (e.g., `posts/2025-10-12-hello-world/`), append `post.md`
-   - If path is already a file (e.g., `posts/2025-10-12-hello-world/post.md`), use as-is
+   - If path is a directory, append `post.md`
+   - If path is already a file, use as-is
    - If no path provided, ask the user to specify a post path
 
 2. **Sync Vale styles:**
-   - Run `vale sync` to ensure style packages are up to date
-   - This is a quick operation and ensures consistency
+   - Run `vale sync` ignore in final results. Just ensures vale settings are properly updated.
 
 3. **Run Vale prose linting:**
    - Execute: `vale <path-to-post.md>`
-   - Show the full output to the user
-   - Interpret the results:
-     - 0 errors, 0 warnings = ✅ Perfect!
-     - Only suggestions = 💡 Consider reviewing
-     - Warnings = ⚠️ Should fix
-     - Errors = ❌ Must fix
+   - Parse the output
 
-4. **Provide context:**
-   - Explain any common issues found
-   - Suggest fixes for warnings
-   - Note that suggestions are optional for technical writing
+4. **Run SEO analysis:**
+   - Execute: `uv run tools/seo_check.py <path-to-post.md>`
+   - Parse the output
 
-## Notes
-
-- Vale checks writing style, not technical accuracy
-- Passive voice is sometimes clearer in technical documentation
-- Code blocks and frontmatter are automatically ignored
-- Configuration is in `.vale.ini`
+5. **Format and display results:**
+   - Show a clean summary with two sections:
+     - **Writing Issues** (from Vale)
+     - **SEO Issues** (from seo_check.py)
+   - For each issue, include:
+     - Severity (error/warning/suggestion)
+     - Line number (if applicable)
+     - Description
+   - If no issues, show success message for that section
