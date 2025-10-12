@@ -148,7 +148,7 @@ def is_dangerous_permission_change(command):
     """
     Detect dangerous permission changes.
     Allows chmod +x for making scripts executable (common development need).
-    Blocks other dangerous permission patterns.
+    Blocks other dangerous permission patterns including setuid/setgid.
     """
     normalized = ' '.join(command.lower().split())
 
@@ -163,6 +163,8 @@ def is_dangerous_permission_change(command):
         r'\bchmod\s+.*a\+rwx',                  # All read/write/execute
         r'\bchmod\s+.*o\+w',                    # Others can write
         r'\bchmod\s+.*-R.*[67][67][67]',        # Recursive permissive modes
+        r'\bchmod\s+[0-7]*[4567][0-7]{3}\b',    # Setuid/setgid bit (4000, 6755, etc.)
+        r'\bchmod\s+.*[ug]\+s',                 # Setuid/setgid symbolic (u+s, g+s)
         r'\bchown\s+.*-R\s+root',               # Recursive root ownership
         r'\bchown\s+.*-R\s+.*:.*',              # Recursive ownership change (risky)
         r'\bsudo\s+chmod\s+(?!\+x)',            # Sudo chmod (except +x)
@@ -211,17 +213,18 @@ def is_credential_file_access(tool_name, tool_input):
     - token.pickle (pickled authentication tokens)
 
     Enhanced to catch all access methods (editors, encoding tools, streaming, scripting).
+    Case-insensitive matching to prevent bypasses.
     """
     if tool_name in ['Read', 'Edit', 'MultiEdit', 'Write', 'Bash']:
         # Check file paths for file-based tools
         if tool_name in ['Read', 'Edit', 'MultiEdit', 'Write']:
-            file_path = tool_input.get('file_path', '')
+            file_path = tool_input.get('file_path', '').lower()
 
-            # Block all .env variants except .env.sample and .env.example
+            # Block all .env variants except .env.sample and .env.example (case-insensitive)
             if re.search(r'\.env(?!\.sample|\.example)', file_path):
                 return True
 
-            # Block JSON and pickle credential files
+            # Block JSON and pickle credential files (case-insensitive)
             credential_files = [
                 r'client_secret\.json',
                 r'\.credentials\.json',
@@ -234,31 +237,35 @@ def is_credential_file_access(tool_name, tool_input):
 
         # Check bash commands for credential file access
         elif tool_name == 'Bash':
-            command = tool_input.get('command', '')
+            command = tool_input.get('command', '').lower()
 
             # Enhanced patterns to catch all .env variants and access methods
+            # Case-insensitive matching, catches globs and path variations
             env_patterns = [
                 # Basic .env access (all variants except .sample/.example)
+                # Catches: .env, .env.local, .ENV, ./env, path/.env*, etc.
                 r'\.env[^\s/]*(?!\.sample|\.example)\b',
+                r'\.env[^\s/]*(?!\.sample|\.example)["\']',  # With quotes
+                r'\.env\*',  # Glob patterns
 
                 # Read commands
-                r'(cat|less|more|head|tail|grep|awk|sed)\s+[^\s]*\.env(?!\.sample|\.example)',
+                r'(cat|less|more|head|tail|grep|awk|sed)\s+.*\.env(?!\.sample|\.example)',
 
                 # Editor commands
-                r'(vim|vi|nano|emacs|code|subl|atom)\s+[^\s]*\.env(?!\.sample|\.example)',
+                r'(vim|vi|nano|emacs|code|subl|atom)\s+.*\.env(?!\.sample|\.example)',
 
                 # Encoding/streaming commands
-                r'(base64|xxd|od|strings|hexdump)\s+[^\s]*\.env(?!\.sample|\.example)',
+                r'(base64|xxd|od|strings|hexdump)\s+.*\.env(?!\.sample|\.example)',
 
                 # Write/modify commands
-                r'(echo|printf|tee)\s+.*>\s*[^\s]*\.env(?!\.sample|\.example)',
+                r'(echo|printf|tee)\s+.*>\s*.*\.env(?!\.sample|\.example)',
                 r'(touch|cp|mv)\s+.*\.env(?!\.sample|\.example)',
 
                 # Scripting languages
-                r'(python|ruby|perl|node|php)\s+.*["\'].*\.env(?!\.sample|\.example)',
+                r'(python|ruby|perl|node|php)\s+.*\.env(?!\.sample|\.example)',
 
                 # Other access methods
-                r'(curl|wget)\s+.*-o\s+[^\s]*\.env(?!\.sample|\.example)',
+                r'(curl|wget)\s+.*-o.*\.env(?!\.sample|\.example)',
                 r'(zip|tar|gzip)\s+.*\.env(?!\.sample|\.example)',
             ]
 
@@ -266,7 +273,7 @@ def is_credential_file_access(tool_name, tool_input):
                 if re.search(pattern, command):
                     return True
 
-            # Patterns for JSON/pickle credential files
+            # Patterns for JSON/pickle credential files (case-insensitive)
             credential_file_patterns = [
                 # Direct access
                 r'client_secret\.json',
@@ -274,7 +281,7 @@ def is_credential_file_access(tool_name, tool_input):
                 r'token\.pickle',
 
                 # With commands
-                r'(cat|less|more|head|tail|grep)\s+.*client_secret\.json',
+                r'(cat|less|more|head|tail|grep|jq|json_pp)\s+.*client_secret\.json',
                 r'(cat|less|more|head|tail|grep)\s+.*\.credentials\.json',
                 r'(cat|less|more|head|tail|grep)\s+.*token\.pickle',
 
@@ -355,7 +362,7 @@ def main():
             # Check permission changes
             if is_dangerous_permission_change(command):
                 print("BLOCKED: Dangerous permission change detected", file=sys.stderr)
-                print("Commands like chmod 777 and recursive chown are not allowed.", file=sys.stderr)
+                print("Commands like chmod 777, setuid/setgid, and recursive chown are not allowed.", file=sys.stderr)
                 print("Note: chmod +x is allowed for making scripts executable.", file=sys.stderr)
                 sys.exit(2)
 
