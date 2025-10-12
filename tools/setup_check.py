@@ -255,10 +255,8 @@ class SetupChecker:
         if not blog_id:
             print()
             print_action("To find your blog ID:")
-            print("  Option 1: Check Blogger dashboard URL")
+            print("  Check Blogger dashboard URL:")
             print("    https://www.blogger.com/blog/posts/[YOUR_BLOG_ID]")
-            print("  Option 2: Run this command (requires OAuth setup first):")
-            print_action("    uv run tools/get_blog_id.py")
 
     def test_connectivity(self):
         """Test actual API connectivity if everything is configured"""
@@ -303,8 +301,8 @@ class SetupChecker:
                 print_action("Refresh token expired or invalid. Regenerate it:")
                 print_action("  uv run tools/generate_refresh_token.py")
             elif 'not found' in error_str or '404' in error_str:
-                print_action("Blog ID not found. Verify your blogger_blog_id:")
-                print_action("  uv run tools/get_blog_id.py")
+                print_action("Blog ID not found. Check your Blogger dashboard URL:")
+                print_action("  https://www.blogger.com/blog/posts/[YOUR_BLOG_ID]")
             elif 'unauthorized' in error_str or '401' in error_str:
                 print_action("Authorization failed. Check OAuth consent screen test users:")
                 print_action("  https://console.cloud.google.com/apis/credentials/consent")
