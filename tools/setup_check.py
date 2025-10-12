@@ -65,6 +65,7 @@ class SetupChecker:
             ("Configuration Files", self.check_config_files),
             ("Google OAuth Setup", self.check_google_oauth),
             ("Cloudinary Setup", self.check_cloudinary),
+            ("OpenAI Setup", self.check_openai),
             ("Blog Configuration", self.check_blog_config),
             ("Connectivity Test", self.test_connectivity),
         ]
@@ -77,35 +78,17 @@ class SetupChecker:
         self.print_summary()
 
     def check_dependencies(self):
-        """Check if required Python packages are installed"""
+        """Check if required dependencies are installed"""
         import subprocess
 
-        required_packages = [
-            ('google.auth', 'google-auth'),
-            ('google_auth_oauthlib', 'google-auth-oauthlib'),
-            ('googleapiclient', 'google-api-python-client'),
-            ('markdown_it', 'markdown-it-py'),
-            ('PIL', 'Pillow'),
-            ('cloudinary', 'cloudinary'),
-            ('yaml', 'PyYAML'),
-            ('dotenv', 'python-dotenv'),
-            ('pygments', 'Pygments'),
-        ]
-
-        missing = []
-        for module_name, package_name in required_packages:
-            try:
-                __import__(module_name)
-                print_success(f"{package_name} installed")
-            except ImportError:
-                missing.append(package_name)
-                print_error(f"{package_name} not found")
-
-        if missing:
-            self.issues.append("Missing Python dependencies")
-            print_action("Run: uv sync")
+        # Check if uv environment is set up
+        venv_path = Path('.venv')
+        if venv_path.exists():
+            print_success("Python virtual environment exists (.venv)")
         else:
-            print_success("All Python dependencies installed")
+            print_error("Virtual environment not found")
+            self.issues.append("Missing virtual environment")
+            print_action("Run: uv sync")
 
         # Check for Vale prose linter
         try:
@@ -167,6 +150,7 @@ class SetupChecker:
                         print("    CLOUDINARY_CLOUD_NAME=")
                         print("    CLOUDINARY_API_KEY=")
                         print("    CLOUDINARY_API_SECRET=")
+                        print("    OPENAI_API_KEY=")
                         print_info("See: specs/blog-google-auth.md for detailed setup")
 
                     elif filename == 'blog-config.yaml':
@@ -246,6 +230,23 @@ class SetupChecker:
             print("  2. Go to Dashboard → Account Details")
             print("  3. Copy Cloud Name, API Key, and API Secret")
             print("  4. Add them to .env.local")
+
+    def check_openai(self):
+        """Check OpenAI API key setup"""
+        api_key = os.getenv('OPENAI_API_KEY')
+
+        if api_key:
+            masked = api_key[:8] + '...' if len(api_key) > 8 else '***'
+            print_success(f"OPENAI_API_KEY set ({masked})")
+        else:
+            print_warning("OPENAI_API_KEY not set - Image generation unavailable")
+            self.warnings.append("OpenAI API key not configured")
+            print()
+            print_action("To set up OpenAI API (optional for image generation):")
+            print("  1. Sign up at https://platform.openai.com/")
+            print("  2. Generate API key at: https://platform.openai.com/api-keys")
+            print("  3. Add OPENAI_API_KEY to .env.local")
+            print_info("   Used by: uv run tools/generate_image.py")
 
     def check_blog_config(self):
         """Check blog-config.yaml"""

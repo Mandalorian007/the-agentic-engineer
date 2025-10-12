@@ -6,14 +6,14 @@ tags:
 - ai-agents
 status: draft
 blogger_id: '5153024988526706623'
-updated: '2025-10-12T18:18:58.627698'
+updated: '2025-10-12T18:56:26.609055'
 images:
   hello-world.png:
-    url: https://res.cloudinary.com/drdtiykkg/image/upload/v1760286767/agentic-engineer-blog/hello-world/hello-world.webp
-    hash: sha256:4cef930b76f28771fc314ec9e8f5586217e138e19e44c0831fa058606c0e3ecd
-    uploaded_at: '2025-10-12T16:32:47.887282Z'
-    width: 800
-    height: 800
+    url: https://res.cloudinary.com/drdtiykkg/image/upload/v1760295385/agentic-engineer-blog/hello-world/hello-world.webp
+    hash: sha256:168967b24dba9f5be3ea5cf4306f2b4c977e769ef2f77fb0652102bbfe76f3d2
+    uploaded_at: '2025-10-12T18:56:26.301262Z'
+    width: 1024
+    height: 1024
     format: webp
 ---
 ![Hello World](hello-world.png)
