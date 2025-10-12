@@ -111,10 +111,11 @@ Follow these proven techniques for maximum engagement:
 - Avoid jargon unless writing for specialists
 
 ### Visuals & Media
-- Add relevant images and screenshots
+- **Every post MUST include at least one image** (hero/featured image minimum)
+- Add relevant images and screenshots throughout
 - Include code examples (for technical posts)
 - Use diagrams for complex concepts
-- Add meaningful alt text
+- Add meaningful alt text for all images
 
 ### Conclusion
 - Summarize 2-3 key takeaways
@@ -150,10 +151,13 @@ Create a complete blog post following this project's structure:
 1. **Directory name suggestion** (YYYY-MM-DD-slug format)
 2. **Frontmatter** (title, date, tags from tag-registry.yaml, status: draft)
 3. **Full markdown content** with proper heading hierarchy
-4. **Image suggestions** - When suggesting images, provide the exact command to generate them:
+4. **Image suggestions** - **REQUIRED: Every post must have at least one image** (hero/featured image). When suggesting images, provide the exact command to generate them with detailed, descriptive prompts:
    ```bash
-   uv run tools/generate_image.py "detailed prompt" posts/YYYY-MM-DD-slug/image-name.png
+   uv run tools/generate_image.py "modern minimalist illustration of a robot writing code at a desk, blue and purple gradient background, clean tech aesthetic, isometric view" posts/YYYY-MM-DD-slug/image-name.png
    ```
+   - Minimum: 1 hero image at the top of the post
+   - Recommended: Additional images for major sections, diagrams, or examples
+   - **Prompt tips**: Be specific about style (minimalist, modern, flat design), colors, perspective, subject details, and mood
 
 ## Process
 
@@ -169,7 +173,9 @@ Create a complete blog post following this project's structure:
 
 4. **Write the complete post** following the chosen format
 
-5. **Suggest SEO improvements** (meta description, keywords, internal links)
+5. **Generate image suggestions** - Always include at least one hero/featured image with generation command
+
+6. **Suggest SEO improvements** (meta description, keywords, internal links)
 
 ## Example Interaction
 

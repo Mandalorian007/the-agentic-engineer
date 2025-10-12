@@ -3,8 +3,10 @@
 Generate images using OpenAI's GPT-Image-1 API.
 
 Usage:
-    python tools/generate_image.py "a cat wearing a hat" output.png
-    python tools/generate_image.py "modern tech blog header" posts/2025-10-12-my-post/hero.png
+    python tools/generate_image.py "modern minimalist illustration of a robot writing code at a desk, blue and purple gradient background, clean tech aesthetic, isometric view" output.png
+    python tools/generate_image.py "sleek futuristic dashboard interface with glowing charts and graphs, dark theme with neon accents, professional tech aesthetic, wide angle view" posts/2025-10-12-my-post/hero.png
+
+Tip: More detailed prompts produce better results. Include style, colors, perspective, and mood.
 """
 
 import argparse
@@ -98,14 +100,21 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Generate a simple image
-  python tools/generate_image.py "a cat wearing a hat" cat.png
+  # Blog post hero image with detailed prompt
+  python tools/generate_image.py "modern minimalist illustration of a robot writing code at a desk, blue and purple gradient background, clean tech aesthetic, isometric view" posts/2025-10-12-my-post/hero.png
 
-  # Generate a blog post hero image
-  python tools/generate_image.py "modern tech blog header" posts/2025-10-12-my-post/hero.png
+  # Data visualization image
+  python tools/generate_image.py "sleek futuristic dashboard with glowing charts and metrics, dark theme with neon blue accents, professional tech aesthetic, wide angle perspective" posts/2025-10-12-analytics/dashboard.png
 
-  # Complex prompt
-  python tools/generate_image.py "a minimalist illustration of a robot writing code" robot.png
+  # Architecture diagram style
+  python tools/generate_image.py "clean technical diagram of microservices architecture with connected nodes and data flows, white background, blue and gray color scheme, minimalist flat design" architecture.png
+
+Tip: More detailed prompts produce better results. Include:
+  - Style (minimalist, modern, flat design, realistic, abstract)
+  - Colors (blue gradient, warm tones, monochrome, neon accents)
+  - Perspective (isometric, top-down, close-up, wide angle)
+  - Mood (professional, playful, serious, energetic, futuristic)
+  - Subject details (objects, actions, composition, lighting)
         """
     )
 

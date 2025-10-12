@@ -6,6 +6,7 @@ Automated blog publishing system for Google Blogger with Cloudinary CDN integrat
 
 ✅ **Automated Publishing**: Write in Markdown, publish to Blogger with one command
 ✅ **Image CDN**: Automatic upload and optimization via Cloudinary
+✅ **AI Image Generation**: Generate blog images with OpenAI's GPT-Image-1
 ✅ **Idempotent**: Safe to run multiple times, no duplicates
 ✅ **Smart Updates**: Detects existing posts, updates instead of duplicating
 ✅ **Path-Based Identity**: Directory name determines post URL
@@ -119,6 +120,7 @@ BLOGGER_REFRESH_TOKEN=xxx
 CLOUDINARY_CLOUD_NAME=xxx
 CLOUDINARY_API_KEY=xxx
 CLOUDINARY_API_SECRET=xxx
+OPENAI_API_KEY=xxx  # Optional: for AI image generation
 ```
 
 ## Post Format
@@ -191,6 +193,35 @@ Alert levels:
 - 💡 **Suggestion**: Consider but not required (passive voice, weasel words)
 - ⚠️ **Warning**: Should fix (too wordy, clichés, title length)
 - ❌ **Error**: Must fix (multiple H1 headings)
+
+## Image Generation
+
+Generate AI images for your blog posts using OpenAI's GPT-Image-1:
+
+```bash
+uv run tools/generate_image.py "your detailed prompt" posts/YYYY-MM-DD-slug/image.png
+```
+
+**Example:**
+```bash
+uv run tools/generate_image.py "modern minimalist illustration of AI automation with robotic arms assembling puzzle pieces, blue and teal gradient background, clean tech aesthetic, slightly isometric perspective, professional and futuristic mood" posts/2025-10-12-my-post/hero.png
+```
+
+**Prompt Tips:**
+- Be specific about style (minimalist, modern, flat design, realistic, abstract)
+- Include colors or color schemes (blue gradient, warm tones, monochrome)
+- Specify perspective (isometric, top-down, close-up, wide angle)
+- Add mood descriptors (professional, playful, serious, energetic)
+- Detail the subject (what objects, actions, composition)
+
+**Features:**
+- Uses GPT-Image-1 (latest model, high quality)
+- Generates 1024x1024 images
+- Cost: ~$0.015 per image
+- Automatically creates directories
+- More detailed prompts = better results
+
+**Note:** Requires `OPENAI_API_KEY` in `.env.local`
 
 ## Tag Management
 
