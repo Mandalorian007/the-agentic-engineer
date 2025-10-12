@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice-to-Blog Automation with AI and Python - Preview</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            color: #333;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+        h1 { font-size: 2em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+        h2 { font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+        code {
+            background: #f6f8fa;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+        }
+        pre {
+            background: #f6f8fa;
+            padding: 16px;
+            overflow: auto;
+            line-height: 1.45;
+            border-radius: 3px;
+        }
+        pre code {
+            background: transparent;
+            padding: 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 16px 0;
+        }
+        table th, table td {
+            border: 1px solid #dfe2e5;
+            padding: 6px 13px;
+        }
+        table th {
+            background: #f6f8fa;
+            font-weight: 600;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .meta {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+            padding: 10px;
+            background: #f6f8fa;
+            border-radius: 3px;
+        }
+        pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.highlight .hll { background-color: #49483e }
+.highlight { background: #272822; color: #F8F8F2 }
+.highlight .c { color: #959077 } /* Comment */
+.highlight .err { color: #ED007E; background-color: #1E0010 } /* Error */
+.highlight .esc { color: #F8F8F2 } /* Escape */
+.highlight .g { color: #F8F8F2 } /* Generic */
+.highlight .k { color: #66D9EF } /* Keyword */
+.highlight .l { color: #AE81FF } /* Literal */
+.highlight .n { color: #F8F8F2 } /* Name */
+.highlight .o { color: #FF4689 } /* Operator */
+.highlight .x { color: #F8F8F2 } /* Other */
+.highlight .p { color: #F8F8F2 } /* Punctuation */
+.highlight .ch { color: #959077 } /* Comment.Hashbang */
+.highlight .cm { color: #959077 } /* Comment.Multiline */
+.highlight .cp { color: #959077 } /* Comment.Preproc */
+.highlight .cpf { color: #959077 } /* Comment.PreprocFile */
+.highlight .c1 { color: #959077 } /* Comment.Single */
+.highlight .cs { color: #959077 } /* Comment.Special */
+.highlight .gd { color: #FF4689 } /* Generic.Deleted */
+.highlight .ge { color: #F8F8F2; font-style: italic } /* Generic.Emph */
+.highlight .ges { color: #F8F8F2; font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.highlight .gr { color: #F8F8F2 } /* Generic.Error */
+.highlight .gh { color: #F8F8F2 } /* Generic.Heading */
+.highlight .gi { color: #A6E22E } /* Generic.Inserted */
+.highlight .go { color: #66D9EF } /* Generic.Output */
+.highlight .gp { color: #FF4689; font-weight: bold } /* Generic.Prompt */
+.highlight .gs { color: #F8F8F2; font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #959077 } /* Generic.Subheading */
+.highlight .gt { color: #F8F8F2 } /* Generic.Traceback */
+.highlight .kc { color: #66D9EF } /* Keyword.Constant */
+.highlight .kd { color: #66D9EF } /* Keyword.Declaration */
+.highlight .kn { color: #FF4689 } /* Keyword.Namespace */
+.highlight .kp { color: #66D9EF } /* Keyword.Pseudo */
+.highlight .kr { color: #66D9EF } /* Keyword.Reserved */
+.highlight .kt { color: #66D9EF } /* Keyword.Type */
+.highlight .ld { color: #E6DB74 } /* Literal.Date */
+.highlight .m { color: #AE81FF } /* Literal.Number */
+.highlight .s { color: #E6DB74 } /* Literal.String */
+.highlight .na { color: #A6E22E } /* Name.Attribute */
+.highlight .nb { color: #F8F8F2 } /* Name.Builtin */
+.highlight .nc { color: #A6E22E } /* Name.Class */
+.highlight .no { color: #66D9EF } /* Name.Constant */
+.highlight .nd { color: #A6E22E } /* Name.Decorator */
+.highlight .ni { color: #F8F8F2 } /* Name.Entity */
+.highlight .ne { color: #A6E22E } /* Name.Exception */
+.highlight .nf { color: #A6E22E } /* Name.Function */
+.highlight .nl { color: #F8F8F2 } /* Name.Label */
+.highlight .nn { color: #F8F8F2 } /* Name.Namespace */
+.highlight .nx { color: #A6E22E } /* Name.Other */
+.highlight .py { color: #F8F8F2 } /* Name.Property */
+.highlight .nt { color: #FF4689 } /* Name.Tag */
+.highlight .nv { color: #F8F8F2 } /* Name.Variable */
+.highlight .ow { color: #FF4689 } /* Operator.Word */
+.highlight .pm { color: #F8F8F2 } /* Punctuation.Marker */
+.highlight .w { color: #F8F8F2 } /* Text.Whitespace */
+.highlight .mb { color: #AE81FF } /* Literal.Number.Bin */
+.highlight .mf { color: #AE81FF } /* Literal.Number.Float */
+.highlight .mh { color: #AE81FF } /* Literal.Number.Hex */
+.highlight .mi { color: #AE81FF } /* Literal.Number.Integer */
+.highlight .mo { color: #AE81FF } /* Literal.Number.Oct */
+.highlight .sa { color: #E6DB74 } /* Literal.String.Affix */
+.highlight .sb { color: #E6DB74 } /* Literal.String.Backtick */
+.highlight .sc { color: #E6DB74 } /* Literal.String.Char */
+.highlight .dl { color: #E6DB74 } /* Literal.String.Delimiter */
+.highlight .sd { color: #E6DB74 } /* Literal.String.Doc */
+.highlight .s2 { color: #E6DB74 } /* Literal.String.Double */
+.highlight .se { color: #AE81FF } /* Literal.String.Escape */
+.highlight .sh { color: #E6DB74 } /* Literal.String.Heredoc */
+.highlight .si { color: #E6DB74 } /* Literal.String.Interpol */
+.highlight .sx { color: #E6DB74 } /* Literal.String.Other */
+.highlight .sr { color: #E6DB74 } /* Literal.String.Regex */
+.highlight .s1 { color: #E6DB74 } /* Literal.String.Single */
+.highlight .ss { color: #E6DB74 } /* Literal.String.Symbol */
+.highlight .bp { color: #F8F8F2 } /* Name.Builtin.Pseudo */
+.highlight .fm { color: #A6E22E } /* Name.Function.Magic */
+.highlight .vc { color: #F8F8F2 } /* Name.Variable.Class */
+.highlight .vg { color: #F8F8F2 } /* Name.Variable.Global */
+.highlight .vi { color: #F8F8F2 } /* Name.Variable.Instance */
+.highlight .vm { color: #F8F8F2 } /* Name.Variable.Magic */
+.highlight .il { color: #AE81FF } /* Literal.Number.Integer.Long */
+    </style>
+</head>
+<body>
+    <div class="meta">
+        <strong>Title:</strong> Voice-to-Blog Automation with AI and Python<br>
+        <strong>Date:</strong> 2025-10-12T14:30:00Z<br>
+        <strong>Status:</strong> draft<br>
+        <strong>Tags:</strong> ai-agents, python, workflow-automation, openai, anthropic
+    </div>
+    <p><img src="./hero-voice-to-blog-pipeline.png" alt="AI-powered blog automation workflow" /></p>
+<h2>The Problem: Blogging Is Too Much Work</h2>
+<p>Let's be honest—blogging sucks. Not the writing part. Not the creative part. But everything else:</p>
+<ul>
+<li>Formatting markdown by hand</li>
+<li>Creating or finding images that don't look like stock photo garbage</li>
+<li>Converting to HTML that actually looks good</li>
+<li>Optimizing images for web</li>
+<li>Uploading images to a CDN</li>
+<li>Publishing to your blog platform</li>
+<li>Running SEO checks</li>
+<li>Making sure you didn't write like a robot</li>
+</ul>
+<p>By the time you've done all that, you've lost the momentum that made you want to write in the first place.</p>
+<h2>What If You Could Just… Talk?</h2>
+<p>Here's what I built: <strong>A complete voice-to-published-blog pipeline powered by AI</strong>.</p>
+<p>You literally just ramble about your idea—like you're explaining it to a friend at a coffee shop—and the system:</p>
+<ol>
+<li>✅ <strong>Converts your rambling into a structured blog post</strong></li>
+<li>✅ <strong>Generates professional images with AI</strong> (OpenAI GPT-Image-1)</li>
+<li>✅ <strong>Builds the HTML with syntax highlighting and formatting</strong></li>
+<li>✅ <strong>Runs SEO and quality checks automatically</strong></li>
+<li>✅ <strong>Uploads images to Cloudinary CDN</strong></li>
+<li>✅ <strong>Publishes to Google Blogger as a draft</strong></li>
+<li>✅ <strong>Updates instead of duplicating</strong> (it's idempotent!)</li>
+</ol>
+<p>Then you review it, change <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">status</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> draft</span>
+</code></pre></div>
+ to <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">status</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> published</span>
+</code></pre></div>
+, run one command, and <strong>you're live</strong>.</p>
+<p>That's it. That's the whole workflow.</p>
+<h2>How It Works: The Four-Command Workflow</h2>
+<p>Here's the actual workflow I use now:</p>
+<h3>Step 1: Create the Post (Voice or Text)</h3>
+<p>I have a Claude Code slash command called <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/create-post
+</code></pre></div>
+. I just talk about my idea:</p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/create-post<span style="color: #F8F8F2"> </span>So<span style="color: #F8F8F2"> </span>today<span style="color: #F8F8F2"> </span>I<span style="color: #F8F8F2"> </span>made<span style="color: #F8F8F2"> </span>a<span style="color: #F8F8F2"> </span>really<span style="color: #F8F8F2"> </span>cool<span style="color: #F8F8F2"> </span>tech<span style="color: #F8F8F2"> </span>thing.<span style="color: #F8F8F2"> </span>It<span style="color: #E6DB74">&#39;s for blogging.</span>
+<span style="color: #E6DB74">All I have to do is ramble about whatever I want to write about—I don&#39;</span>t
+even<span style="color: #F8F8F2"> </span>have<span style="color: #F8F8F2"> </span>to<span style="color: #F8F8F2"> </span>structure<span style="color: #F8F8F2"> </span>it.<span style="color: #F8F8F2"> </span>The<span style="color: #F8F8F2"> </span>system<span style="color: #F8F8F2"> </span>takes<span style="color: #F8F8F2"> </span>my<span style="color: #F8F8F2"> </span>blurb,<span style="color: #F8F8F2"> </span>converts<span style="color: #F8F8F2"> </span>it<span style="color: #F8F8F2"> </span>into
+proper<span style="color: #F8F8F2"> </span>markdown,<span style="color: #F8F8F2"> </span>and<span style="color: #F8F8F2"> </span>even<span style="color: #F8F8F2"> </span>generates<span style="color: #F8F8F2"> </span>images<span style="color: #F8F8F2"> </span><span style="color: #66D9EF">for</span><span style="color: #F8F8F2"> </span>it...
+</code></pre></div>
+</pre>
+<p>Claude Code (powered by Anthropic's Sonnet) then:</p>
+<ul>
+<li>Analyzes my rambling and identifies the core story</li>
+<li>Chooses the best blog post format (tutorial, case study, listicle, etc.)</li>
+<li>Writes a complete, structured blog post in markdown</li>
+<li><strong>Generates images automatically</strong> using the image generation tool</li>
+<li>Suggests detailed AI prompts for each image (hero images, diagrams, etc.)</li>
+<li>Saves everything to <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>posts/YYYY-MM-DD-slug/post.md
+</code></pre></div>
+</li>
+</ul>
+<p>Here's the magic: the <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/create-post
+</code></pre></div>
+ command doesn't just write text—it <strong>actively generates the images</strong> as part of the workflow. The command has access to the <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>generate_image.py
+</code></pre></div>
+ tool, so it crafts detailed prompts and creates the images while writing the post.</p>
+<h3>Step 2: Generate Images (If Needed)</h3>
+<p>If you want more images beyond what the command created, you can run:</p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>uv<span style="color: #F8F8F2"> </span>run<span style="color: #F8F8F2"> </span>tools/generate_image.py<span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;modern minimalist illustration of</span>
+<span style="color: #E6DB74">AI automation pipeline with voice input, markdown documents, and blog</span>
+<span style="color: #E6DB74">publishing, blue and purple gradient, clean tech aesthetic, isometric</span>
+<span style="color: #E6DB74">view, professional futuristic mood&quot;</span><span style="color: #F8F8F2"> </span>posts/2025-10-12-my-post/hero.png
+</code></pre></div>
+</pre>
+<p>Each image costs about <strong>$0.015</strong> (less than two cents) and looks way better than stock photos. We save the images directly in the post directory.</p>
+<h3>Step 3: Quality Check, Build, and Publish</h3>
+<p>With the post written and images generated, I run three more slash commands:</p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># Optional: Check quality (SEO + prose linting)</span>
+/quality-check<span style="color: #F8F8F2"> </span>posts/2025-10-12-my-post/
+
+<span style="color: #959077"># Validate and preview locally</span>
+/build<span style="color: #F8F8F2"> </span>posts/2025-10-12-my-post/
+
+<span style="color: #959077"># Publish to Blogger (creates draft)</span>
+/publish<span style="color: #F8F8F2"> </span>posts/2025-10-12-my-post/
+</code></pre></div>
+</pre>
+<p><strong>The <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/quality-check
+</code></pre></div>
+ command</strong> runs both Vale prose linting and SEO analysis, catching issues like passive voice, wordy phrases, missing meta descriptions, and title length problems.</p>
+<p><strong>The <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/build
+</code></pre></div>
+ command</strong> validates everything:</p>
+<ul>
+<li>Checks frontmatter and tag registry</li>
+<li>Validates image references</li>
+<li>Converts markdown to HTML with syntax highlighting</li>
+<li>Generates a local preview HTML file</li>
+</ul>
+<p><strong>The <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/publish
+</code></pre></div>
+ command</strong> does the actual publishing:</p>
+<ul>
+<li>Uploads images to Cloudinary CDN (with hash-based deduplication)</li>
+<li>Converts markdown to HTML with Pygments syntax highlighting</li>
+<li>Detects if the post already exists (via directory path)</li>
+<li>Creates OR updates the post on Blogger (no duplicates!)</li>
+<li>Saves the <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>blogger_id
+</code></pre></div>
+ back to frontmatter for future updates</li>
+</ul>
+<p>When I'm ready to go live, I just change <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">status</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> draft</span>
+</code></pre></div>
+ to <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">status</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> published</span>
+</code></pre></div>
+ in the markdown and run <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/publish
+</code></pre></div>
+ again. <strong>One command. Live blog post.</strong></p>
+<h2>The Technical Stack</h2>
+<p>Here's what makes this work:</p>
+<h3>AI Content Generation</h3>
+<ul>
+<li><strong>Claude Code (Anthropic Sonnet 4.5)</strong> - Converts rambling to structured posts</li>
+<li><strong>OpenAI GPT-Image-1</strong> - Generates custom blog images from prompts</li>
+</ul>
+<h3>Content Pipeline</h3>
+<ul>
+<li><strong>Python 3.13</strong> with <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>uv
+</code></pre></div>
+ for dependency management</li>
+<li><strong>Markdown → HTML</strong> conversion with Python-Markdown</li>
+<li><strong>Pygments</strong> for code syntax highlighting</li>
+<li><strong>YAML frontmatter</strong> for metadata (title, date, tags, status)</li>
+</ul>
+<h3>Infrastructure</h3>
+<ul>
+<li><strong>Cloudinary</strong> - Image CDN with automatic WebP conversion</li>
+<li><strong>Google Blogger API</strong> - Publishing platform (with OAuth 2.0)</li>
+<li><strong>Vale</strong> - Prose linting for readability and style</li>
+<li>Custom <strong>SEO checker</strong> - Validates title length, meta descriptions, headings, content length</li>
+</ul>
+<h3>Smart Features</h3>
+<ul>
+<li><strong>Idempotent publishing</strong> - Detects existing posts by directory path, updates instead of duplicating</li>
+<li><strong>Hash-based image deduplication</strong> - Only uploads changed images to Cloudinary</li>
+<li><strong>Tag registry</strong> - Enforced tag consistency (no tag sprawl!)</li>
+<li><strong>Path-based URLs</strong> - <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #AE81FF">2025</span><span style="color: #FF4689">-</span><span style="color: #AE81FF">10</span><span style="color: #FF4689">-</span><span style="color: #AE81FF">12</span><span style="color: #FF4689">-</span><span style="color: #F8F8F2">hello</span><span style="color: #FF4689">-</span><span style="color: #F8F8F2">world</span>
+</code></pre></div>
+ → <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/2025/10/hello-world.html
+</code></pre></div>
+</li>
+</ul>
+<h2>The Architecture: How Everything Fits Together</h2>
+<p><img src="./diagram-blog-automation-architecture.png" alt="Blog automation architecture diagram" /></p>
+<p>Here's the flow:</p>
+<ol>
+<li><strong>Voice/Text Input</strong> → Claude Code <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/create-post
+</code></pre></div>
+ command</li>
+<li><strong>AI Processing</strong> → Structured markdown + image prompts + frontmatter</li>
+<li><strong>Image Generation</strong> → OpenAI API → Saved to post directory</li>
+<li><strong>Build Step</strong> → Validates tags, converts markdown, generates preview HTML</li>
+<li><strong>Quality Checks</strong> → SEO analysis + Vale prose linting (optional)</li>
+<li><strong>Publish Step</strong> →
+<ul>
+<li>Upload images to Cloudinary (if changed)</li>
+<li>Convert markdown to HTML with Pygments</li>
+<li>Create/update post via Blogger API</li>
+<li>Save <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>blogger_id
+</code></pre></div>
+ to frontmatter</li>
+</ul>
+</li>
+<li><strong>Status Toggle</strong> → Change <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>draft
+</code></pre></div>
+ → <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>published
+</code></pre></div>
+ and republish</li>
+</ol>
+<p>Everything is idempotent—you can run commands many times safely. The system is smart enough to:</p>
+<ul>
+<li>Detect existing posts by directory name</li>
+<li>Only upload images when their hashes change</li>
+<li>Update instead of duplicate</li>
+<li>Preserve your <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>blogger_id
+</code></pre></div>
+ across runs</li>
+</ul>
+<h2>What This Actually Looks Like in Practice</h2>
+<p>Let me show you a real example. Here's my actual workflow from 30 minutes ago (yes, this is the meta-post about itself):</p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># 1. Talk about my idea (literally just rambled into Claude Code)</span>
+/create-post<span style="color: #F8F8F2"> </span>So<span style="color: #F8F8F2"> </span>today<span style="color: #F8F8F2"> </span>I<span style="color: #F8F8F2"> </span>made<span style="color: #F8F8F2"> </span>a<span style="color: #F8F8F2"> </span>really<span style="color: #F8F8F2"> </span>cool<span style="color: #F8F8F2"> </span>tech<span style="color: #F8F8F2"> </span>thing...
+
+<span style="color: #959077"># 2. Claude wrote the post AND generated the images automatically!</span>
+
+<span style="color: #959077"># 3. Optional: Run quality checks</span>
+/quality-check<span style="color: #F8F8F2"> </span>posts/2025-10-12-voice-to-blog-automation/
+
+<span style="color: #959077"># 4. Build and preview</span>
+/build<span style="color: #F8F8F2"> </span>posts/2025-10-12-voice-to-blog-automation/
+
+<span style="color: #959077"># 5. Publish as draft</span>
+/publish<span style="color: #F8F8F2"> </span>posts/2025-10-12-voice-to-blog-automation/
+
+<span style="color: #959077"># 6. Review on Blogger, then publish live</span>
+<span style="color: #959077"># (Edit status: draft → published in post.md)</span>
+/publish<span style="color: #F8F8F2"> </span>posts/2025-10-12-voice-to-blog-automation/
+</code></pre></div>
+</pre>
+<p><strong>Total hands-on time: ~5 minutes</strong> (most of it reviewing the AI output—the images generated automatically!)</p>
+<p>Compare that to traditional blogging:</p>
+<ul>
+<li>Write in markdown editor: 45-60 minutes</li>
+<li>Find/create images: 20-30 minutes</li>
+<li>Format and optimize: 15-20 minutes</li>
+<li>Upload to blog platform: 10-15 minutes</li>
+<li>SEO checks: 10 minutes</li>
+</ul>
+<p><strong>Old way: 2+ hours. New way: 5 minutes.</strong></p>
+<h2>The Quality Checks: Making Sure It's Actually Good</h2>
+<p>One concern with AI-generated content: is it any good? Will it rank? Is it readable?</p>
+<p>The <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/quality-check
+</code></pre></div>
+ command runs two automated checks:</p>
+<h3>1. SEO Analysis</h3>
+<p>Checks for search optimization best practices:</p>
+<ul>
+<li>✅ Title length (30-60 chars for Google)</li>
+<li>✅ Meta description (150-160 chars)</li>
+<li>✅ Heading structure (single H1, proper H2/H3 hierarchy)</li>
+<li>✅ Content length (300+ words recommended)</li>
+<li>✅ Image alt text</li>
+<li>✅ Internal/external links</li>
+<li>✅ Keyword density</li>
+</ul>
+<p><strong>Example output:</strong></p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>✅<span style="color: #F8F8F2"> Title length</span>:<span style="color: #F8F8F2"> </span><span style="color: #AE81FF">52</span><span style="color: #F8F8F2"> characters </span><span style="color: #E6DB74">(</span><span style="color: #F8F8F2">optimal</span><span style="color: #E6DB74">)</span>
+✅<span style="color: #F8F8F2"> Single H1 heading found</span>
+✅<span style="color: #F8F8F2"> Content length</span>:<span style="color: #F8F8F2"> </span><span style="color: #AE81FF">1</span>,<span style="color: #AE81FF">847</span><span style="color: #F8F8F2"> words</span>
+⚠️<span style="color: #F8F8F2">  Add meta description </span><span style="color: #66D9EF">for</span><span style="color: #F8F8F2"> search results</span>
+✅<span style="color: #F8F8F2"> </span><span style="color: #AE81FF">3</span><span style="color: #F8F8F2"> images with alt text</span>
+</code></pre></div>
+</pre>
+<h3>2. Prose Linting with Vale</h3>
+<p>Vale checks writing quality automatically:</p>
+<ul>
+<li>Passive voice detection</li>
+<li>Readability scores</li>
+<li>Clichés and weasel words</li>
+<li>Technical writing best practices</li>
+</ul>
+<p><strong>Example output:</strong></p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code> 12:34  suggestion  &#39;really&#39; is a weasel word  write-good.Weasel
+ 45:12  warning     This sentence is too long  write-good.TooWordy
+</code></pre></div>
+</pre>
+<p>You can ignore suggestions, but the system catches common mistakes before publishing. Run <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/quality-check
+</code></pre></div>
+ on any post to get instant feedback.</p>
+<h2>Why This Matters: The Future of Content Creation</h2>
+<p>This isn't just about saving time (though that's significant). It's about <strong>removing friction from the creative process</strong>.</p>
+<p>When you have an idea, the momentum is <strong>right now</strong>. But by the time you've:</p>
+<ul>
+<li>Opened your markdown editor</li>
+<li>Formatted the frontmatter</li>
+<li>Found stock images</li>
+<li>Remembered how to publish to Blogger</li>
+<li>Dealt with OAuth tokens expiring</li>
+<li>Manually uploaded images</li>
+</ul>
+<p>...the moment has passed. You've talked yourself out of it.</p>
+<p>With this system, the barrier is <strong>as low as talking</strong>. You're 5 minutes from published draft.</p>
+<h3>What's Next?</h3>
+<p>I'm planning to add:</p>
+<ul>
+<li><strong>Automatic social media posts</strong> (LinkedIn, Twitter) from blog content</li>
+<li><strong>Voice-to-text input</strong> (literally just record audio, get blog post)</li>
+<li><strong>Multi-platform publishing</strong> (Dev.to, Medium, Hashnode)</li>
+<li><strong>Analytics integration</strong> (track what actually performs)</li>
+<li><strong>Automated internal linking</strong> (connect related posts automatically)</li>
+</ul>
+<h2>What's Coming Next</h2>
+<p>This blog will dive deep into each piece of this automation pipeline—from setting up the Blogger API and OAuth flows, to building the markdown converter, to integrating Cloudinary for image optimization. I'll walk through the architecture decisions, the code, and the lessons learned along the way.</p>
+<p>But here's where it gets even more interesting: <strong>adding an agentic layer on top</strong>.</p>
+<p>Imagine the system automatically:</p>
+<ul>
+<li>Generating follow-up posts based on engagement metrics</li>
+<li>Creating social media threads from your blog content</li>
+<li>Suggesting related topics based on trending searches</li>
+<li>Autonomously maintaining and updating older posts</li>
+<li>Building internal link networks between related content</li>
+</ul>
+<p>We're just scratching the surface of what's possible when you combine AI agents with content workflows.</p>
+<p><strong>Stay tuned for more.</strong> The future of content creation is autonomous, and we're going to build it together.</p>
+<h2>Conclusion: Just Talk and Ship</h2>
+<p>The best blogging system is the one you actually use. If the friction is low enough, you'll write more. If you write more, you'll get better. If you get better, you'll reach more people.</p>
+<p>This system removes the boring parts and lets you focus on the only thing that matters: <strong>having something to say</strong>.</p>
+<p>Stop wrestling with markdown formatting and image optimization. <strong>Just talk about your idea and ship it.</strong></p>
+
+</body>
+</html>

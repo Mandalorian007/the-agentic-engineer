@@ -53,10 +53,22 @@ EOF
 
 ### 3. Build and Publish
 
-```bash
-# Lint prose (optional)
-vale posts/2025-10-12-my-first-post/post.md
+**Using Claude Code slash commands** (recommended):
 
+```bash
+# Optional: Run quality checks (SEO + prose linting)
+/quality-check posts/2025-10-12-my-first-post/
+
+# Validate and preview
+/build posts/2025-10-12-my-first-post/
+
+# Publish to Blogger
+/publish posts/2025-10-12-my-first-post/
+```
+
+**Or run Python scripts directly**:
+
+```bash
 # Validate and preview
 uv run build.py posts/2025-10-12-my-first-post/
 
@@ -66,7 +78,18 @@ uv run publish.py posts/2025-10-12-my-first-post/
 
 ## Workflow
 
-### Commands
+### Claude Code Slash Commands
+
+When using Claude Code, you can use these convenient slash commands:
+
+- **`/create-post <idea>`**: Create a blog post from voice/text input (generates content + images automatically)
+- **`/quality-check <path>`**: Run SEO analysis and Vale prose linting
+- **`/build <path>`**: Validate and generate preview (no external changes)
+- **`/publish <path>`**: Upload images, create/update post on Blogger
+
+### Python Scripts
+
+You can also run the underlying Python scripts directly:
 
 - **`build.py`**: Validate and generate preview (no external changes)
 - **`publish.py`**: Upload images, create/update post on Blogger
@@ -74,7 +97,8 @@ uv run publish.py posts/2025-10-12-my-first-post/
 ### First Publish
 
 ```bash
-uv run publish.py posts/2025-10-12-new-post/
+/publish posts/2025-10-12-new-post/
+# Or: uv run publish.py posts/2025-10-12-new-post/
 ```
 
 Result: Post **CREATED** on Blogger as DRAFT
@@ -84,7 +108,8 @@ Result: Post **CREATED** on Blogger as DRAFT
 Edit `post.md`, then:
 
 ```bash
-uv run publish.py posts/2025-10-12-new-post/
+/publish posts/2025-10-12-new-post/
+# Or: uv run publish.py posts/2025-10-12-new-post/
 ```
 
 Result: Post **UPDATED** (detected via `blogger_id` or path)

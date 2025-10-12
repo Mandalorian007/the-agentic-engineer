@@ -99,18 +99,25 @@ def analyze_seo(post_path: Path):
         warnings.append("Add 'description' field to frontmatter for better SEO")
 
     # 3. Heading structure
-    h1_headings = re.findall(r'^# (.+)$', body, re.MULTILINE)
+    # Remove code blocks first to avoid counting comments as headings
+    body_no_code_blocks = re.sub(r'```.*?```', '', body, flags=re.DOTALL)
+
+    h1_headings = re.findall(r'^# (.+)$', body_no_code_blocks, re.MULTILINE)
     if len(h1_headings) == 1:
         print_success(f"Single H1 heading: '{h1_headings[0][:50]}...'")
     elif len(h1_headings) == 0:
-        print_error("No H1 heading found in content")
-        issues.append("Add a single H1 (#) heading to your content")
+        # For blog posts with frontmatter, the title serves as H1
+        if title:
+            print_success("H1 heading: Using frontmatter title (recommended for blog posts)")
+        else:
+            print_error("No H1 heading found in content")
+            issues.append("Add a single H1 (#) heading to your content or a title in frontmatter")
     else:
         print_error(f"Multiple H1 headings found: {len(h1_headings)}")
         issues.append("Use only one H1 heading per page")
 
     # Check for heading hierarchy
-    headings = re.findall(r'^(#{1,6}) (.+)$', body, re.MULTILINE)
+    headings = re.findall(r'^(#{1,6}) (.+)$', body_no_code_blocks, re.MULTILINE)
     if headings:
         print_success(f"Total headings: {len(headings)}")
         # Check if headings skip levels
