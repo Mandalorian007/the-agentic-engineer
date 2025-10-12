@@ -86,7 +86,7 @@ When using Claude Code, you can use these convenient slash commands:
 - **`/quality-check <path>`**: Run SEO analysis and Vale prose linting
 - **`/build <path>`**: Validate and generate preview (no external changes)
 - **`/publish <path>`**: Upload images, create/update post on Blogger (supports scheduling)
-- **`/sync`**: Sync post status from Blogger to local frontmatter
+- **`/sync-publish-status`**: Sync post status from Blogger to local frontmatter
 
 ### Python Scripts
 
@@ -156,11 +156,11 @@ If you've been away or made changes in Blogger's UI, sync your local files with 
 
 ```bash
 # Sync all posts
-uv run tools/sync_publish_status.py
-# Or use slash command: /sync
+uv run tools/sync-publish-status.py
+# Or use slash command: /sync-publish-status
 
 # Sync specific post
-uv run tools/sync_publish_status.py --post-dir posts/2025-10-12-my-post/
+uv run tools/sync-publish-status.py --post-dir posts/2025-10-12-my-post/
 ```
 
 **When to sync:**
@@ -174,7 +174,7 @@ The sync tool updates:
 - Published date
 - Updated timestamp
 
-**Note:** Setup check automatically runs sync if you have published posts.
+**Note:** The setup check script (`uv run tools/setup-check.py`) automatically runs sync if you have published posts, so you'll always see the latest status when verifying your setup.
 
 ## Configuration
 

@@ -385,7 +385,7 @@ class SetupChecker:
         try:
             import subprocess
             result = subprocess.run(
-                ['uv', 'run', 'tools/sync_publish_status.py'],
+                ['uv', 'run', 'tools/sync-publish-status.py'],
                 capture_output=True,
                 text=True,
                 timeout=60
@@ -401,10 +401,10 @@ class SetupChecker:
 
         except subprocess.TimeoutExpired:
             print_warning("Sync timed out (you can run manually later)")
-            print_action("Run manually: uv run tools/sync_publish_status.py")
+            print_action("Run manually: uv run tools/sync-publish-status.py")
         except Exception as e:
             print_warning(f"Could not run sync: {e}")
-            print_action("Run manually: uv run tools/sync_publish_status.py")
+            print_action("Run manually: uv run tools/sync-publish-status.py")
 
     def print_summary(self):
         """Print final summary"""

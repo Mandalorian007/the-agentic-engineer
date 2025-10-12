@@ -6,10 +6,10 @@ Run the sync tool to check all posts (or a specific post) on Blogger and update 
 
 ```bash
 # Sync all posts
-uv run tools/sync_publish_status.py
+uv run tools/sync-publish-status.py
 
 # Sync specific post
-uv run tools/sync_publish_status.py --post-dir $POST_DIR
+uv run tools/sync-publish-status.py --post-dir $POST_DIR
 ```
 
 This is useful when:
