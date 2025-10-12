@@ -1,0 +1,26 @@
+# Blog Identity
+blog_name: "Agentic Engineer Blog"
+blogger_blog_id: "7784028204618796167"
+
+# Image Optimization (applied before Cloudinary upload)
+image_optimization:
+  max_width: 1200        # Resize images wider than this
+  max_height: 1200       # Resize images taller than this
+  quality: 85            # JPEG quality (1-100)
+  format: "JPEG"         # Pre-upload format (JPEG or PNG)
+
+# Cloudinary Upload Settings
+cloudinary:
+  folder: "blog-posts"   # Base folder for uploads
+  format: "webp"         # Final format (webp, auto)
+  quality: "auto:good"   # auto, auto:low, auto:good, auto:best, or 1-100
+
+# Markdown Processing
+markdown:
+  extensions:
+    - "tables"           # GitHub-style tables
+    - "strikethrough"    # ~~text~~
+    - "tasklists"        # - [ ] todo items
+  syntax_highlighting:
+    style: "monokai"     # Pygments style
+    line_numbers: true

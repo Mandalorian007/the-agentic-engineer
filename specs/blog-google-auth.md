@@ -333,7 +333,7 @@ uv run tools/generate_refresh_token.py
 4. Grant permissions to manage your Blogger account
 5. Script displays credentials in terminal
 
-**Copy the output** and add to `.env`:
+**Copy the output** and add to `.env.local`:
 
 ```bash
 # Google Blogger API Credentials
@@ -370,7 +370,7 @@ from googleapiclient.discovery import build
 from dotenv import load_dotenv
 import os
 
-load_dotenv()
+load_dotenv('.env.local')
 
 def main():
     creds = Credentials(
@@ -445,7 +445,7 @@ Create/update `.gitignore`:
 
 ```gitignore
 # Credentials (NEVER COMMIT)
-.env
+.env.local
 client_secret.json
 .credentials.json
 token.pickle
@@ -493,8 +493,8 @@ def test_config():
     """Test configuration loading"""
     print("=== Testing Configuration ===\n")
 
-    # Check .env
-    load_dotenv()
+    # Check .env.local
+    load_dotenv('.env.local')
     required_env = [
         'BLOGGER_CLIENT_ID',
         'BLOGGER_CLIENT_SECRET',
@@ -506,9 +506,9 @@ def test_config():
 
     missing = [k for k in required_env if not os.getenv(k)]
     if missing:
-        print(f"❌ Missing .env variables: {', '.join(missing)}")
+        print(f"❌ Missing .env.local variables: {', '.join(missing)}")
         return False
-    print("✅ .env loaded successfully")
+    print("✅ .env.local loaded successfully")
 
     # Check blog-config.yaml
     try:
@@ -606,7 +606,7 @@ uv run tools/test_auth.py
 
 === Testing Configuration ===
 
-✅ .env loaded successfully
+✅ .env.local loaded successfully
 ✅ blog-config.yaml loaded successfully
    Blog: Agentic Engineer Blog
    Blog ID: 1234567890123456789
@@ -724,9 +724,10 @@ def test_connection(service, blog_id: str) -> bool:
 1. **Never commit credentials**:
    ```bash
    # Add to .gitignore
-   .env
+   .env.local
    client_secret.json
    ```
+   Note: `.env` is reserved for MCP configuration
 
 2. **Use environment variables** for all secrets
 
@@ -755,7 +756,7 @@ def test_connection(service, blog_id: str) -> bool:
 
 **Fix**:
 1. Run `uv run tools/generate_refresh_token.py` again
-2. Update `.env` with new refresh token
+2. Update `.env.local` with new refresh token
 
 ### Error: "insufficient_permissions" or "insufficientPermissions"
 
@@ -781,7 +782,7 @@ def test_connection(service, blog_id: str) -> bool:
 After completing this setup:
 
 1. ✅ **Authentication configured** - Ready to use Blogger API
-2. ✅ **Configuration files created** - `blog-config.yaml` and `.env`
+2. ✅ **Configuration files created** - `blog-config.yaml` and `.env.local`
 3. ✅ **Dependencies installed** - All libraries available
 
 **You're ready to implement**:
@@ -861,6 +862,8 @@ uv run publish.py posts/2025-10-12-my-post/
 ```
 
 ### Environment Variables Reference
+
+File: `.env.local`
 
 ```bash
 # Blogger (from OAuth flow)
