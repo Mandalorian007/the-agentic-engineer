@@ -82,6 +82,25 @@ uv run publish.py posts/2025-10-12-my-first-post/
 
 When using Claude Code, you can use these convenient slash commands:
 
+#### Typical Workflow
+The recommended workflow for creating new blog posts:
+
+```bash
+# 1. First, sync publish status to ensure dates are up-to-date
+/sync-publish-status
+
+# 2. Then create and publish a new post (all in one command)
+/create-quality-build-publish Your blog post idea goes here
+```
+
+This ensures the next Monday date calculation is accurate and the complete workflow (create → quality check → build → publish) runs automatically.
+
+#### Available Commands
+
+**End-to-End Workflow:**
+- **`/create-quality-build-publish <idea>`**: Complete workflow - gets next Monday date, creates post, runs quality checks, builds preview, and publishes to Blogger
+
+**Individual Steps:**
 - **`/create-post <idea>`**: Create a blog post from voice/text input (generates content + images automatically)
 - **`/quality-check <path>`**: Run SEO analysis and Vale prose linting
 - **`/build <path>`**: Validate and generate preview (no external changes)
@@ -305,6 +324,34 @@ uv run tools/generate_image.py "modern minimalist illustration of AI automation 
 - More detailed prompts = better results
 
 **Note:** Requires `OPENAI_API_KEY` in `.env.local`
+
+## Publishing Schedule
+
+### Next Monday Publish Date
+
+Maintain a consistent Monday publishing schedule:
+
+```bash
+uv run tools/next_publish_date.py
+```
+
+**Features**:
+- Scans all post directories to find the next available Monday
+- Skips Mondays that already have scheduled posts
+- Provides both directory name format and frontmatter date format
+
+**Example output**:
+```
+Next available Monday for publishing:
+----------------------------------------
+Directory name: 2025-10-20-your-slug-here
+Frontmatter date: 2025-10-20T10:00:00Z
+Day: Monday, October 20, 2025
+----------------------------------------
+
+Latest scheduled post: 2025-10-12 (Sunday)
+Days until next post: 8
+```
 
 ## Tag Management
 
