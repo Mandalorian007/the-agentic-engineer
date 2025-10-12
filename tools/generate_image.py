@@ -15,27 +15,32 @@ import os
 import sys
 from pathlib import Path
 
+from dotenv import load_dotenv
 from openai import OpenAI
 
 
-def generate_image(prompt: str, output_path: str, api_key: str = None) -> None:
+def generate_image(prompt: str, output_path: str) -> None:
     """
     Generate an image using DALL-E and save it to the specified path.
 
     Args:
         prompt: The text prompt to generate the image from
         output_path: Path where the image should be saved
-        api_key: OpenAI API key (defaults to OPENAI_API_KEY env var)
     """
     # Save the current working directory to restore later
     original_cwd = os.getcwd()
 
-    # Get API key from environment if not provided
-    if api_key is None:
-        api_key = os.environ.get("OPENAI_API_KEY")
-        if not api_key:
-            print("❌ Error: OPENAI_API_KEY environment variable not set", file=sys.stderr)
-            sys.exit(1)
+    # Load environment variables from .env.local
+    env_path = Path('.env.local')
+    if env_path.exists():
+        load_dotenv(env_path)
+
+    # Get API key from environment
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        print("❌ Error: OPENAI_API_KEY environment variable not set", file=sys.stderr)
+        print("   Add OPENAI_API_KEY=xxx to .env.local", file=sys.stderr)
+        sys.exit(1)
 
     # Initialize OpenAI client
     client = OpenAI(api_key=api_key)
@@ -128,15 +133,9 @@ Tip: More detailed prompts produce better results. Include:
         help="Path where the generated image should be saved (e.g., output.png)"
     )
 
-    parser.add_argument(
-        "--api-key",
-        help="OpenAI API key (defaults to OPENAI_API_KEY environment variable)",
-        default=None
-    )
-
     args = parser.parse_args()
 
-    generate_image(args.prompt, args.output_path, args.api_key)
+    generate_image(args.prompt, args.output_path)
 
 
 if __name__ == "__main__":

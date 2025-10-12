@@ -1,20 +1,13 @@
-# Tag Registry for Agentic Engineer Blog
-# Core tags for AI and automation topics
-#
-# Keep this list small and focused - only the most essential tags
-
 tags:
-  # Core AI Topics
-  - ai-agents
-  - prompt-engineering
-
-  # Automation
-  - workflow-automation
-
-  # Development
-  - python
-  - typescript
-
-  # Platforms
-  - openai
-  - anthropic
+- ai-agents
+- anthropic
+- grafana
+- homelab
+- monitoring
+- observability
+- openai
+- prometheus
+- prompt-engineering
+- python
+- typescript
+- workflow-automation
