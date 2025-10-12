@@ -12,7 +12,7 @@ When the user runs `/build <path>`:
    - If no path provided, ask the user to specify a post path
 
 2. **Run the build script:**
-   - Execute: `uv run build.py <path-to-post-directory>/`
+   - Execute: `uv run tools/build.py <path-to-post-directory>/`
    - This will:
      - Validate post content and frontmatter
      - Check image references

@@ -70,10 +70,10 @@ EOF
 
 ```bash
 # Validate and preview
-uv run build.py posts/2025-10-12-my-first-post/
+uv run tools/build.py posts/2025-10-12-my-first-post/
 
 # Publish to Blogger
-uv run publish.py posts/2025-10-12-my-first-post/
+uv run tools/publish.py posts/2025-10-12-my-first-post/
 ```
 
 ## Workflow
@@ -111,14 +111,14 @@ This ensures the next Monday date calculation is accurate and the complete workf
 
 You can also run the underlying Python scripts directly:
 
-- **`build.py`**: Validate and generate preview (no external changes)
-- **`publish.py`**: Upload images, create/update post on Blogger
+- **`tools/build.py`**: Validate and generate preview (no external changes)
+- **`tools/publish.py`**: Upload images, create/update post on Blogger
 
 ### First Publish
 
 ```bash
 /publish posts/2025-10-12-new-post/
-# Or: uv run publish.py posts/2025-10-12-new-post/
+# Or: uv run tools/publish.py posts/2025-10-12-new-post/
 ```
 
 Result: Post **CREATED** on Blogger as DRAFT
@@ -129,7 +129,7 @@ Edit `post.md`, then:
 
 ```bash
 /publish posts/2025-10-12-new-post/
-# Or: uv run publish.py posts/2025-10-12-new-post/
+# Or: uv run tools/publish.py posts/2025-10-12-new-post/
 ```
 
 Result: Post **UPDATED** (detected via `blogger_id` or path)
@@ -151,7 +151,7 @@ status: published  # Will be scheduled, not published immediately
 ---
 ```
 
-When you run `/publish` (or `uv run publish.py`):
+When you run `/publish` (or `uv run tools/publish.py`):
 - If `date` is in the **future**: Post is **scheduled** on Blogger
 - If `date` is in the **past or present**: Post publishes immediately
 
@@ -163,8 +163,8 @@ mkdir posts/2025-10-14-post-2
 # ... (all with future dates in frontmatter)
 
 # Publish all at once - they'll be scheduled!
-uv run publish.py posts/2025-10-13-post-1/
-uv run publish.py posts/2025-10-14-post-2/
+uv run tools/publish.py posts/2025-10-13-post-1/
+uv run tools/publish.py posts/2025-10-14-post-2/
 # ... now relax! Blogger will publish them automatically
 
 ```

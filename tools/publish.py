@@ -3,10 +3,10 @@
 Publish command: Upload images and create/update blog post on Blogger
 
 Usage:
-    uv run publish.py <post-directory>
+    uv run tools/publish.py <post-directory>
 
 Example:
-    uv run publish.py posts/2025-10-12-my-first-post/
+    uv run tools/publish.py posts/2025-10-12-my-first-post/
 """
 
 import sys
@@ -234,9 +234,9 @@ def publish_post(post_dir_str: str) -> int:
 
 def main():
     if len(sys.argv) != 2:
-        print("Usage: uv run publish.py <post-directory>", file=sys.stderr)
+        print("Usage: uv run tools/publish.py <post-directory>", file=sys.stderr)
         print("\nExample:", file=sys.stderr)
-        print("  uv run publish.py posts/2025-10-12-my-first-post/", file=sys.stderr)
+        print("  uv run tools/publish.py posts/2025-10-12-my-first-post/", file=sys.stderr)
         sys.exit(1)
 
     post_dir = sys.argv[1]

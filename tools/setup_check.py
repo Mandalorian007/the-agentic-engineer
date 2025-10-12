@@ -418,14 +418,14 @@ class SetupChecker:
             print()
             print_info("You're ready to create and publish posts:")
             print("  1. Create a post: posts/YYYY-MM-DD-slug/post.md")
-            print("  2. Validate: uv run build.py posts/YYYY-MM-DD-slug/")
-            print("  3. Publish: uv run publish.py posts/YYYY-MM-DD-slug/")
+            print("  2. Validate: uv run tools/build.py posts/YYYY-MM-DD-slug/")
+            print("  3. Publish: uv run tools/publish.py posts/YYYY-MM-DD-slug/")
             print()
             print_info("Example:")
             print_action("  mkdir -p posts/2025-10-12-my-first-post")
             print_action("  # Edit posts/2025-10-12-my-first-post/post.md")
-            print_action("  uv run build.py posts/2025-10-12-my-first-post/")
-            print_action("  uv run publish.py posts/2025-10-12-my-first-post/")
+            print_action("  uv run tools/build.py posts/2025-10-12-my-first-post/")
+            print_action("  uv run tools/publish.py posts/2025-10-12-my-first-post/")
 
         else:
             print_error(f"Found {len(self.issues)} issue(s) to fix:")

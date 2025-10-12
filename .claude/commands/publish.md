@@ -12,7 +12,7 @@ When the user runs `/publish <path>`:
    - If no path provided, ask the user to specify a post path
 
 2. **Run the publish script:**
-   - Execute: `uv run publish.py <path-to-post-directory>/`
+   - Execute: `uv run tools/publish.py <path-to-post-directory>/`
    - This will:
      - Validate post content
      - Upload images to Cloudinary CDN (if not already cached)

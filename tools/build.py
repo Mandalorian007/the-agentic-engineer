@@ -3,10 +3,10 @@
 Build command: Validate and preview blog post
 
 Usage:
-    uv run build.py <post-directory>
+    uv run tools/build.py <post-directory>
 
 Example:
-    uv run build.py posts/2025-10-12-my-first-post/
+    uv run tools/build.py posts/2025-10-12-my-first-post/
 """
 
 import sys
@@ -113,7 +113,7 @@ def build_post(post_dir_str: str) -> int:
         print(f"Blogger path: {blogger_path}")
         print(f"Images:       {len(image_refs)} ({'all cached' if all(info['status'] == '✓ cached' for info in image_info.values()) else 'some need upload'})")
         print("\n✅ Ready to publish!")
-        print(f"   Run: uv run publish.py {post_dir_str}")
+        print(f"   Run: uv run tools/publish.py {post_dir_str}")
         print("="*60)
 
         return 0
@@ -220,9 +220,9 @@ def generate_preview_html(frontmatter: dict, body_html: str, converter) -> str:
 
 def main():
     if len(sys.argv) != 2:
-        print("Usage: uv run build.py <post-directory>", file=sys.stderr)
+        print("Usage: uv run tools/build.py <post-directory>", file=sys.stderr)
         print("\nExample:", file=sys.stderr)
-        print("  uv run build.py posts/2025-10-12-my-first-post/", file=sys.stderr)
+        print("  uv run tools/build.py posts/2025-10-12-my-first-post/", file=sys.stderr)
         sys.exit(1)
 
     post_dir = sys.argv[1]
