@@ -102,11 +102,11 @@ class MarkdownConverter:
                 # Try to guess language
                 lexer = guess_lexer(code)
 
-            # Create formatter with configuration
+            # Create formatter with inline styles (Blogger strips <style> tags)
             formatter = HtmlFormatter(
                 style=self.highlight_style,
-                linenos='table' if self.show_line_numbers else False,
-                cssclass='highlight',
+                linenos=False,  # Disable line numbers
+                noclasses=True,  # Use inline styles instead of CSS classes
                 wrapcode=True
             )
 
