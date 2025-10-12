@@ -53,8 +53,6 @@ EOF
 
 ### 3. Build and Publish
 
-**Using Claude Code slash commands** (recommended):
-
 ```bash
 # Optional: Run quality checks (SEO + prose linting)
 /quality-check posts/2025-10-12-my-first-post/
@@ -66,23 +64,9 @@ EOF
 /publish posts/2025-10-12-my-first-post/
 ```
 
-**Or run Python scripts directly**:
-
-```bash
-# Validate and preview
-uv run tools/build.py posts/2025-10-12-my-first-post/
-
-# Publish to Blogger
-uv run tools/publish.py posts/2025-10-12-my-first-post/
-```
-
 ## Workflow
 
-### Claude Code Slash Commands
-
-When using Claude Code, you can use these convenient slash commands:
-
-#### Typical Workflow
+### Typical Workflow
 The recommended workflow for creating new blog posts:
 
 ```bash
@@ -95,7 +79,7 @@ The recommended workflow for creating new blog posts:
 
 This ensures the next Monday date calculation is accurate and the complete workflow (create → quality check → build → publish) runs automatically.
 
-#### Available Commands
+### Available Commands
 
 **End-to-End Workflow:**
 - **`/create-quality-build-publish <idea>`**: Complete workflow - gets next Monday date, creates post, runs quality checks, builds preview, and publishes to Blogger
@@ -107,18 +91,10 @@ This ensures the next Monday date calculation is accurate and the complete workf
 - **`/publish <path>`**: Upload images, create/update post on Blogger (supports scheduling)
 - **`/sync-publish-status`**: Sync post status from Blogger to local frontmatter
 
-### Python Scripts
-
-You can also run the underlying Python scripts directly:
-
-- **`tools/build.py`**: Validate and generate preview (no external changes)
-- **`tools/publish.py`**: Upload images, create/update post on Blogger
-
 ### First Publish
 
 ```bash
 /publish posts/2025-10-12-new-post/
-# Or: uv run tools/publish.py posts/2025-10-12-new-post/
 ```
 
 Result: Post **CREATED** on Blogger as DRAFT
@@ -129,7 +105,6 @@ Edit `post.md`, then:
 
 ```bash
 /publish posts/2025-10-12-new-post/
-# Or: uv run tools/publish.py posts/2025-10-12-new-post/
 ```
 
 Result: Post **UPDATED** (detected via `blogger_id` or path)
@@ -151,35 +126,16 @@ status: published  # Will be scheduled, not published immediately
 ---
 ```
 
-When you run `/publish` (or `uv run tools/publish.py`):
+When you run `/publish`:
 - If `date` is in the **future**: Post is **scheduled** on Blogger
 - If `date` is in the **past or present**: Post publishes immediately
-
-**Batch scheduling workflow:**
-```bash
-# Write 30 posts with future dates
-mkdir posts/2025-10-13-post-1
-mkdir posts/2025-10-14-post-2
-# ... (all with future dates in frontmatter)
-
-# Publish all at once - they'll be scheduled!
-uv run tools/publish.py posts/2025-10-13-post-1/
-uv run tools/publish.py posts/2025-10-14-post-2/
-# ... now relax! Blogger will publish them automatically
-
-```
 
 ### Sync Post Status
 
 If you've been away or made changes in Blogger's UI, sync your local files with actual published status:
 
 ```bash
-# Sync all posts
-uv run tools/sync-publish-status.py
-# Or use slash command: /sync-publish-status
-
-# Sync specific post
-uv run tools/sync-publish-status.py --post-dir posts/2025-10-12-my-post/
+/sync-publish-status
 ```
 
 **When to sync:**
@@ -385,6 +341,24 @@ To use these tags:
   1. Add them to tag-registry.yaml
   2. Run build again
 ```
+
+## Python Scripts (Advanced)
+
+If you need to run the underlying Python scripts directly without Claude Code:
+
+**Build & Publish:**
+- `uv run tools/build.py <post-directory>` - Validate and generate preview
+- `uv run tools/publish.py <post-directory>` - Upload images and publish to Blogger
+
+**Utilities:**
+- `uv run tools/generate_image.py <prompt> <output-path>` - Generate AI images
+- `uv run tools/seo_check.py <post-directory>` - Run SEO analysis
+- `uv run tools/next_publish_date.py` - Get next available Monday
+- `uv run tools/sync-publish-status.py` - Sync post status from Blogger
+- `uv run tools/list_tags.py` - View approved tags
+- `uv run tools/add_tag.py <tag-name>` - Add new tag to registry
+- `uv run tools/setup_check.py` - Verify setup configuration
+- `uv run tools/test_auth.py` - Test authentication
 
 ## Troubleshooting
 
