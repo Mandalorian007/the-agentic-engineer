@@ -1,6 +1,8 @@
 tags:
 - ai-agents
 - anthropic
+- automation
+- claude-code
 - grafana
 - homelab
 - monitoring
@@ -9,5 +11,6 @@ tags:
 - prometheus
 - prompt-engineering
 - python
+- security
 - typescript
 - workflow-automation

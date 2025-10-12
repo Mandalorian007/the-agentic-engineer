@@ -21,6 +21,7 @@ When the user runs `/create-quality-build-publish <idea>`:
    ```bash
    /quality-check posts/2025-10-20-automated-blog-publishing/
    ```
+   - ensure to resolve any reasonable issues that were discovered and validate them before continuing to the build
 
 4. **Build preview:**
    ```bash

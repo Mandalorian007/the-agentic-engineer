@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taming Claude YOLO Mode with Safety Hooks - Preview</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #fff;
+            color: #333;
+        }
+        h1, h2, h3, h4, h5, h6 {
+            margin-top: 24px;
+            margin-bottom: 16px;
+            font-weight: 600;
+            line-height: 1.25;
+        }
+        h1 { font-size: 2em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+        h2 { font-size: 1.5em; border-bottom: 1px solid #eaecef; padding-bottom: 0.3em; }
+        code {
+            background: #f6f8fa;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 3px;
+        }
+        pre {
+            background: #f6f8fa;
+            padding: 16px;
+            overflow: auto;
+            line-height: 1.45;
+            border-radius: 3px;
+        }
+        pre code {
+            background: transparent;
+            padding: 0;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 16px 0;
+        }
+        table th, table td {
+            border: 1px solid #dfe2e5;
+            padding: 6px 13px;
+        }
+        table th {
+            background: #f6f8fa;
+            font-weight: 600;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+        .meta {
+            color: #666;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+            padding: 10px;
+            background: #f6f8fa;
+            border-radius: 3px;
+        }
+        pre { line-height: 125%; }
+td.linenos .normal { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+span.linenos { color: inherit; background-color: transparent; padding-left: 5px; padding-right: 5px; }
+td.linenos .special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 5px; padding-right: 5px; }
+.highlight .hll { background-color: #49483e }
+.highlight { background: #272822; color: #F8F8F2 }
+.highlight .c { color: #959077 } /* Comment */
+.highlight .err { color: #ED007E; background-color: #1E0010 } /* Error */
+.highlight .esc { color: #F8F8F2 } /* Escape */
+.highlight .g { color: #F8F8F2 } /* Generic */
+.highlight .k { color: #66D9EF } /* Keyword */
+.highlight .l { color: #AE81FF } /* Literal */
+.highlight .n { color: #F8F8F2 } /* Name */
+.highlight .o { color: #FF4689 } /* Operator */
+.highlight .x { color: #F8F8F2 } /* Other */
+.highlight .p { color: #F8F8F2 } /* Punctuation */
+.highlight .ch { color: #959077 } /* Comment.Hashbang */
+.highlight .cm { color: #959077 } /* Comment.Multiline */
+.highlight .cp { color: #959077 } /* Comment.Preproc */
+.highlight .cpf { color: #959077 } /* Comment.PreprocFile */
+.highlight .c1 { color: #959077 } /* Comment.Single */
+.highlight .cs { color: #959077 } /* Comment.Special */
+.highlight .gd { color: #FF4689 } /* Generic.Deleted */
+.highlight .ge { color: #F8F8F2; font-style: italic } /* Generic.Emph */
+.highlight .ges { color: #F8F8F2; font-weight: bold; font-style: italic } /* Generic.EmphStrong */
+.highlight .gr { color: #F8F8F2 } /* Generic.Error */
+.highlight .gh { color: #F8F8F2 } /* Generic.Heading */
+.highlight .gi { color: #A6E22E } /* Generic.Inserted */
+.highlight .go { color: #66D9EF } /* Generic.Output */
+.highlight .gp { color: #FF4689; font-weight: bold } /* Generic.Prompt */
+.highlight .gs { color: #F8F8F2; font-weight: bold } /* Generic.Strong */
+.highlight .gu { color: #959077 } /* Generic.Subheading */
+.highlight .gt { color: #F8F8F2 } /* Generic.Traceback */
+.highlight .kc { color: #66D9EF } /* Keyword.Constant */
+.highlight .kd { color: #66D9EF } /* Keyword.Declaration */
+.highlight .kn { color: #FF4689 } /* Keyword.Namespace */
+.highlight .kp { color: #66D9EF } /* Keyword.Pseudo */
+.highlight .kr { color: #66D9EF } /* Keyword.Reserved */
+.highlight .kt { color: #66D9EF } /* Keyword.Type */
+.highlight .ld { color: #E6DB74 } /* Literal.Date */
+.highlight .m { color: #AE81FF } /* Literal.Number */
+.highlight .s { color: #E6DB74 } /* Literal.String */
+.highlight .na { color: #A6E22E } /* Name.Attribute */
+.highlight .nb { color: #F8F8F2 } /* Name.Builtin */
+.highlight .nc { color: #A6E22E } /* Name.Class */
+.highlight .no { color: #66D9EF } /* Name.Constant */
+.highlight .nd { color: #A6E22E } /* Name.Decorator */
+.highlight .ni { color: #F8F8F2 } /* Name.Entity */
+.highlight .ne { color: #A6E22E } /* Name.Exception */
+.highlight .nf { color: #A6E22E } /* Name.Function */
+.highlight .nl { color: #F8F8F2 } /* Name.Label */
+.highlight .nn { color: #F8F8F2 } /* Name.Namespace */
+.highlight .nx { color: #A6E22E } /* Name.Other */
+.highlight .py { color: #F8F8F2 } /* Name.Property */
+.highlight .nt { color: #FF4689 } /* Name.Tag */
+.highlight .nv { color: #F8F8F2 } /* Name.Variable */
+.highlight .ow { color: #FF4689 } /* Operator.Word */
+.highlight .pm { color: #F8F8F2 } /* Punctuation.Marker */
+.highlight .w { color: #F8F8F2 } /* Text.Whitespace */
+.highlight .mb { color: #AE81FF } /* Literal.Number.Bin */
+.highlight .mf { color: #AE81FF } /* Literal.Number.Float */
+.highlight .mh { color: #AE81FF } /* Literal.Number.Hex */
+.highlight .mi { color: #AE81FF } /* Literal.Number.Integer */
+.highlight .mo { color: #AE81FF } /* Literal.Number.Oct */
+.highlight .sa { color: #E6DB74 } /* Literal.String.Affix */
+.highlight .sb { color: #E6DB74 } /* Literal.String.Backtick */
+.highlight .sc { color: #E6DB74 } /* Literal.String.Char */
+.highlight .dl { color: #E6DB74 } /* Literal.String.Delimiter */
+.highlight .sd { color: #E6DB74 } /* Literal.String.Doc */
+.highlight .s2 { color: #E6DB74 } /* Literal.String.Double */
+.highlight .se { color: #AE81FF } /* Literal.String.Escape */
+.highlight .sh { color: #E6DB74 } /* Literal.String.Heredoc */
+.highlight .si { color: #E6DB74 } /* Literal.String.Interpol */
+.highlight .sx { color: #E6DB74 } /* Literal.String.Other */
+.highlight .sr { color: #E6DB74 } /* Literal.String.Regex */
+.highlight .s1 { color: #E6DB74 } /* Literal.String.Single */
+.highlight .ss { color: #E6DB74 } /* Literal.String.Symbol */
+.highlight .bp { color: #F8F8F2 } /* Name.Builtin.Pseudo */
+.highlight .fm { color: #A6E22E } /* Name.Function.Magic */
+.highlight .vc { color: #F8F8F2 } /* Name.Variable.Class */
+.highlight .vg { color: #F8F8F2 } /* Name.Variable.Global */
+.highlight .vi { color: #F8F8F2 } /* Name.Variable.Instance */
+.highlight .vm { color: #F8F8F2 } /* Name.Variable.Magic */
+.highlight .il { color: #AE81FF } /* Literal.Number.Integer.Long */
+    </style>
+</head>
+<body>
+    <div class="meta">
+        <strong>Title:</strong> Taming Claude YOLO Mode with Safety Hooks<br>
+        <strong>Date:</strong> 2025-10-13 10:00:00+00:00<br>
+        <strong>Status:</strong> draft<br>
+        <strong>Tags:</strong> claude-code, automation, security, python
+    </div>
+    <p><img src="./hero-safe-yolo-mode.png" alt="Hero image showing a safe with code symbols" /></p>
+<p>You've discovered Claude Code's <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>--dangerously-skip-permissions
+</code></pre></div>
+ flag (affectionately known as &quot;YOLO mode&quot;), and suddenly your workflow is <strong>10x faster</strong>. No more clicking &quot;approve&quot; 100 times per session. But then you remember the horror stories: accidental <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>rm -rf /
+</code></pre></div>
+, exposed <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #A6E22E">.env</span>
+</code></pre></div>
+ credentials, force-pushed over <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>main
+</code></pre></div>
+.</p>
+<p>The dilemma is real: you want speed <strong>and</strong> safety. Good news—you can have both.</p>
+<h2>The YOLO Mode Dilemma</h2>
+<p><strong>Without <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>--dangerously-skip-permissions
+</code></pre></div>
+:</strong></p>
+<ul>
+<li>Constant approval prompts for every Read, Edit, and Bash command</li>
+<li>100+ interruptions per session</li>
+<li>Workflow grinds to a halt</li>
+<li>Completely unusable for real work</li>
+</ul>
+<p><strong>With <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>--dangerously-skip-permissions
+</code></pre></div>
+:</strong></p>
+<ul>
+<li>Fast, productive, uninterrupted workflow</li>
+<li>Risk of accidental credential leaks (<div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>cat .env
+</code></pre></div>
+)</li>
+<li>Risk of destructive commands (<div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>rm -rf
+</code></pre></div>
+, <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>git push --force
+</code></pre></div>
+)</li>
+<li>One mistake could nuke your project</li>
+</ul>
+<p>We need both: <strong>speed AND safety</strong>.</p>
+<h2>Solution: Pre-Tool-Use Hooks</h2>
+<p>Claude Code introduced a powerful feature called <strong>hooks</strong>—scripts that intercept operations before they execute. Think of them as a safety net that catches dangerous operations while letting safe ones through automatically.</p>
+<p><img src="./diagram-hook-flow.png" alt="Diagram showing hook flow" /></p>
+<p><strong>The flow:</strong></p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>User → Claude → Pre-Tool-Use Hook → [Block/Allow] → Tool Execution
+</code></pre></div>
+</pre>
+<p>Every tool call (Read, Write, Edit, Bash) passes through your hook script first. Your script examines the operation and returns:</p>
+<ul>
+<li><strong>Exit code 0</strong>: Allow (operation proceeds)</li>
+<li><strong>Exit code 2</strong>: Block (operation stopped, error message shown)</li>
+</ul>
+<p>This gives you 100% coverage with zero manual intervention.</p>
+<h2>Setting Up Safety Hooks</h2>
+<h3>Step 1: Configure the Hook in <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #A6E22E">.claude</span><span style="color: #ED007E; background-color: #1E0010">/</span><span style="color: #66D9EF">settings.json</span>
+</code></pre></div>
+</h3>
+<p>Add the <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>PreToolUse
+</code></pre></div>
+ hook to your project settings:</p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;hooks&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;PreToolUse&quot;</span><span style="color: #F8F8F2">: [</span>
+<span style="color: #F8F8F2">      {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">&quot;matcher&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">&quot;hooks&quot;</span><span style="color: #F8F8F2">: [</span>
+<span style="color: #F8F8F2">          {</span>
+<span style="color: #F8F8F2">            </span><span style="color: #FF4689">&quot;type&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;command&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">            </span><span style="color: #FF4689">&quot;command&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;uv run $CLAUDE_PROJECT_DIR/.claude/hooks/pre_tool_use.py&quot;</span>
+<span style="color: #F8F8F2">          }</span>
+<span style="color: #F8F8F2">        ]</span>
+<span style="color: #F8F8F2">      }</span>
+<span style="color: #F8F8F2">    ]</span>
+<span style="color: #F8F8F2">  }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+</pre>
+<p><strong>Key points:</strong></p>
+<ul>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>$CLAUDE_PROJECT_DIR
+</code></pre></div>
+ is an environment variable pointing to your project root</li>
+<li>The <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>matcher
+</code></pre></div>
+ field is empty, meaning this hook applies to <strong>all</strong> tool calls</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>uv run
+</code></pre></div>
+ executes the Python script with proper dependency management</li>
+</ul>
+<h3>Step 2: Create the Hook Script</h3>
+<p>Create <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #FF4689">.</span><span style="color: #F8F8F2">claude</span><span style="color: #FF4689">/</span><span style="color: #F8F8F2">hooks</span><span style="color: #FF4689">/</span><span style="color: #F8F8F2">pre_tool_use</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">py</span>
+</code></pre></div>
+:</p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">#!/usr/bin/env python3</span>
+<span style="color: #FF4689">import</span><span style="color: #F8F8F2"> json</span>
+<span style="color: #FF4689">import</span><span style="color: #F8F8F2"> sys</span>
+<span style="color: #FF4689">import</span><span style="color: #F8F8F2"> re</span>
+
+<span style="color: #66D9EF">def</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">main</span><span style="color: #F8F8F2">():</span>
+    <span style="color: #959077"># Read tool call data from stdin</span>
+    <span style="color: #F8F8F2">input_data</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">json</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">load(sys</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">stdin)</span>
+    <span style="color: #F8F8F2">tool_name</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">input_data</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">get(</span><span style="color: #E6DB74">&quot;tool_name&quot;</span><span style="color: #F8F8F2">)</span>
+    <span style="color: #F8F8F2">tool_input</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">input_data</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">get(</span><span style="color: #E6DB74">&quot;tool_input&quot;</span><span style="color: #F8F8F2">)</span>
+
+    <span style="color: #959077"># Check credential file access</span>
+    <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">is_credential_file_access(tool_name,</span> <span style="color: #F8F8F2">tool_input):</span>
+        <span style="color: #F8F8F2">print(</span><span style="color: #E6DB74">&quot;BLOCKED: Access to credential files prohibited&quot;</span><span style="color: #F8F8F2">,</span> <span style="color: #F8F8F2">file</span><span style="color: #FF4689">=</span><span style="color: #F8F8F2">sys</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">stderr)</span>
+        <span style="color: #F8F8F2">sys</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">exit(</span><span style="color: #AE81FF">2</span><span style="color: #F8F8F2">)</span>  <span style="color: #959077"># Block the operation</span>
+
+    <span style="color: #959077"># Check dangerous bash commands</span>
+    <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">tool_name</span> <span style="color: #FF4689">==</span> <span style="color: #E6DB74">&quot;Bash&quot;</span><span style="color: #F8F8F2">:</span>
+        <span style="color: #F8F8F2">command</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">tool_input</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">get(</span><span style="color: #E6DB74">&quot;command&quot;</span><span style="color: #F8F8F2">,</span> <span style="color: #E6DB74">&quot;&quot;</span><span style="color: #F8F8F2">)</span>
+        <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">is_dangerous_command(command):</span>
+            <span style="color: #F8F8F2">print(</span><span style="color: #E6DB74">f&quot;BLOCKED: Dangerous command detected: {</span><span style="color: #F8F8F2">command</span><span style="color: #E6DB74">}&quot;</span><span style="color: #F8F8F2">,</span> <span style="color: #F8F8F2">file</span><span style="color: #FF4689">=</span><span style="color: #F8F8F2">sys</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">stderr)</span>
+            <span style="color: #F8F8F2">sys</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">exit(</span><span style="color: #AE81FF">2</span><span style="color: #F8F8F2">)</span>
+
+    <span style="color: #959077"># Allow the operation</span>
+    <span style="color: #F8F8F2">sys</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">exit(</span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2">)</span>
+
+<span style="color: #66D9EF">def</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">is_credential_file_access</span><span style="color: #F8F8F2">(tool_name,</span> <span style="color: #F8F8F2">tool_input):</span>
+<span style="color: #F8F8F2">    </span><span style="color: #E6DB74">&quot;&quot;&quot;Block access to credential files like .env, client_secret.json&quot;&quot;&quot;</span>
+
+    <span style="color: #959077"># Check file-based tools (Read, Write, Edit)</span>
+    <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">tool_name</span> <span style="color: #FF4689">in</span> <span style="color: #F8F8F2">[</span><span style="color: #E6DB74">&quot;Read&quot;</span><span style="color: #F8F8F2">,</span> <span style="color: #E6DB74">&quot;Write&quot;</span><span style="color: #F8F8F2">,</span> <span style="color: #E6DB74">&quot;Edit&quot;</span><span style="color: #F8F8F2">]:</span>
+        <span style="color: #F8F8F2">file_path</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">tool_input</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">get(</span><span style="color: #E6DB74">&#39;file_path&#39;</span><span style="color: #F8F8F2">,</span> <span style="color: #E6DB74">&#39;&#39;</span><span style="color: #F8F8F2">)</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">lower()</span>
+
+        <span style="color: #959077"># Block .env files (but allow .env.sample, .env.example)</span>
+        <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">re</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">search(</span><span style="color: #E6DB74">r&#39;\.env(?!\.sample|\.example)&#39;</span><span style="color: #F8F8F2">,</span> <span style="color: #F8F8F2">file_path):</span>
+            <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">True</span>
+
+        <span style="color: #959077"># Block credential files</span>
+        <span style="color: #F8F8F2">credential_patterns</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">[</span>
+            <span style="color: #E6DB74">r&#39;client_secret\.json&#39;</span><span style="color: #F8F8F2">,</span>
+            <span style="color: #E6DB74">r&#39;\.credentials\.json&#39;</span><span style="color: #F8F8F2">,</span>
+            <span style="color: #E6DB74">r&#39;token\.pickle&#39;</span><span style="color: #F8F8F2">,</span>
+            <span style="color: #E6DB74">r&#39;.*\.pem$&#39;</span><span style="color: #F8F8F2">,</span>
+            <span style="color: #E6DB74">r&#39;.*\.key$&#39;</span>
+        <span style="color: #F8F8F2">]</span>
+        <span style="color: #66D9EF">for</span> <span style="color: #F8F8F2">pattern</span> <span style="color: #FF4689">in</span> <span style="color: #F8F8F2">credential_patterns:</span>
+            <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">re</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">search(pattern,</span> <span style="color: #F8F8F2">file_path):</span>
+                <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">True</span>
+
+    <span style="color: #959077"># Check Bash commands trying to read credentials</span>
+    <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">tool_name</span> <span style="color: #FF4689">==</span> <span style="color: #E6DB74">&quot;Bash&quot;</span><span style="color: #F8F8F2">:</span>
+        <span style="color: #F8F8F2">command</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">tool_input</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">get(</span><span style="color: #E6DB74">&#39;command&#39;</span><span style="color: #F8F8F2">,</span> <span style="color: #E6DB74">&#39;&#39;</span><span style="color: #F8F8F2">)</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">lower()</span>
+
+        <span style="color: #959077"># Detect cat, vim, base64, curl with .env files</span>
+        <span style="color: #F8F8F2">dangerous_patterns</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">[</span>
+            <span style="color: #E6DB74">r&#39;(cat|vim|nano|less|head|tail|base64)\s+.*\.env&#39;</span><span style="color: #F8F8F2">,</span>
+            <span style="color: #E6DB74">r&#39;source\s+.*\.env&#39;</span><span style="color: #F8F8F2">,</span>
+            <span style="color: #E6DB74">r&#39;curl.*-H.*\$\{.*\}&#39;</span>  <span style="color: #959077"># curl with env variable in header</span>
+        <span style="color: #F8F8F2">]</span>
+        <span style="color: #66D9EF">for</span> <span style="color: #F8F8F2">pattern</span> <span style="color: #FF4689">in</span> <span style="color: #F8F8F2">dangerous_patterns:</span>
+            <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">re</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">search(pattern,</span> <span style="color: #F8F8F2">command):</span>
+                <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">True</span>
+
+    <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">False</span>
+
+<span style="color: #66D9EF">def</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">is_dangerous_command</span><span style="color: #F8F8F2">(command):</span>
+<span style="color: #F8F8F2">    </span><span style="color: #E6DB74">&quot;&quot;&quot;Block destructive bash commands&quot;&quot;&quot;</span>
+
+    <span style="color: #959077"># Normalize command (lowercase, collapse whitespace)</span>
+    <span style="color: #F8F8F2">normalized</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">re</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">sub(</span><span style="color: #E6DB74">r&#39;\s+&#39;</span><span style="color: #F8F8F2">,</span> <span style="color: #E6DB74">&#39; &#39;</span><span style="color: #F8F8F2">,</span> <span style="color: #F8F8F2">command</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">lower()</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">strip())</span>
+
+    <span style="color: #959077"># Dangerous rm patterns</span>
+    <span style="color: #F8F8F2">rm_patterns</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">[</span>
+        <span style="color: #E6DB74">r&#39;\brm\s+-[rf]*[fr][rf]*\s+/&#39;</span><span style="color: #F8F8F2">,</span>        <span style="color: #959077"># rm -rf /, rm -fr /, etc.</span>
+        <span style="color: #E6DB74">r&#39;\brm\s+-[rf]*[fr][rf]*\s+\*&#39;</span><span style="color: #F8F8F2">,</span>       <span style="color: #959077"># rm -rf *, rm -fr *, etc.</span>
+        <span style="color: #E6DB74">r&#39;\brm\s+-[rf]*[fr][rf]*\s+~&#39;</span><span style="color: #F8F8F2">,</span>        <span style="color: #959077"># rm -rf ~</span>
+        <span style="color: #E6DB74">r&#39;\brm\s+-[rf]*[fr][rf]*\s+\$HOME&#39;</span>    <span style="color: #959077"># rm -rf $HOME</span>
+    <span style="color: #F8F8F2">]</span>
+    <span style="color: #66D9EF">for</span> <span style="color: #F8F8F2">pattern</span> <span style="color: #FF4689">in</span> <span style="color: #F8F8F2">rm_patterns:</span>
+        <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">re</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">search(pattern,</span> <span style="color: #F8F8F2">normalized):</span>
+            <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">True</span>
+
+    <span style="color: #959077"># Dangerous git operations</span>
+    <span style="color: #F8F8F2">git_patterns</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">[</span>
+        <span style="color: #E6DB74">r&#39;git\s+push\s+.*--force&#39;</span><span style="color: #F8F8F2">,</span>
+        <span style="color: #E6DB74">r&#39;git\s+reset\s+--hard&#39;</span><span style="color: #F8F8F2">,</span>
+        <span style="color: #E6DB74">r&#39;git\s+config\s+--global&#39;</span>
+    <span style="color: #F8F8F2">]</span>
+    <span style="color: #66D9EF">for</span> <span style="color: #F8F8F2">pattern</span> <span style="color: #FF4689">in</span> <span style="color: #F8F8F2">git_patterns:</span>
+        <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">re</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">search(pattern,</span> <span style="color: #F8F8F2">normalized):</span>
+            <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">True</span>
+
+    <span style="color: #959077"># Dangerous chmod operations</span>
+    <span style="color: #F8F8F2">chmod_patterns</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">[</span>
+        <span style="color: #E6DB74">r&#39;chmod\s+777&#39;</span><span style="color: #F8F8F2">,</span>           <span style="color: #959077"># World-writable</span>
+        <span style="color: #E6DB74">r&#39;chmod\s+[ugoa]*\+s&#39;</span>     <span style="color: #959077"># Setuid/setgid</span>
+    <span style="color: #F8F8F2">]</span>
+    <span style="color: #66D9EF">for</span> <span style="color: #F8F8F2">pattern</span> <span style="color: #FF4689">in</span> <span style="color: #F8F8F2">chmod_patterns:</span>
+        <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">re</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">search(pattern,</span> <span style="color: #F8F8F2">normalized):</span>
+            <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">True</span>
+
+    <span style="color: #959077"># Block brew install (unauthorized packages)</span>
+    <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">re</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">search(</span><span style="color: #E6DB74">r&#39;\bbrew\s+install\b&#39;</span><span style="color: #F8F8F2">,</span> <span style="color: #F8F8F2">normalized):</span>
+        <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">True</span>
+
+    <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">False</span>
+
+<span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">__name__</span> <span style="color: #FF4689">==</span> <span style="color: #E6DB74">&quot;__main__&quot;</span><span style="color: #F8F8F2">:</span>
+    <span style="color: #F8F8F2">main()</span>
+</code></pre></div>
+</pre>
+<h3>Step 3: Make the Script Executable</h3>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>chmod<span style="color: #F8F8F2"> </span>+x<span style="color: #F8F8F2"> </span>.claude/hooks/pre_tool_use.py
+</code></pre></div>
+</pre>
+<h2>What This Hook Protects Against</h2>
+<h3>1. Credential File Access</h3>
+<p><strong>Blocks:</strong></p>
+<ul>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>cat .env
+</code></pre></div>
+ or <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>cat .env.local
+</code></pre></div>
+</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>vim client_secret.json
+</code></pre></div>
+</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>base64 .env
+</code></pre></div>
+ (encoding to bypass detection)</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>curl<span style="color: #F8F8F2"> </span>-H<span style="color: #F8F8F2"> </span>&quot;Authorization:<span style="color: #F8F8F2"> </span><span style="color: #959077">${</span><span style="color: #F8F8F2">API_KEY</span><span style="color: #959077">}</span>&quot;
+</code></pre></div>
+ (env vars in commands)</li>
+</ul>
+<p><strong>Allows:</strong></p>
+<ul>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>cat .env.sample
+</code></pre></div>
+ (safe template files)</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>cat .env.example
+</code></pre></div>
+</li>
+</ul>
+<p><strong>Why it matters:</strong> Claude can't accidentally expose your API keys, database passwords, or OAuth tokens.</p>
+<h3>2. Destructive rm Commands</h3>
+<p><strong>Blocks:</strong></p>
+<ul>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>rm -rf /
+</code></pre></div>
+ (nuclear option)</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>rm -rf *
+</code></pre></div>
+ (delete everything in current directory)</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>rm -rf ~
+</code></pre></div>
+ (delete home directory)</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>rm -rf $HOME
+</code></pre></div>
+</li>
+</ul>
+<p><strong>Allows:</strong></p>
+<ul>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>rm -rf node_modules
+</code></pre></div>
+ (safe, specific deletions)</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>rm file.txt
+</code></pre></div>
+</li>
+</ul>
+<p><strong>Why it matters:</strong> Typos happen. One misplaced space in <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>rm -rf / tmp
+</code></pre></div>
+ instead of <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>rm -rf /tmp
+</code></pre></div>
+ could destroy your system.</p>
+<h3>3. Git History Damage</h3>
+<p><strong>Blocks:</strong></p>
+<ul>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>git push --force
+</code></pre></div>
+ (overwrites remote history)</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>git reset --hard
+</code></pre></div>
+ (destructive local changes)</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>git config --global
+</code></pre></div>
+ (changes global git config)</li>
+</ul>
+<p><strong>Allows:</strong></p>
+<ul>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>git push
+</code></pre></div>
+</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>git reset --soft
+</code></pre></div>
+</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>git config user.name
+</code></pre></div>
+ (local config)</li>
+</ul>
+<p><strong>Why it matters:</strong> Force pushes to shared branches can destroy team members' work. Global config changes affect all your projects.</p>
+<h3>4. Permission Exploits</h3>
+<p><strong>Blocks:</strong></p>
+<ul>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>chmod 777
+</code></pre></div>
+ (world-writable, security risk)</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>chmod u+s
+</code></pre></div>
+ (setuid, privilege escalation)</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>brew install
+</code></pre></div>
+ (unauthorized package installation)</li>
+</ul>
+<p><strong>Allows:</strong></p>
+<ul>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>chmod +x script.sh
+</code></pre></div>
+ (making scripts executable)</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>chmod 644 file.txt
+</code></pre></div>
+ (safe permissions)</li>
+</ul>
+<p><strong>Why it matters:</strong> World-writable files can be modified by any user. Setuid binaries can escalate privileges.</p>
+<h2>The .env.mcp Pattern: Separating Credentials</h2>
+<p>A smart convention: separate your credential files by purpose.</p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #A6E22E">.env.local</span><span style="color: #F8F8F2">      </span><span style="color: #959077"># App credentials (Blogger, Cloudinary, OpenAI)</span>
+<span style="color: #A6E22E">.env.mcp</span><span style="color: #F8F8F2">        </span><span style="color: #959077"># MCP server credentials (Perplexity, Firecrawl, YouTube)</span>
+<span style="color: #A6E22E">.env.sample</span><span style="color: #F8F8F2">     </span><span style="color: #959077"># Safe template (commit to git)</span>
+</code></pre></div>
+</pre>
+<p><strong>Why separate files?</strong></p>
+<ul>
+<li>Different rotation schedules (MCP keys vs app keys)</li>
+<li>Different access patterns (Claude loads MCP, app uses local)</li>
+<li>Explicit about what loads where</li>
+<li>Easier to audit and manage</li>
+</ul>
+<p><strong>Example <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #A6E22E">.env.local</span>
+</code></pre></div>
+ (blocked by hook):</strong></p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">BLOGGER_CLIENT_ID</span><span style="color: #FF4689">=</span>xxx
+<span style="color: #F8F8F2">BLOGGER_CLIENT_SECRET</span><span style="color: #FF4689">=</span>xxx
+<span style="color: #F8F8F2">BLOGGER_REFRESH_TOKEN</span><span style="color: #FF4689">=</span>xxx
+<span style="color: #F8F8F2">CLOUDINARY_CLOUD_NAME</span><span style="color: #FF4689">=</span>xxx
+<span style="color: #F8F8F2">OPENAI_API_KEY</span><span style="color: #FF4689">=</span>xxx
+</code></pre></div>
+</pre>
+<p><strong>Example <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #A6E22E">.env.mcp</span>
+</code></pre></div>
+ (also blocked by hook):</strong></p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">PERPLEXITY_API_KEY</span><span style="color: #FF4689">=</span>xxx
+<span style="color: #F8F8F2">FIRECRAWL_API_KEY</span><span style="color: #FF4689">=</span>xxx
+<span style="color: #F8F8F2">YOUTUBE_API_KEY</span><span style="color: #FF4689">=</span>xxx
+</code></pre></div>
+</pre>
+<p><strong>How MCP servers use these:</strong></p>
+<p>In <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #A6E22E">.mcp.json</span>
+</code></pre></div>
+, reference environment variables with <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077">${</span><span style="color: #F8F8F2">VAR_NAME</span><span style="color: #959077">}</span>
+</code></pre></div>
+ syntax:</p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">{</span>
+<span style="color: #F8F8F2">  </span><span style="color: #FF4689">&quot;mcpServers&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">    </span><span style="color: #FF4689">&quot;perplexity-ask&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;command&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;npx&quot;</span><span style="color: #F8F8F2">,</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;args&quot;</span><span style="color: #F8F8F2">: [</span><span style="color: #E6DB74">&quot;-y&quot;</span><span style="color: #F8F8F2">, </span><span style="color: #E6DB74">&quot;server-perplexity-ask&quot;</span><span style="color: #F8F8F2">],</span>
+<span style="color: #F8F8F2">      </span><span style="color: #FF4689">&quot;env&quot;</span><span style="color: #F8F8F2">: {</span>
+<span style="color: #F8F8F2">        </span><span style="color: #FF4689">&quot;PERPLEXITY_API_KEY&quot;</span><span style="color: #F8F8F2">: </span><span style="color: #E6DB74">&quot;${PERPLEXITY_API_KEY}&quot;</span>
+<span style="color: #F8F8F2">      }</span>
+<span style="color: #F8F8F2">    }</span>
+<span style="color: #F8F8F2">  }</span>
+<span style="color: #F8F8F2">}</span>
+</code></pre></div>
+</pre>
+<p>When you start Claude Code with the env vars loaded, MCP servers receive them securely.</p>
+<h2>The Alias Pattern: One Command to Rule Them All</h2>
+<p>Set up a shell alias to start Claude Code with MCP credentials loaded and YOLO mode active:</p>
+<p><strong>Add to <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #A6E22E">.zshrc</span>
+</code></pre></div>
+ or <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #A6E22E">.bashrc</span>
+</code></pre></div>
+:</strong></p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># Claude Code with auto-loaded MCP credentials</span>
+<span style="color: #F8F8F2">alias claudey</span><span style="color: #FF4689">=</span><span style="color: #E6DB74">&#39;env $(grep -v &quot;^#&quot; .env.mcp | grep -v &quot;^$&quot; | xargs) claude --dangerously-skip-permissions&#39;</span>
+</code></pre></div>
+</pre>
+<p><strong>Breakdown:</strong></p>
+<ol>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>grep -v &quot;^#&quot;
+</code></pre></div>
+ - Skip comment lines</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>grep -v &quot;^$&quot;
+</code></pre></div>
+ - Skip empty lines</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>xargs
+</code></pre></div>
+ - Convert to <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>KEY=VALUE
+</code></pre></div>
+ pairs</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>env
+</code></pre></div>
+ - Inject into environment</li>
+<li><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>claude --dangerously-skip-permissions
+</code></pre></div>
+ - YOLO mode with hooks active</li>
+</ol>
+<p><strong>Usage:</strong></p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">cd </span>/your/project
+claudey<span style="color: #F8F8F2">  </span><span style="color: #959077"># Start Claude with MCP creds + safety hooks</span>
+</code></pre></div>
+</pre>
+<p>Now your MCP servers (Perplexity, Firecrawl, YouTube, etc.) work seamlessly, and your credentials stay protected.</p>
+<h2>Real-World Example Session</h2>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>$<span style="color: #F8F8F2"> </span>claudey
+Claude<span style="color: #F8F8F2"> </span>Code<span style="color: #F8F8F2"> </span>started<span style="color: #F8F8F2"> </span>with<span style="color: #F8F8F2"> </span>safety<span style="color: #F8F8F2"> </span>hooks<span style="color: #F8F8F2"> </span>active
+
+You:<span style="color: #F8F8F2"> </span>Read<span style="color: #F8F8F2"> </span>the<span style="color: #F8F8F2"> </span>.env<span style="color: #F8F8F2"> </span>file
+Claude:<span style="color: #F8F8F2"> </span><span style="color: #FF4689">[</span>attempts<span style="color: #F8F8F2"> </span>Read<span style="color: #F8F8F2"> </span>tool<span style="color: #FF4689">]</span>
+🛑<span style="color: #F8F8F2"> </span>Hook:<span style="color: #F8F8F2"> </span>BLOCKED<span style="color: #F8F8F2"> </span>-<span style="color: #F8F8F2"> </span>Access<span style="color: #F8F8F2"> </span>to<span style="color: #F8F8F2"> </span>credential<span style="color: #F8F8F2"> </span>files<span style="color: #F8F8F2"> </span>prohibited
+
+You:<span style="color: #F8F8F2"> </span>Read<span style="color: #F8F8F2"> </span>.env.sample
+Claude:<span style="color: #F8F8F2"> </span><span style="color: #FF4689">[</span>attempts<span style="color: #F8F8F2"> </span>Read<span style="color: #F8F8F2"> </span>tool<span style="color: #FF4689">]</span>
+✅<span style="color: #F8F8F2"> </span>Hook:<span style="color: #F8F8F2"> </span>ALLOWED
+<span style="color: #FF4689">[</span>Shows<span style="color: #F8F8F2"> </span>.env.sample<span style="color: #F8F8F2"> </span>contents<span style="color: #FF4689">]</span>
+
+You:<span style="color: #F8F8F2"> </span>chmod<span style="color: #F8F8F2"> </span>+x<span style="color: #F8F8F2"> </span>deploy.sh
+✅<span style="color: #F8F8F2"> </span>Hook:<span style="color: #F8F8F2"> </span>ALLOWED
+✅<span style="color: #F8F8F2"> </span>Made<span style="color: #F8F8F2"> </span>deploy.sh<span style="color: #F8F8F2"> </span>executable
+
+You:<span style="color: #F8F8F2"> </span>rm<span style="color: #F8F8F2"> </span>-rf<span style="color: #F8F8F2"> </span>node_modules
+🛑<span style="color: #F8F8F2"> </span>Hook:<span style="color: #F8F8F2"> </span>BLOCKED<span style="color: #F8F8F2"> </span>-<span style="color: #F8F8F2"> </span>Dangerous<span style="color: #F8F8F2"> </span>rm<span style="color: #F8F8F2"> command </span>detected
+<span style="color: #FF4689">(</span>Claude<span style="color: #F8F8F2"> </span>would<span style="color: #F8F8F2"> </span>need<span style="color: #F8F8F2"> </span>to<span style="color: #F8F8F2"> </span>use<span style="color: #F8F8F2"> </span>a<span style="color: #F8F8F2"> </span>safer<span style="color: #F8F8F2"> </span>alternative<span style="color: #F8F8F2"> </span>or<span style="color: #F8F8F2"> </span>you<span style="color: #F8F8F2"> </span>override<span style="color: #F8F8F2"> </span>manually<span style="color: #FF4689">)</span>
+</code></pre></div>
+</pre>
+<p>The hook catches dangerous operations <strong>before</strong> they execute, giving you peace of mind.</p>
+<h2>Project Structure</h2>
+<p>Here's how your <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #A6E22E">.claude</span><span style="color: #ED007E; background-color: #1E0010">/</span>
+</code></pre></div>
+ directory should look:</p>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #FF4689">.</span><span style="color: #F8F8F2">claude</span><span style="color: #FF4689">/</span>
+<span style="color: #ED007E; background-color: #1E0010">├──</span><span style="color: #F8F8F2"> settings</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">json              </span><span style="color: #959077"># Hook registration + permissions</span>
+<span style="color: #ED007E; background-color: #1E0010">├──</span><span style="color: #F8F8F2"> hooks</span><span style="color: #FF4689">/</span>
+<span style="color: #ED007E; background-color: #1E0010">│</span><span style="color: #F8F8F2">   </span><span style="color: #ED007E; background-color: #1E0010">├──</span><span style="color: #F8F8F2"> pre_tool_use</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">py       </span><span style="color: #959077"># Security layer (main focus)</span>
+<span style="color: #ED007E; background-color: #1E0010">│</span><span style="color: #F8F8F2">   </span><span style="color: #ED007E; background-color: #1E0010">├──</span><span style="color: #F8F8F2"> post_tool_use</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">py      </span><span style="color: #959077"># Logging (optional)</span>
+<span style="color: #ED007E; background-color: #1E0010">│</span><span style="color: #F8F8F2">   </span><span style="color: #ED007E; background-color: #1E0010">├──</span><span style="color: #F8F8F2"> notification</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">py        </span><span style="color: #959077"># Alerts (optional)</span>
+<span style="color: #ED007E; background-color: #1E0010">│</span><span style="color: #F8F8F2">   </span><span style="color: #ED007E; background-color: #1E0010">├──</span><span style="color: #F8F8F2"> stop</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">py               </span><span style="color: #959077"># Cleanup on exit</span>
+<span style="color: #ED007E; background-color: #1E0010">│</span><span style="color: #F8F8F2">   </span><span style="color: #ED007E; background-color: #1E0010">└──</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">...</span>
+<span style="color: #ED007E; background-color: #1E0010">└──</span><span style="color: #F8F8F2"> commands</span><span style="color: #FF4689">/</span>
+<span style="color: #F8F8F2">    </span><span style="color: #ED007E; background-color: #1E0010">├──</span><span style="color: #F8F8F2"> create</span><span style="color: #FF4689">-</span><span style="color: #F8F8F2">post</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">md        </span><span style="color: #959077"># Slash command definitions</span>
+<span style="color: #F8F8F2">    </span><span style="color: #ED007E; background-color: #1E0010">├──</span><span style="color: #F8F8F2"> build</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">md</span>
+<span style="color: #F8F8F2">    </span><span style="color: #ED007E; background-color: #1E0010">└──</span><span style="color: #F8F8F2"> </span><span style="color: #FF4689">...</span>
+
+<span style="color: #FF4689">.</span><span style="color: #F8F8F2">env</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">local                     </span><span style="color: #959077"># App credentials (protected)</span>
+<span style="color: #FF4689">.</span><span style="color: #F8F8F2">env</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">mcp                       </span><span style="color: #959077"># MCP credentials (protected)</span>
+<span style="color: #FF4689">.</span><span style="color: #F8F8F2">env</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">sample                    </span><span style="color: #959077"># Safe template (OK to read)</span>
+<span style="color: #FF4689">.</span><span style="color: #F8F8F2">mcp</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">json                      </span><span style="color: #959077"># MCP server configuration</span>
+</code></pre></div>
+</pre>
+<p><strong>Key insight:</strong> The <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #A6E22E">.claude</span><span style="color: #ED007E; background-color: #1E0010">/</span>
+</code></pre></div>
+ directory is your control panel for AI behavior.</p>
+<h2>Advanced: Customizing the Hook</h2>
+<p>You can extend <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">pre_tool_use</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">py</span>
+</code></pre></div>
+ to match your team's needs:</p>
+<h3>Allow Read-Only Access to Specific Env Files</h3>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">def</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">is_credential_file_access</span><span style="color: #F8F8F2">(tool_name,</span> <span style="color: #F8F8F2">tool_input):</span>
+    <span style="color: #959077"># Allow reading .env.sample but block editing</span>
+    <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">tool_name</span> <span style="color: #FF4689">in</span> <span style="color: #F8F8F2">[</span><span style="color: #E6DB74">&quot;Write&quot;</span><span style="color: #F8F8F2">,</span> <span style="color: #E6DB74">&quot;Edit&quot;</span><span style="color: #F8F8F2">]:</span>
+        <span style="color: #F8F8F2">file_path</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">tool_input</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">get(</span><span style="color: #E6DB74">&#39;file_path&#39;</span><span style="color: #F8F8F2">,</span> <span style="color: #E6DB74">&#39;&#39;</span><span style="color: #F8F8F2">)</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">lower()</span>
+        <span style="color: #66D9EF">if</span> <span style="color: #E6DB74">&#39;.env&#39;</span> <span style="color: #FF4689">in</span> <span style="color: #F8F8F2">file_path:</span>
+            <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">True</span>  <span style="color: #959077"># Block all env file edits</span>
+
+    <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">tool_name</span> <span style="color: #FF4689">==</span> <span style="color: #E6DB74">&quot;Read&quot;</span><span style="color: #F8F8F2">:</span>
+        <span style="color: #F8F8F2">file_path</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">tool_input</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">get(</span><span style="color: #E6DB74">&#39;file_path&#39;</span><span style="color: #F8F8F2">,</span> <span style="color: #E6DB74">&#39;&#39;</span><span style="color: #F8F8F2">)</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">lower()</span>
+        <span style="color: #959077"># Allow sample files</span>
+        <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">re</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">search(</span><span style="color: #E6DB74">r&#39;\.env\.(sample|example)&#39;</span><span style="color: #F8F8F2">,</span> <span style="color: #F8F8F2">file_path):</span>
+            <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">False</span>
+        <span style="color: #959077"># Block real env files</span>
+        <span style="color: #66D9EF">if</span> <span style="color: #E6DB74">&#39;.env&#39;</span> <span style="color: #FF4689">in</span> <span style="color: #F8F8F2">file_path:</span>
+            <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">True</span>
+
+    <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">False</span>
+</code></pre></div>
+</pre>
+<h3>Log All Blocked Attempts</h3>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #FF4689">import</span><span style="color: #F8F8F2"> logging</span>
+
+<span style="color: #F8F8F2">logging</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">basicConfig(</span>
+    <span style="color: #F8F8F2">filename</span><span style="color: #FF4689">=</span><span style="color: #E6DB74">&#39;.claude/blocked_operations.log&#39;</span><span style="color: #F8F8F2">,</span>
+    <span style="color: #F8F8F2">level</span><span style="color: #FF4689">=</span><span style="color: #F8F8F2">logging</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">INFO,</span>
+    <span style="color: #F8F8F2">format</span><span style="color: #FF4689">=</span><span style="color: #E6DB74">&#39;%(asctime)s - %(message)s&#39;</span>
+<span style="color: #F8F8F2">)</span>
+
+<span style="color: #66D9EF">def</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">main</span><span style="color: #F8F8F2">():</span>
+    <span style="color: #F8F8F2">input_data</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">json</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">load(sys</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">stdin)</span>
+
+    <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">is_dangerous(input_data):</span>
+        <span style="color: #F8F8F2">logging</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">info(</span><span style="color: #E6DB74">f&quot;BLOCKED: {</span><span style="color: #F8F8F2">input_data</span><span style="color: #E6DB74">}&quot;</span><span style="color: #F8F8F2">)</span>
+        <span style="color: #F8F8F2">sys</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">exit(</span><span style="color: #AE81FF">2</span><span style="color: #F8F8F2">)</span>
+
+    <span style="color: #F8F8F2">sys</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">exit(</span><span style="color: #AE81FF">0</span><span style="color: #F8F8F2">)</span>
+</code></pre></div>
+</pre>
+<h3>Whitelist Specific rm Commands</h3>
+<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #66D9EF">def</span><span style="color: #F8F8F2"> </span><span style="color: #A6E22E">is_dangerous_rm</span><span style="color: #F8F8F2">(command):</span>
+    <span style="color: #959077"># Allow common safe deletions</span>
+    <span style="color: #F8F8F2">safe_patterns</span> <span style="color: #FF4689">=</span> <span style="color: #F8F8F2">[</span>
+        <span style="color: #E6DB74">r&#39;rm -rf node_modules$&#39;</span><span style="color: #F8F8F2">,</span>
+        <span style="color: #E6DB74">r&#39;rm -rf dist$&#39;</span><span style="color: #F8F8F2">,</span>
+        <span style="color: #E6DB74">r&#39;rm -rf build$&#39;</span><span style="color: #F8F8F2">,</span>
+        <span style="color: #E6DB74">r&#39;rm -rf \.next$&#39;</span>
+    <span style="color: #F8F8F2">]</span>
+
+    <span style="color: #66D9EF">for</span> <span style="color: #F8F8F2">pattern</span> <span style="color: #FF4689">in</span> <span style="color: #F8F8F2">safe_patterns:</span>
+        <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">re</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">search(pattern,</span> <span style="color: #F8F8F2">command):</span>
+            <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">False</span>  <span style="color: #959077"># Explicitly safe</span>
+
+    <span style="color: #959077"># Block other rm -rf commands</span>
+    <span style="color: #66D9EF">if</span> <span style="color: #F8F8F2">re</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">search(</span><span style="color: #E6DB74">r&#39;rm\s+-[rf]*[fr][rf]*&#39;</span><span style="color: #F8F8F2">,</span> <span style="color: #F8F8F2">command):</span>
+        <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">True</span>
+
+    <span style="color: #66D9EF">return</span> <span style="color: #66D9EF">False</span>
+</code></pre></div>
+</pre>
+<h2>Key Takeaways</h2>
+<ol>
+<li><strong>YOLO mode + hooks = safe automation</strong> - No more approval fatigue, no more risk</li>
+<li><strong>Hooks run automatically</strong> - Every tool call passes through your security layer</li>
+<li><strong>Separate .env files</strong> - <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #A6E22E">.env.local</span>
+</code></pre></div>
+ for app, <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #A6E22E">.env.mcp</span>
+</code></pre></div>
+ for MCP servers</li>
+<li><strong>Alias pattern simplifies workflow</strong> - One command (<div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>claudey
+</code></pre></div>
+) starts everything safely</li>
+<li><strong>Exit code 2 blocks operations</strong> - Simple, effective contract</li>
+<li><strong>Customize to your needs</strong> - The hook script is yours to extend</li>
+</ol>
+<h2>Resources</h2>
+<ul>
+<li><strong>Official Hook Documentation</strong>: <a href="https://docs.claude.com/en/docs/claude-code/hooks">Claude Code Hooks</a></li>
+<li><strong>Claude Code Docs</strong>: <a href="https://docs.claude.com/en/docs/claude-code">docs.claude.com/claude-code</a></li>
+<li><strong>Example Hook Implementation</strong>: <a href="https://gist.github.com/Mandalorian007/3dcafac5b8e97458bdc8816ce0d4f55d">Pre-Tool-Use Hook Gist</a></li>
+<li><strong>This Project's Hook</strong>: <a href="https://github.com/your-repo/agentic-engineer-blog/blob/main/.claude/hooks/pre_tool_use.py">.claude/hooks/pre_tool_use.py</a></li>
+</ul>
+<h2>Conclusion</h2>
+<p>Running Claude Code with <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>--dangerously-skip-permissions
+</code></pre></div>
+ doesn't have to be dangerous. With a simple pre-tool-use hook, you get the speed of YOLO mode with the safety of explicit permissions.</p>
+<p>The setup takes 15 minutes. The peace of mind lasts forever.</p>
+<p>Now go forth and code—confidently, quickly, and safely. May your hard drive remain un-nuked.</p>
+<p><strong>Want to see this in action?</strong> Check out this project's <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #FF4689">.</span><span style="color: #F8F8F2">claude</span><span style="color: #FF4689">/</span><span style="color: #F8F8F2">hooks</span><span style="color: #FF4689">/</span><span style="color: #F8F8F2">pre_tool_use</span><span style="color: #FF4689">.</span><span style="color: #F8F8F2">py</span>
+</code></pre></div>
+ for a production-ready implementation. Share your own hook patterns and help make AI-assisted development safer for everyone.</p>
+
+</body>
+</html>

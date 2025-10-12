@@ -127,20 +127,23 @@ def publish_post(post_dir_str: str) -> int:
         is_draft = frontmatter.get('status', 'draft') == 'draft'
 
         # Check if post should be scheduled
-        post_date_str = frontmatter.get('date')
+        post_date = frontmatter.get('date')
         published_date = None
         is_scheduled = False
 
-        if post_date_str:
-            from dateutil import parser as date_parser
-            post_date = date_parser.isoparse(post_date_str)
+        if post_date:
+            # post_date can be either a datetime object (parsed by YAML) or a string
+            if isinstance(post_date, str):
+                from dateutil import parser as date_parser
+                post_date = date_parser.isoparse(post_date)
+
             now = datetime.now(post_date.tzinfo) if post_date.tzinfo else datetime.utcnow()
 
             if post_date > now:
                 # Future date - schedule the post
-                published_date = post_date_str
+                published_date = post_date.isoformat().replace('+00:00', 'Z')
                 is_scheduled = True
-                print(f"   📅 Scheduling post for: {post_date_str}")
+                print(f"   📅 Scheduling post for: {published_date}")
 
         if post_status == 'CREATE':
             result = blogger_client.create_post(
