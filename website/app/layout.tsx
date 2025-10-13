@@ -6,6 +6,7 @@ import { Footer16 } from "@/components/footer16";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ClerkProvider } from "@clerk/nextjs";
 import { shadcn } from "@clerk/themes";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -55,6 +56,7 @@ export default function RootLayout({
             <main className="flex-1 pt-20">{children}</main>
             <Footer16 />
           </ThemeProvider>
+          <Analytics />
         </body>
       </html>
     </ClerkProvider>
