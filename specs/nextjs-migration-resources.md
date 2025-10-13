@@ -1,15 +1,324 @@
-# Next.js Migration Resources
+# Next.js Migration Plan
 
-This document collects resources and information for migrating the Agentic Engineer Blog to Next.js.
+This document defines the architecture and migration plan for The Agentic Engineer Blog from Blogger to Next.js.
 
 ## Overview
 
-Planning migration from current Markdown + Blogger setup to a Next.js-based blog platform.
+Migrating from current Markdown + Blogger + Cloudinary setup to a **simple, self-contained Next.js blog** hosted on Vercel.
 
 **Branding & Domain:**
 - **Blog Name**: The Agentic Engineer
 - **Domain**: the-agentic-engineer.com
 - All branding should use "The Agentic Engineer" naming
+
+**Core Philosophy:**
+- ✅ Simple, maintainable, Git-based workflow
+- ✅ No external CDN dependencies (no Cloudinary)
+- ✅ Static generation (SSG) for best SEO and performance
+- ✅ Local images served via Vercel CDN
+- ✅ MDX-first content with relative image paths
+
+---
+
+## Architecture Decision: Option 1 (MDX + File-Based Routing)
+
+### Directory Structure
+
+```
+the-agentic-engineer/
+├── app/
+│   ├── page.tsx                        # Homepage
+│   ├── blog/
+│   │   ├── page.tsx                    # Blog listing page (all posts)
+│   │   ├── category/
+│   │   │   └── [category]/
+│   │   │       └── page.tsx            # Category filter page
+│   │   └── [slug]/
+│   │       └── page.tsx                # Dynamic blog post page
+│   ├── layout.tsx                      # Root layout (navbar, footer)
+│   └── sitemap.ts                      # Auto-generated sitemap
+├── content/
+│   └── posts/
+│       ├── 2025-10-12-voice-to-blog-automation.mdx
+│       └── 2025-10-13-taming-claude-yolo-mode.mdx
+├── public/
+│   └── blog/
+│       ├── 2025-10-12-voice-to-blog-automation/
+│       │   ├── hero-voice-to-blog-pipeline.webp
+│       │   └── diagram-blog-automation-architecture.webp
+│       └── 2025-10-13-taming-claude-yolo-mode/
+│           ├── hero-safe-yolo-mode.webp
+│           └── diagram-hook-flow.webp
+├── lib/
+│   ├── posts.ts                        # Load and parse MDX files (with date filtering)
+│   ├── categories.ts                   # Hardcoded categories + validation
+│   └── remark-image-path.ts            # Rewrite relative image paths
+├── components/
+│   ├── ui/                             # shadcn/ui components
+│   ├── blog-post-card.tsx              # Blog listing card with category/hashtags
+│   ├── category-filter.tsx             # Category filter tabs
+│   ├── hashtag-badge.tsx               # HashTag display badge (not clickable)
+│   └── navbar.tsx                      # Navigation
+├── mdx-components.tsx                  # Custom MDX components (next/image wrapper)
+└── next.config.mjs                     # Next.js configuration
+```
+
+### URL Structure
+
+```
+/                                       # Homepage
+/blog                                   # Blog listing (all posts)
+/blog/category/[category]               # Filter by category
+/blog/2025-10-12-voice-to-blog-automation  # Individual post
+/blog/2025-10-13-taming-claude-yolo-mode   # Individual post
+/sitemap.xml                            # Auto-generated sitemap
+```
+
+### MDX Format
+
+**Example: content/posts/2025-10-12-voice-to-blog-automation.mdx**
+
+```mdx
+---
+title: "Voice to Blog Automation"
+description: "Build an automated blog publishing pipeline with Claude Code"
+date: "2025-10-12T10:00:00Z"
+category: "case-studies"
+hashtags: ["ai-agents", "python", "claude-code", "workflow-automation"]
+---
+
+![Hero image showing voice-to-blog pipeline](./hero-voice-to-blog-pipeline.webp)
+
+## Introduction
+
+Your blog content here...
+
+![Architecture diagram](./diagram-blog-automation-architecture.webp)
+
+More content with **bold** and _italic_ text.
+```
+
+**Frontmatter Fields:**
+- `title` (required) - Post title
+- `description` (required) - SEO meta description
+- `date` (required) - ISO 8601 date (posts with future dates are hidden until that date)
+- `category` (required) - Primary category (must be one of 7 hardcoded categories)
+- `hashtags` (optional) - Array of freeform hashtags for display only
+
+### How Images Work
+
+1. **Store images** in `public/blog/[slug]/image.webp`
+2. **Reference in MDX** with relative paths: `./image.webp`
+3. **Custom remark plugin** rewrites `./image.webp` → `/blog/[slug]/image.webp` at build time
+4. **Custom MDX component** wraps `<img>` tags with `next/image` for automatic optimization
+5. **Vercel CDN** serves optimized images (WebP, responsive sizes, lazy loading)
+
+**No Cloudinary needed** - images are committed to Git, served from Vercel CDN.
+
+### Tech Stack
+
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Framework** | Next.js 15 (App Router) | React framework with SSG |
+| **Hosting** | Vercel | Zero-config deployment + CDN |
+| **Content** | MDX files | Markdown with frontmatter |
+| **Rendering** | react-markdown + remark-gfm | Convert MDX to HTML |
+| **Styling** | Tailwind CSS + @tailwindcss/typography | Utility-first CSS + prose |
+| **Components** | shadcn/ui | Pre-built UI components |
+| **Images** | next/image | Automatic optimization |
+| **Code Highlighting** | react-syntax-highlighter | Code blocks with themes |
+
+### SEO Features
+
+✅ **Static Generation (SSG)** - `generateStaticParams()` pre-renders all posts at build time
+✅ **Dynamic Metadata** - `generateMetadata()` per post for title, description, Open Graph
+✅ **Auto Sitemap** - `app/sitemap.ts` generates XML sitemap from posts
+✅ **Image Optimization** - `next/image` handles alt text, dimensions, lazy loading
+✅ **Clean URLs** - Semantic, hackable URLs matching current date-based structure
+✅ **robots.txt** - Auto-generated by Next.js
+✅ **Structured Data** - JSON-LD BlogPosting schema (implement in post page)
+
+### Category & HashTag System Design
+
+**Philosophy:**
+- **Categories** = Primary classification for navigation/filtering (single choice per post, validated)
+- **HashTags** = Secondary metadata for visual scanning (multiple per post, freeform, display-only)
+- No registry files needed - categories hardcoded in TypeScript, hashtags are freeform
+
+**Hardcoded Categories (`lib/categories.ts`):**
+
+Aligned with blog post formats from `/create-post` command:
+
+```typescript
+export const CATEGORIES = {
+  'tutorials': {
+    name: 'Tutorials & How-Tos',
+    description: 'Step-by-step guides teaching skills and processes'
+  },
+  'case-studies': {
+    name: 'Case Studies',
+    description: 'Real-world project showcases and results'
+  },
+  'guides': {
+    name: 'Guides & Fundamentals',
+    description: 'Beginner-friendly introductions to complex topics'
+  },
+  'lists': {
+    name: 'Lists & Tips',
+    description: 'Curated collections of tools, tips, and strategies'
+  },
+  'comparisons': {
+    name: 'Comparisons & Reviews',
+    description: 'Side-by-side comparisons and product reviews'
+  },
+  'problem-solution': {
+    name: 'Problem & Solution',
+    description: 'Addressing pain points with practical solutions'
+  },
+  'opinions': {
+    name: 'Opinions & Analysis',
+    description: 'Perspectives, analysis, and myth debunking'
+  }
+} as const;
+
+export type CategoryId = keyof typeof CATEGORIES;
+```
+
+**HashTags:**
+- Freeform array in frontmatter (no validation, no registry)
+- Display-only badges on post cards (NOT clickable)
+- No filter pages for hashtags
+- Authors can use any hashtags they want
+
+**UI Integration (blog27 layout):**
+- **Category Filter Tabs**: Horizontal tabs at top of blog listing ("All", "Tutorials", "Case Studies", etc.)
+- **HashTag Badges**: Displayed on each post card as visual labels (NOT clickable)
+- **Active State**: Highlight selected category
+- **Post Count**: Show count next to each category
+
+**Example Post Card:**
+```
+┌─────────────────────────────────────┐
+│ [Category Badge: Case Studies]       │
+│                                      │
+│ Voice-to-Blog Automation             │
+│ Build an automated blog pipeline... │
+│                                      │
+│ #ai-agents #python #claude-code      │  ← Display-only badges (not clickable)
+│                                      │
+│ Oct 12, 2025 • 8 min read           │
+└─────────────────────────────────────┘
+```
+
+### Scheduled Posts & Future Date Filtering
+
+**Requirement:** Posts with future dates should not be visible until their publication date arrives.
+
+**Implementation Options:**
+
+**Option 1: Build-Time Filtering Only (Simplest)**
+- Filter out future posts in `lib/posts.ts`
+- Requires manual Vercel deploy when posts should go live
+- ✅ **Pros**: Simple, no ISR complexity, works with static export
+- ❌ **Cons**: Not automatic - must manually trigger deploy
+
+**Option 2: ISR with Time-Based Revalidation (Recommended)**
+- Set `revalidate = 3600` (1 hour) on blog pages
+- Filter future posts at request time
+- Pages rebuild hourly, picking up newly-published posts
+- ✅ **Pros**: Automatic within ~1 hour, no manual intervention
+- ✅ **Pros**: Works well with Vercel hosting
+- ❌ **Cons**: Not instant (up to 1 hour delay)
+
+**Option 3: ISR with Shorter Revalidation**
+- Set `revalidate = 300` (5 minutes)
+- More frequent rebuilds
+- ✅ **Pros**: Faster publishing (5-min delay)
+- ❌ **Cons**: More Vercel function invocations, higher costs at scale
+
+**Option 4: On-Demand Revalidation via API Route**
+- Create API route `/api/revalidate?secret=xxx`
+- Use external cron job or GitHub Actions to ping API at post publish time
+- Trigger immediate revalidation via `revalidatePath('/blog')`
+- ✅ **Pros**: Instant publishing, precise control
+- ❌ **Cons**: Requires external orchestration, more complex setup
+
+**Option 5: GitHub Actions + Auto-Deploy**
+- GitHub Actions workflow checks for posts with `date <= now` daily
+- If found, triggers Vercel deploy hook
+- ✅ **Pros**: Fully automated, no ISR needed
+- ❌ **Cons**: Requires GitHub Actions setup, daily granularity only
+
+**Recommendation: Start with Option 2 (ISR 1-hour), upgrade to Option 4 if needed**
+
+**Implementation in `lib/posts.ts`:**
+```typescript
+export function getPublishedPosts(): Post[] {
+  const allPosts = getAllPosts();
+  const now = new Date();
+
+  return allPosts.filter(post => {
+    // Exclude future posts
+    const postDate = new Date(post.date);
+    if (postDate > now) return false;
+
+    return true;
+  });
+}
+```
+
+**Revalidation Setup (Option 2):**
+```typescript
+// app/blog/page.tsx
+export const revalidate = 3600; // 1 hour
+
+// app/blog/[slug]/page.tsx
+export const revalidate = 3600; // 1 hour
+```
+
+### Key Implementation Details
+
+**1. Post Loading (`lib/posts.ts`)**
+- Read MDX files from `content/posts/`
+- Parse frontmatter (title, date, category, hashtags, description)
+- Extract slug from filename
+- Filter by date (exclude future posts)
+- Sort by date descending
+- Export `getAllPosts()`, `getPublishedPosts()`, `getPostBySlug(slug)`
+
+**2. Category Management (`lib/categories.ts`)**
+- Hardcoded TypeScript constant with 7 categories
+- Validate post category at build time (fail build if invalid)
+- Export `CATEGORIES`, `CategoryId`, `getCategoryById(id)`, `getPostsByCategory(categoryId)`
+- Filter logic for category pages
+
+**3. Image Path Rewriting (`lib/remark-image-path.ts`)**
+- Custom remark plugin
+- Rewrites `./image.webp` → `/blog/[slug]/image.webp`
+- Injected into MDX processing pipeline
+
+**4. Image Component (`mdx-components.tsx`)**
+- Wraps `<img>` with `next/image`
+- Automatic width/height, WebP conversion
+- Lazy loading except hero images
+
+**5. Dynamic Post Page (`app/blog/[slug]/page.tsx`)**
+- `generateStaticParams()` - returns all post slugs for SSG
+- `generateMetadata()` - dynamic SEO metadata per post
+- Renders MDX with `MDXRemote` or `react-markdown`
+- Displays category badge and hashtag badges
+
+**6. Category Filter Page (`app/blog/category/[category]/page.tsx`)**
+- `generateStaticParams()` - returns all 7 category IDs for SSG
+- Filters posts by category using `getPostsByCategory()`
+- Renders blog27 layout with filtered posts
+- Shows category name and description
+
+**7. Sitemap (`app/sitemap.ts`)**
+- Reads all posts from `content/posts/`
+- Includes category filter pages
+- Returns array of URLs with lastModified dates
+- Auto-generates `/sitemap.xml`
 
 ---
 
@@ -135,6 +444,14 @@ Planning migration from current Markdown + Blogger setup to a Next.js-based blog
 ### Build & Deployment
 <!-- Resources about building and deploying Next.js apps -->
 
+- **Hosting Platform**: Vercel (official Next.js hosting)
+  - Zero-config deployment for Next.js
+  - Automatic HTTPS/SSL
+  - Global CDN by default
+  - Edge functions support
+  - Preview deployments for branches
+  - Excellent Next.js 15 support
+
 ### Migration Strategy
 <!-- Resources about migration approaches and best practices -->
 
@@ -147,10 +464,13 @@ Planning migration from current Markdown + Blogger setup to a Next.js-based blog
   - Accessible by default
   - Init command: `pnpm dlx shadcn@latest init`
 
-- **Clerk**: Authentication and user management
+- **Clerk**: Authentication and user management (for future features)
   - Components: SignInButton, SignOutButton, UserButton
   - Will integrate with navbar8 from shadcnblocks
   - Handles signin/signout flows
+  - **Note**: Auth is included in navbar but NOT required for any features initially
+  - **Purpose**: Enables future comments system or subscription features
+  - Login UI will be present but no gated content
 
 - **react-markdown**: Markdown to HTML rendering
   - Install: `pnpm add react-markdown remark-gfm`
@@ -169,6 +489,67 @@ Planning migration from current Markdown + Blogger setup to a Next.js-based blog
 
 ---
 
+## Migration Checklist
+
+### Phase 1: Project Setup
+- [ ] Initialize Next.js 15 project with TypeScript
+- [ ] Configure Tailwind CSS + @tailwindcss/typography
+- [ ] Install dependencies (react-markdown, remark-gfm, react-syntax-highlighter, etc.)
+- [ ] Set up shadcn/ui with Clean Slate theme
+- [ ] Configure next.config.mjs with MDX support
+
+### Phase 2: Content Migration
+- [ ] Analyze existing posts and assign categories (from 7 hardcoded options)
+- [ ] Convert existing posts from `posts/YYYY-MM-DD-slug/post.md` → `content/posts/YYYY-MM-DD-slug.mdx`
+- [ ] Add `category` field to each post's frontmatter (validate against hardcoded list)
+- [ ] Rename `tags` field to `hashtags` in frontmatter
+- [ ] Update frontmatter (remove `blogger_id`, `updated`, `images`, `status` fields)
+- [ ] Move images from `posts/*/` → `public/blog/[slug]/`
+- [ ] Convert images to WebP format
+- [ ] Update image references to use relative paths (`./image.webp`)
+
+### Phase 3: Core Implementation
+- [ ] Implement `lib/posts.ts` (post loading/parsing with date filtering)
+- [ ] Implement `lib/categories.ts` (hardcoded categories + validation)
+- [ ] Implement `lib/remark-image-path.ts` (image path rewriting)
+- [ ] Create `mdx-components.tsx` (next/image wrapper)
+- [ ] Build `app/page.tsx` (homepage)
+- [ ] Build `app/blog/page.tsx` (blog listing with category filter tabs)
+- [ ] Build `app/blog/category/[category]/page.tsx` (category filter page)
+- [ ] Build `app/blog/[slug]/page.tsx` (dynamic post page with category/hashtags)
+- [ ] Build `app/sitemap.ts` (sitemap generation including category pages)
+- [ ] Implement root layout with navbar/footer
+- [ ] Add ISR revalidation (1 hour) to blog pages
+
+### Phase 4: UI Components
+- [ ] Create `components/category-filter.tsx` (horizontal category tabs)
+- [ ] Create `components/hashtag-badge.tsx` (display-only hashtag badges, NOT clickable)
+- [ ] Integrate shadcnblocks navbar8 (with Clerk auth placeholders for future use)
+- [ ] Integrate shadcnblocks footer16
+- [ ] Integrate shadcnblocks blog27 (blog listing layout with category filters)
+- [ ] Integrate shadcnblocks blogpost5 (post page layout)
+- [ ] Style code blocks with react-syntax-highlighter (enable line numbers, use monokai theme)
+
+### Phase 5: SEO & Polish
+- [ ] Implement `generateMetadata()` for dynamic SEO (posts, categories)
+- [ ] Add JSON-LD structured data (BlogPosting schema)
+- [ ] Add category metadata to sitemap
+- [ ] Test sitemap generation (verify all routes included)
+- [ ] Verify image optimization (WebP, responsive, lazy loading)
+- [ ] Test all internal links (category links, post links)
+- [ ] Add RSS feed (`app/rss.xml/route.ts`)
+- [ ] Test scheduled post filtering (future dates hidden)
+- [ ] Verify ISR revalidation works correctly (1-hour refresh)
+
+### Phase 6: Deployment
+- [ ] Create Vercel project
+- [ ] Configure domain (the-agentic-engineer.com)
+- [ ] Set up environment variables (if needed)
+- [ ] Deploy to production
+- [ ] Verify SEO (Google Search Console)
+
+---
+
 ## Notes & Ideas
 
 ### Branding Consistency
@@ -176,11 +557,15 @@ Planning migration from current Markdown + Blogger setup to a Next.js-based blog
 - Domain: the-agentic-engineer.com
 - Apply to: navbar, footer, page titles, meta tags, etc.
 
----
-
-## Action Items
-
-- [ ] Review collected resources
-- [ ] Decide on architecture approach
-- [ ] Create detailed migration plan
+### Future Enhancements (Post-Launch)
+- [ ] Archive pages by date (`/blog/2025/10`)
+- [ ] Search functionality (client-side fuzzy search or Algolia)
+- [ ] Reading time calculation (display on post cards)
+- [ ] Table of contents generation (for long posts)
+- [ ] Related posts suggestions (based on tags/categories)
+- [ ] Comment system (Giscus or similar, gated by Clerk auth)
+- [ ] Newsletter subscriptions (email capture, gated by Clerk auth)
+- [ ] Post reactions/likes (gated by Clerk auth)
+- [ ] Dark mode toggle
+- [ ] Social share buttons
 
