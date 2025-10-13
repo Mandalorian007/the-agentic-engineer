@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
+import { calculateReadingTime } from './reading-time';
 
 const postsDirectory = path.join(process.cwd(), 'content/posts');
 
@@ -13,6 +14,7 @@ export interface Post {
   hashtags: string[];
   content: string;
   heroImage?: string;
+  readingTime: number;
 }
 
 /**
@@ -49,6 +51,7 @@ export function getAllPosts(): Post[] {
         hashtags: data.hashtags || [],
         content,
         heroImage,
+        readingTime: calculateReadingTime(content),
       } as Post;
     });
 
@@ -98,6 +101,7 @@ export function getPostBySlug(slug: string): Post | null {
       hashtags: data.hashtags || [],
       content,
       heroImage,
+      readingTime: calculateReadingTime(content),
     } as Post;
   } catch {
     return null;

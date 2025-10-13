@@ -6,6 +6,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { ArrowRight } from "lucide-react";
 import { getRecentPosts } from "@/lib/posts";
 import { CATEGORY_LABELS } from "@/lib/categories";
+import { formatReadingTime } from "@/lib/reading-time";
 
 export default function Home() {
   const recentPosts = getRecentPosts(3);
@@ -65,11 +66,14 @@ export default function Home() {
                         {post.description}
                       </p>
                     </div>
-                    <div>
+                    <div className="flex items-center justify-between">
                       <Button size="sm" variant="outline">
                         Read More
                         <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
+                      <span className="text-xs text-muted-foreground">
+                        {formatReadingTime(post.readingTime)}
+                      </span>
                     </div>
                   </div>
                 </CardContent>

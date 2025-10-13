@@ -32,6 +32,7 @@ interface Post {
   link: string;
   cta: string;
   thumbnail: string;
+  readingTime?: string;
 }
 
 interface Category {
@@ -518,7 +519,7 @@ const BreadcrumbBlog = ({ breadcrumb }: BreadcrumbBlogProps) => {
   );
 };
 
-const BlogCard = ({ category, title, thumbnail, summary, link, cta }: Post) => {
+const BlogCard = ({ category, title, thumbnail, summary, link, cta, readingTime }: Post) => {
   /**
    * Format category ID to display name
    * Examples:
@@ -557,11 +558,16 @@ const BlogCard = ({ category, title, thumbnail, summary, link, cta }: Post) => {
                 {summary}
               </p>
             </div>
-            <div>
+            <div className="flex items-center justify-between">
               <Button size="sm" variant="outline">
                 {cta}
                 <ArrowRight />
               </Button>
+              {readingTime && (
+                <span className="text-xs text-muted-foreground">
+                  {readingTime}
+                </span>
+              )}
             </div>
           </div>
         </CardContent>

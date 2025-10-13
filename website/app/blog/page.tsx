@@ -5,6 +5,7 @@
 
 import { getPublishedPosts } from "@/lib/posts";
 import { Blog27 } from "@/components/blog27";
+import { formatReadingTime } from "@/lib/reading-time";
 
 // Enable ISR with 1-hour revalidation (future-dated posts will appear within an hour)
 export const revalidate = 3600;
@@ -28,6 +29,7 @@ export default function BlogListingPage() {
       link: `/blog/${post.slug}`,
       cta: "Read More",
       thumbnail,
+      readingTime: formatReadingTime(post.readingTime),
     };
   });
 

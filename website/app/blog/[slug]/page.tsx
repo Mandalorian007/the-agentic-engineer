@@ -16,6 +16,7 @@ import { CodeBlock } from "@/components/code-block";
 import { ShareButtons } from "@/components/share-buttons";
 import { TableOfContents } from "@/components/table-of-contents";
 import { extractHeadings, generateHeadingId } from "@/lib/toc";
+import { formatReadingTime } from "@/lib/reading-time";
 
 // ISR: Revalidate every 1 hour (3600 seconds)
 export const revalidate = 3600;
@@ -149,6 +150,8 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
                 day: "numeric",
               })}
             </time>
+            <span>•</span>
+            <span>{formatReadingTime(post.readingTime)}</span>
           </div>
 
           <Separator className="mb-8" />
