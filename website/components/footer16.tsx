@@ -1,4 +1,3 @@
-import { Github, Linkedin, Twitter } from "lucide-react";
 import Link from "next/link";
 
 import {
@@ -7,25 +6,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-
-const SOCIAL_LINKS = [
-  {
-    icon: Github,
-    href: "#",
-    label: "GitHub",
-  },
-  {
-    icon: Linkedin,
-    href: "#",
-    label: "LinkedIn",
-  },
-  {
-    icon: Twitter,
-    href: "#",
-    label: "Twitter",
-  },
-];
 
 const NAVIGATION = [
   {
@@ -59,20 +39,6 @@ const Footer16 = () => {
             <p className="text-muted-foreground text-sm max-w-md">
               Exploring AI agents, automation, and engineering with practical insights and real-world examples.
             </p>
-            <div className="flex items-center justify-start gap-4 md:flex-row">
-              {SOCIAL_LINKS.map((item, i) => (
-                <Button
-                  key={`social-link-${i}`}
-                  size="icon"
-                  variant="secondary"
-                  asChild
-                >
-                  <a href={item.href} aria-label={item.label}>
-                    <item.icon className="size-4 lg:size-5" />
-                  </a>
-                </Button>
-              ))}
-            </div>
           </div>
           <div>
             <div className="hidden md:flex md:gap-10 lg:gap-24 xl:gap-32">
