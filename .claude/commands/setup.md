@@ -7,5 +7,6 @@ Run the comprehensive setup verification script using `uv run tools/setup_check.
 - Cloudinary credentials (cloud name, API key, secret)
 - Blog configuration (blog name, blog ID)
 - API connectivity (Blogger API and Cloudinary)
+- Next.js website configuration (website/.env, shadcnblocks registry)
 
 The script provides actionable guidance for each missing or misconfigured component, with specific commands to fix issues and links to detailed documentation.

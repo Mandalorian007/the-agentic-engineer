@@ -3,7 +3,7 @@ title: Taming Claude YOLO Mode with Safety Hooks
 description: Learn how to use Claude Code's pre-tool-use hooks to protect against
   accidental rm -rf, credential leaks, and git disasters while keeping --dangerously-skip-permissions
   fast and productive.
-date: '2025-10-13T10:00:00Z'
+date: '2025-10-13T06:00:00-04:00'
 tags:
 - claude-code
 - automation
@@ -11,7 +11,7 @@ tags:
 - python
 status: draft
 blogger_id: '8904582180231394338'
-updated: '2025-10-13T00:27:02.989220'
+updated: '2025-10-12T20:27:02-04:00'
 images:
   hero-safe-yolo-mode.png:
     url: https://res.cloudinary.com/drdtiykkg/image/upload/v1760312226/agentic-engineer-blog/taming-claude-yolo-mode/hero-safe-yolo-mode.webp

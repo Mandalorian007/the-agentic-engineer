@@ -67,6 +67,7 @@ class SetupChecker:
             ("Cloudinary Setup", self.check_cloudinary),
             ("OpenAI Setup", self.check_openai),
             ("Blog Configuration", self.check_blog_config),
+            ("Next.js Website Setup", self.check_website_setup),
             ("Connectivity Test", self.test_connectivity),
         ]
 
@@ -292,6 +293,115 @@ class SetupChecker:
             print_action("To find your blog ID:")
             print("  Check Blogger dashboard URL:")
             print("    https://www.blogger.com/blog/posts/[YOUR_BLOG_ID]")
+
+    def check_website_setup(self):
+        """Check Next.js website configuration"""
+        website_dir = Path('website')
+
+        if not website_dir.exists():
+            print_warning("website/ directory not found - Next.js site not initialized")
+            self.warnings.append("Next.js website not set up")
+            return
+
+        print_success("website/ directory exists")
+
+        # Check for website/.env.local file
+        website_env = website_dir / '.env.local'
+        if website_env.exists():
+            print_success("website/.env.local exists")
+
+            # Check for SHADCNBLOCKS_API_KEY
+            try:
+                with open(website_env) as f:
+                    env_content = f.read()
+                    if 'SHADCNBLOCKS_API_KEY' in env_content:
+                        # Extract the value (basic parsing)
+                        for line in env_content.splitlines():
+                            if line.startswith('SHADCNBLOCKS_API_KEY='):
+                                value = line.split('=', 1)[1].strip()
+                                if value and value.startswith('sk_live_'):
+                                    masked = value[:12] + '...'
+                                    print_success(f"  SHADCNBLOCKS_API_KEY set ({masked})")
+                                elif value:
+                                    print_warning("  SHADCNBLOCKS_API_KEY set but doesn't start with 'sk_live_'")
+                                    self.warnings.append("Shadcnblocks API key format may be incorrect")
+                                else:
+                                    print_warning("  SHADCNBLOCKS_API_KEY is empty")
+                                    self.warnings.append("Shadcnblocks API key is empty")
+                                break
+                        else:
+                            print_warning("  SHADCNBLOCKS_API_KEY not found in .env.local")
+                            self.warnings.append("Shadcnblocks API key not configured")
+                    else:
+                        print_warning("  SHADCNBLOCKS_API_KEY not found in .env.local")
+                        self.warnings.append("Shadcnblocks API key not configured")
+                        print_action("  Add to website/.env.local: SHADCNBLOCKS_API_KEY=sk_live_...")
+                        print_info("  Get key from: https://www.shadcnblocks.com/dashboard/api")
+            except Exception as e:
+                print_warning(f"  Could not read website/.env.local: {e}")
+                self.warnings.append("Unable to read website/.env.local")
+        else:
+            print_warning("website/.env.local not found")
+            self.warnings.append("Website environment file missing")
+            print_action("Create website/.env.local with:")
+            print("  SHADCNBLOCKS_API_KEY=sk_live_your_api_key_here")
+            print_info("Get key from: https://www.shadcnblocks.com/dashboard/api")
+
+        # Check components.json registry configuration
+        components_json = website_dir / 'components.json'
+        if components_json.exists():
+            print_success("website/components.json exists")
+
+            try:
+                import json
+                with open(components_json) as f:
+                    config = json.load(f)
+
+                # Check for registries configuration
+                if 'registries' in config:
+                    print_success("  registries section found")
+
+                    if '@shadcnblocks' in config['registries']:
+                        registry = config['registries']['@shadcnblocks']
+                        print_success("  @shadcnblocks registry configured")
+
+                        # Check URL format
+                        url = registry.get('url', '')
+                        if url == 'https://shadcnblocks.com/r/{name}':
+                            print_success("  Registry URL is correct")
+                        else:
+                            print_warning(f"  Registry URL may be incorrect: {url}")
+                            print_warning(f"  Expected: https://shadcnblocks.com/r/{{name}}")
+                            self.warnings.append("Shadcnblocks registry URL format may be incorrect")
+                            print_action("  Update components.json registry URL")
+
+                        # Check for Authorization header
+                        headers = registry.get('headers', {})
+                        if 'Authorization' in headers:
+                            print_success("  Authorization header configured")
+                        else:
+                            print_warning("  Authorization header missing")
+                            self.warnings.append("Shadcnblocks registry missing Authorization header")
+                            print_action("  Add to components.json:")
+                            print('    "headers": {"Authorization": "Bearer ${SHADCNBLOCKS_API_KEY}"}')
+                    else:
+                        print_warning("  @shadcnblocks registry not found")
+                        self.warnings.append("Shadcnblocks registry not configured")
+                        print_action("  See: specs/shadcnblocks-setup.md")
+                else:
+                    print_warning("  No registries section in components.json")
+                    self.warnings.append("Shadcnblocks registry section missing")
+                    print_action("  See: specs/shadcnblocks-setup.md")
+            except json.JSONDecodeError as e:
+                print_warning(f"  Invalid JSON in components.json: {e}")
+                self.warnings.append("components.json has invalid JSON")
+            except Exception as e:
+                print_warning(f"  Could not check components.json: {e}")
+                self.warnings.append("Unable to validate components.json")
+        else:
+            print_warning("website/components.json not found")
+            self.warnings.append("components.json missing")
+            print_action("Run in website/: pnpm dlx shadcn@latest init")
 
     def test_connectivity(self):
         """Test actual API connectivity if everything is configured"""

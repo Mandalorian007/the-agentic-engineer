@@ -335,32 +335,82 @@ export const revalidate = 3600; // 1 hour
 - **URL**: https://tweakcn.com/editor/theme?theme=clean-slate
 - **Theme**: Clean Slate
 - **Description**: Custom theme for shadcn/ui components
+- **Installation**: `pnpm dlx shadcn@latest add https://tweakcn.com/r/themes/clean-slate.json`
+- **Important**: Must be installed AFTER shadcn init to properly override the default theme colors. This ensures the purple/blue accent colors are applied instead of grayscale.
 - **Category**: Styling & UI
 
 #### shadcnblocks - Blog Listing Layout
 - **URL**: https://www.shadcnblocks.com/block/blog27
 - **Block**: blog27
-- **Description**: Pre-built blog page layout for main blog listing
+- **Installation**: `npx shadcn add @shadcnblocks/blog27` (after purchasing Pro)
+- **Status**: PRO BLOCK - Requires purchase from shadcnblocks.com
+- **Description**: Pre-built blog page layout with image slots, filters, and grid layout
+- **Features**: Hero section with featured post image, category filter tabs, post cards with image slots
+- **Alternative**: Currently using custom implementation with shadcn/ui Card components
 - **Category**: Styling & UI, Architecture & Design
 
 #### shadcnblocks - Blog Post Layout
 - **URL**: https://www.shadcnblocks.com/block/blogpost5
 - **Block**: blogpost5
-- **Description**: Pre-built individual blog post layout
+- **Installation**: `npx shadcn add @shadcnblocks/blogpost5` (after purchasing Pro)
+- **Status**: PRO BLOCK - Requires purchase
+- **Description**: Pre-built individual blog post layout with sidebar
+- **Alternative**: Currently using custom implementation
 - **Category**: Styling & UI, Architecture & Design
 
 #### shadcnblocks - Navbar
 - **URL**: https://www.shadcnblocks.com/block/navbar8
 - **Block**: navbar8
+- **Status**: PRO BLOCK - Requires purchase
 - **Description**: Navigation bar layout
-- **Note**: Will integrate Clerk signin/signout components for authentication
+- **Alternative**: Currently using custom navbar implementation with theme toggle
 - **Category**: Styling & UI, Architecture & Design
 
 #### shadcnblocks - Footer
 - **URL**: https://www.shadcnblocks.com/block/footer16
 - **Block**: footer16
+- **Status**: PRO BLOCK - Requires purchase
 - **Description**: Footer layout
+- **Alternative**: Currently using custom footer implementation
 - **Category**: Styling & UI, Architecture & Design
+
+#### Note on shadcnblocks Pro - FIXED & WORKING
+**Status**: Pro license purchased, registry correctly configured, blocks installing successfully!
+
+**Setup Complete**:
+- ✅ API key added to `.env` file (`SHADCNBLOCKS_API_KEY`)
+- ✅ Registry configured in `components.json` with CORRECT URL format
+  - **Fixed URL**: `https://shadcnblocks.com/r/{name}` (NOT `/api/registry/{name}.json`)
+  - **Added**: Authorization header with API key
+- ✅ Clean Slate theme properly installed from tweakcn
+- ✅ blog27 component successfully installed at `components/blog27.tsx`
+
+**Corrected Registry Configuration**:
+```json
+"registries": {
+  "@shadcnblocks": {
+    "url": "https://shadcnblocks.com/r/{name}",
+    "headers": {
+      "Authorization": "Bearer ${SHADCNBLOCKS_API_KEY}"
+    }
+  }
+}
+```
+
+**Next Steps**:
+1. ✅ Install blog27: `pnpm dlx shadcn@latest add @shadcnblocks/blog27` - DONE
+2. Install remaining Pro blocks: blogpost5, navbar8, footer16
+3. Replace custom placeholder components in `app/` pages with Pro block versions
+4. Wire up Pro blocks with actual blog content (MDX posts)
+5. Add images to Pro block image slots
+
+**Key Files**:
+- Setup guide: `specs/shadcnblocks-setup.md`
+- Registry config: `website/components.json` (registries section - NOW FIXED)
+- Environment: `website/.env.local` (contains API key - not committed)
+- Installed component: `website/components/blog27.tsx`
+
+**Important**: Pro blocks have image slots which are crucial for the blog design. The current custom components are placeholders without proper image support.
 
 #### Markdown Processing
 - **Libraries**:
@@ -496,16 +546,18 @@ export const revalidate = 3600; // 1 hour
 - [x] Configure Tailwind CSS + @tailwindcss/typography
 - [x] Set up shadcn/ui with Clean Slate theme (Neutral base color)
 - [x] Install shadcn/ui components (button, card, badge, separator, dropdown-menu)
-- [x] Implement navbar component with auth placeholders
-- [x] Implement footer component
+- [x] **Install shadcnblocks Pro components** (blog27, blogpost5, navbar8, footer16)
+- [x] **Replace navbar with navbar8 Pro block** - Includes theme toggle, responsive mobile menu
+- [x] **Replace footer with footer16 Pro block** - Includes accordion on mobile, social links
 - [x] Create root layout with navbar and footer
 - [x] **Add light/dark theme toggle** (next-themes integration)
 - [x] Create homepage with hero section
-- [x] Create blog listing page (`/blog`) with placeholder posts
+- [x] **Update blog listing page (`/blog`) to use blog27 Pro component**
+- [x] **Wire up blog27 with actual categories from spec** (7 categories aligned with /create-post)
 - [x] Create category filter page (`/blog/category/[category]`)
 - [x] Create individual blog post page (`/blog/[slug]`)
 - [x] Fix container layout issues
-- [x] Test build - all pages compile successfully
+- [x] **Test build - all pages compile successfully with Pro components**
 - [ ] Install markdown dependencies (react-markdown, remark-gfm, react-syntax-highlighter)
 - [ ] Configure next.config.mjs with MDX support
 
