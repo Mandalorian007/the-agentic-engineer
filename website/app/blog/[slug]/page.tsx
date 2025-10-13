@@ -68,9 +68,9 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
     "@type": "BlogPosting",
     "headline": post.title,
     "description": post.description,
-    "image": post.content.match(/!\[.*?\]\((\.\/.*?)\)/g)?.map(img => {
-      const match = img.match(/!\[.*?\]\((\.\/.*?)\)/);
-      return match ? `https://the-agentic-engineer.com/blog/${params.slug}/${match[1].slice(2)}` : null;
+    "image": post.content.match(/!\[.*?\]\(\.\.\/\.\.\/public\/(.*?)\)/g)?.map(img => {
+      const match = img.match(/!\[.*?\]\(\.\.\/\.\.\/public\/(.*?)\)/);
+      return match ? `https://the-agentic-engineer.com/${match[1]}` : null;
     }).filter(Boolean) || [],
     "datePublished": post.date,
     "dateModified": post.date,
@@ -171,11 +171,17 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
                 },
                 // Custom image component with Next.js Image
                 img({ src, alt }) {
-                  // Handle relative image paths
+                  // Handle relative image paths from MDX file location
                   const srcString = typeof src === 'string' ? src : '';
-                  const imageSrc = srcString.startsWith('./')
-                    ? `/blog/${params.slug}/${srcString.slice(2)}`
-                    : srcString;
+
+                  // Convert ../../public/blog/... to /blog/...
+                  let imageSrc = srcString;
+                  if (srcString.startsWith('../../public/')) {
+                    imageSrc = srcString.replace('../../public', '');
+                  } else if (srcString.startsWith('./')) {
+                    // Legacy support: ./image.webp -> /blog/{slug}/image.webp
+                    imageSrc = `/blog/${params.slug}/${srcString.slice(2)}`;
+                  }
 
                   return (
                     <span className="block my-8">
@@ -186,6 +192,7 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
                         height={675}
                         className="rounded-lg"
                         priority={false}
+                        unoptimized
                       />
                     </span>
                   );

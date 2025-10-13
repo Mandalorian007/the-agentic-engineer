@@ -1,31 +1,34 @@
 #!/usr/bin/env python3
 """
-Generate images using OpenAI's GPT-Image-1 API.
+Generate images using OpenAI's GPT-Image-1 API and save as WebP format.
 
 Usage:
-    python tools/generate_image.py "modern minimalist illustration of a robot writing code at a desk, blue and purple gradient background, clean tech aesthetic, isometric view" output.png
-    python tools/generate_image.py "sleek futuristic dashboard interface with glowing charts and graphs, dark theme with neon accents, professional tech aesthetic, wide angle view" posts/2025-10-12-my-post/hero.png
+    python tools/generate_image.py "modern minimalist illustration of a robot writing code at a desk, blue and purple gradient background, clean tech aesthetic, isometric view" output.webp
+    python tools/generate_image.py "sleek futuristic dashboard interface with glowing charts and graphs, dark theme with neon accents, professional tech aesthetic, wide angle view" website/public/blog/2025-10-12-my-post/hero.webp
 
 Tip: More detailed prompts produce better results. Include style, colors, perspective, and mood.
+Note: Output is automatically converted to WebP format for optimal web performance.
 """
 
 import argparse
 import base64
 import os
 import sys
+from io import BytesIO
 from pathlib import Path
 
 from dotenv import load_dotenv
 from openai import OpenAI
+from PIL import Image
 
 
 def generate_image(prompt: str, output_path: str) -> None:
     """
-    Generate an image using DALL-E and save it to the specified path.
+    Generate an image using DALL-E and save it as WebP format.
 
     Args:
         prompt: The text prompt to generate the image from
-        output_path: Path where the image should be saved
+        output_path: Path where the image should be saved (will use .webp extension)
     """
     # Save the current working directory to restore later
     original_cwd = os.getcwd()
@@ -62,12 +65,7 @@ def generate_image(prompt: str, output_path: str) -> None:
         image_data = response.data[0]
         print(f"✅ Image generated successfully")
 
-        # Create output directory if it doesn't exist
-        output_file = Path(output_path)
-        output_file.parent.mkdir(parents=True, exist_ok=True)
-
-        # Decode and save the image
-        print(f"💾 Saving image...")
+        # Decode the image
         if hasattr(image_data, 'b64_json') and image_data.b64_json:
             # Base64 encoded response
             image_bytes = base64.b64decode(image_data.b64_json)
@@ -80,11 +78,24 @@ def generate_image(prompt: str, output_path: str) -> None:
         else:
             raise ValueError("No image data in response")
 
-        with open(output_file, "wb") as f:
-            f.write(image_bytes)
+        # Load image with PIL
+        print(f"🔄 Converting to WebP format...")
+        img = Image.open(BytesIO(image_bytes))
 
-        print(f"✅ Image saved to: {output_path}")
-        print(f"📊 File size: {len(image_bytes) / 1024:.1f} KB")
+        # Ensure output path has .webp extension
+        output_file = Path(output_path)
+        if output_file.suffix.lower() != '.webp':
+            output_file = output_file.with_suffix('.webp')
+
+        # Create output directory if it doesn't exist
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+
+        # Save as WebP with quality 85 (good balance of quality and file size)
+        img.save(output_file, 'WEBP', quality=85, method=6)
+
+        final_size = output_file.stat().st_size
+        print(f"✅ Image saved to: {output_file}")
+        print(f"📊 File size: {final_size / 1024:.1f} KB (WebP format)")
 
         # Print revised prompt if available
         if hasattr(response.data[0], 'revised_prompt') and response.data[0].revised_prompt:
@@ -101,18 +112,18 @@ def generate_image(prompt: str, output_path: str) -> None:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Generate images using OpenAI's GPT-Image-1 API",
+        description="Generate images using OpenAI's GPT-Image-1 API and save as WebP",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
   # Blog post hero image with detailed prompt
-  python tools/generate_image.py "modern minimalist illustration of a robot writing code at a desk, blue and purple gradient background, clean tech aesthetic, isometric view" posts/2025-10-12-my-post/hero.png
+  python tools/generate_image.py "modern minimalist illustration of a robot writing code at a desk, blue and purple gradient background, clean tech aesthetic, isometric view" website/public/blog/2025-10-12-my-post/hero.webp
 
   # Data visualization image
-  python tools/generate_image.py "sleek futuristic dashboard with glowing charts and metrics, dark theme with neon blue accents, professional tech aesthetic, wide angle perspective" posts/2025-10-12-analytics/dashboard.png
+  python tools/generate_image.py "sleek futuristic dashboard with glowing charts and metrics, dark theme with neon blue accents, professional tech aesthetic, wide angle perspective" website/public/blog/2025-10-12-analytics/dashboard.webp
 
   # Architecture diagram style
-  python tools/generate_image.py "clean technical diagram of microservices architecture with connected nodes and data flows, white background, blue and gray color scheme, minimalist flat design" architecture.png
+  python tools/generate_image.py "clean technical diagram of microservices architecture with connected nodes and data flows, white background, blue and gray color scheme, minimalist flat design" website/public/blog/2025-10-12-architecture/diagram.webp
 
 Tip: More detailed prompts produce better results. Include:
   - Style (minimalist, modern, flat design, realistic, abstract)
@@ -120,6 +131,9 @@ Tip: More detailed prompts produce better results. Include:
   - Perspective (isometric, top-down, close-up, wide angle)
   - Mood (professional, playful, serious, energetic, futuristic)
   - Subject details (objects, actions, composition, lighting)
+
+Note: Output is automatically converted to WebP format for optimal web performance.
+      If you provide a .png extension, it will be changed to .webp automatically.
         """
     )
 
@@ -130,7 +144,7 @@ Tip: More detailed prompts produce better results. Include:
 
     parser.add_argument(
         "output_path",
-        help="Path where the generated image should be saved (e.g., output.png)"
+        help="Path where the generated image should be saved (e.g., output.webp)"
     )
 
     args = parser.parse_args()

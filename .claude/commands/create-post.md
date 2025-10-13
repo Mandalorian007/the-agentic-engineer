@@ -174,11 +174,12 @@ Create a complete blog post following this project's structure:
 3. **Full MDX content** with proper heading hierarchy
 4. **Image suggestions** - **REQUIRED: Every post must have at least one image** (hero/featured image). When suggesting images, provide the exact command to generate them with detailed, descriptive prompts:
    ```bash
-   uv run tools/generate_image.py "modern minimalist illustration of a robot writing code at a desk, blue and purple gradient background, clean tech aesthetic, isometric view" website/public/blog/YYYY-MM-DD-slug/image-name.png
+   uv run tools/generate_image.py "modern minimalist illustration of a robot writing code at a desk, blue and purple gradient background, clean tech aesthetic, isometric view" website/public/blog/YYYY-MM-DD-slug/image-name.webp
    ```
    - Minimum: 1 hero image at the top of the post
    - Recommended: Additional images for major sections, diagrams, or examples
    - **Prompt tips**: Be specific about style (minimalist, modern, flat design), colors, perspective, subject details, and mood
+   - **Note**: Images are automatically generated and converted to WebP format by `generate_image.py`
 
 ## Saving the Post to Disk
 
@@ -213,10 +214,12 @@ hashtags: ["python", "automation", "workflow"]
 - `hashtags` (optional) - Array of freeform hashtags, display-only (not for filtering)
 
 ### Image References & Naming
-- Use relative paths: `![Alt text](./hero-blog-automation.webp)`
-- Images must be WebP format (use `tools/convert_to_webp.py` if needed)
+- Use relative paths from MDX location: `![Alt text](../../public/blog/YYYY-MM-DD-slug/hero-blog-automation.webp)`
+- Images are automatically generated in WebP format by `generate_image.py`
 - Name images with descriptive slugs: `hero-topic-name.webp`, `diagram-what-it-shows.webp`, `screenshot-feature-name.webp`
 - Save to: `website/public/blog/YYYY-MM-DD-slug/`
+- Path format: `../../public/blog/[post-slug]/[image-name].webp` (relative from `content/posts/` to `public/blog/`)
+- Next.js automatically converts these to `/blog/...` URLs at render time
 
 ## Process
 
@@ -234,7 +237,7 @@ hashtags: ["python", "automation", "workflow"]
 
 5. **Write the complete post** following the chosen format as MDX
 
-6. **Generate images** - Create at least one hero image using `generate_image.py`, convert to WebP with `convert_to_webp.py`
+6. **Generate images** - Create at least one hero image using `generate_image.py` (outputs WebP directly)
 
 7. **Save to disk** - Write MDX file to `website/content/posts/YYYY-MM-DD-slug.mdx` with proper frontmatter
 

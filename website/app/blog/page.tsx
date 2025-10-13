@@ -18,9 +18,9 @@ export default function BlogListingPage() {
   const transformedPosts = posts.map((post) => {
     const category = getCategoryById(post.category);
     // Extract first hero image from content for thumbnail
-    const imageMatch = post.content.match(/!\[.*?\]\((\.\/.*?\.webp)\)/);
+    const imageMatch = post.content.match(/!\[.*?\]\(\.\.\/\.\.\/public\/(.*?\.webp)\)/);
     const thumbnail = imageMatch
-      ? `/blog/${post.slug}/${imageMatch[1].slice(2)}`
+      ? `/${imageMatch[1]}`
       : "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/placeholder-1.svg";
 
     return {

@@ -95,7 +95,7 @@ Vercel automatically deploys on push! 🚀
 This runs:
 1. Gets next available Monday publish date
 2. Creates MDX post with AI-generated content
-3. Generates and converts images to WebP
+3. Generates images in WebP format
 4. Runs quality review (SEO + Vale)
 5. Reminds you to commit and push
 
@@ -163,13 +163,13 @@ Every post must have ONE category:
 
 ### Image References
 
-Use relative paths in MDX:
+Use relative paths from MDX file location in MDX:
 
 ```markdown
-![Alt text describing image](./hero-automation.webp)
+![Alt text describing image](../../public/blog/2025-10-12-my-post/hero-automation.webp)
 ```
 
-Images are automatically optimized by Next.js `next/image` component.
+The relative path goes from `website/content/posts/` to `website/public/blog/`. Next.js automatically converts these to `/blog/...` URLs at render time, and IDE markdown preview can resolve the images locally.
 
 ## Configuration
 
@@ -242,18 +242,18 @@ Vale configuration in `.vale.ini`:
 
 ## Image Generation
 
-Generate AI images using OpenAI DALL-E:
+Generate AI images using OpenAI DALL-E (outputs WebP directly):
 
 ```bash
-uv run tools/generate_image.py "detailed prompt" website/public/blog/YYYY-MM-DD-slug/image.png
+uv run tools/generate_image.py "detailed prompt" website/public/blog/YYYY-MM-DD-slug/image.webp
 ```
 
 **Example:**
 ```bash
-uv run tools/generate_image.py "modern minimalist illustration of AI automation, blue and purple gradient, clean tech aesthetic, isometric view" website/public/blog/2025-10-12-my-post/hero.png
+uv run tools/generate_image.py "modern minimalist illustration of AI automation, blue and purple gradient, clean tech aesthetic, isometric view" website/public/blog/2025-10-12-my-post/hero.webp
 ```
 
-Images are automatically converted to WebP format.
+Images are automatically saved in WebP format for optimal web performance.
 
 **Prompt Tips:**
 - Specify style (minimalist, modern, flat design)
@@ -301,8 +301,8 @@ Validates TypeScript, MDX, and generates static pages.
 Direct tool usage without Claude Code commands:
 
 **Content Generation:**
-- `uv run tools/generate_image.py <prompt> <path>` - Generate AI images
-- `uv run tools/convert_to_webp.py <input>` - Convert images to WebP
+- `uv run tools/generate_image.py <prompt> <path>` - Generate AI images (outputs WebP)
+- `uv run tools/convert_to_webp.py <input> <output>` - Convert existing images to WebP (rarely needed)
 
 **Validation:**
 - `uv run tools/seo_check.py <mdx-file>` - SEO analysis
