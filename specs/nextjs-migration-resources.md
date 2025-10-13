@@ -700,6 +700,94 @@ export const revalidate = 3600; // 1 hour
 - [ ] Comment system (Giscus or similar, gated by Clerk auth)
 - [ ] Newsletter subscriptions (email capture, gated by Clerk auth)
 - [ ] Post reactions/likes (gated by Clerk auth)
-- [ ] Dark mode toggle
+- [x] Dark mode toggle (already implemented with next-themes)
 - [ ] Social share buttons
+
+---
+
+## Overall Project Status
+
+### **Progress: ~75% Complete**
+
+**✅ Phases Complete:**
+- **Phase 1**: Project Setup (100%)
+- **Phase 2**: Content Migration (100%)
+- **Phase 3**: Core Implementation (100%)
+- **Phase 4**: UI Components (100%)
+
+**⚠️ Phases In Progress:**
+- **Phase 5**: SEO & Polish (20%)
+  - Missing: Sitemap, RSS feed, JSON-LD, ISR configuration
+- **Phase 6**: Deployment (0%)
+  - Not started
+
+### **What's Working Right Now:**
+
+✅ **Full-featured blog with 2 posts**
+- Homepage with hero section
+- Blog listing page with category filter tabs
+- Category filter pages (`/blog/category/[category]`)
+- Individual post pages with sidebar
+- Theme toggle (light/dark mode)
+
+✅ **Theme-aware code styling**
+- Inline code adapts to theme (light/dark)
+- Multi-line code blocks use oneLight/oneDark themes
+- All typography elements styled via @tailwindcss/typography
+
+✅ **Content infrastructure**
+- MDX posts with frontmatter
+- Image optimization via next/image
+- Category system (7 hardcoded categories)
+- Hashtag display badges
+- Future date filtering (scheduled posts)
+
+✅ **Pro components integrated**
+- navbar8 (with theme toggle)
+- footer16 (with mobile accordion)
+- blog27 (blog listing layout)
+- All styled with Clean Slate theme
+
+### **Critical Path to Launch:**
+
+**Priority 1 - SEO (Required for launch):**
+1. Build `app/sitemap.ts` - Generate XML sitemap
+2. Add JSON-LD structured data to blog posts
+3. Add `generateMetadata()` to category pages
+4. Configure ISR revalidation (1 hour) on blog pages
+
+**Priority 2 - Deployment:**
+1. Create Vercel project
+2. Configure root directory to `website/`
+3. Deploy to production
+4. Configure domain (the-agentic-engineer.com)
+
+**Priority 3 - Optional (Post-launch):**
+1. RSS feed
+2. Enhanced metadata
+3. Performance optimizations
+
+### **Key Implementation Details:**
+
+**Components:**
+- `components/code-block.tsx` - Theme-aware syntax highlighting
+- `lib/posts.ts` - Post loading with date filtering
+- `lib/categories.ts` - Category management and validation
+- `app/blog/[slug]/page.tsx` - Dynamic post rendering
+
+**Styling Approach:**
+- Minimal custom CSS (~50 lines of prose overrides)
+- @tailwindcss/typography handles most styling
+- Theme integration via CSS variables
+- Custom code styling adapts to light/dark themes
+
+**Tech Stack:**
+- Next.js 15 (App Router) with Turbopack
+- Tailwind CSS v4 + @tailwindcss/typography
+- shadcn/ui (Clean Slate theme)
+- react-markdown + remark-gfm
+- react-syntax-highlighter (oneLight/oneDark)
+- Clerk authentication (configured but optional)
+
+**Ready for production deployment once sitemap and metadata are complete!**
 
