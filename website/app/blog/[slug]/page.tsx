@@ -15,6 +15,7 @@ import Image from "next/image";
 import { CodeBlock } from "@/components/code-block";
 import { ShareButtons } from "@/components/share-buttons";
 import { TableOfContents } from "@/components/table-of-contents";
+import { ReadingProgress } from "@/components/reading-progress";
 import { extractHeadings, generateHeadingId } from "@/lib/toc";
 import { formatReadingTime } from "@/lib/reading-time";
 
@@ -109,6 +110,9 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
+      {/* Reading Progress Bar */}
+      <ReadingProgress />
 
       <div className="container py-12">
       {/* Breadcrumb */}
