@@ -239,34 +239,34 @@ def is_credential_file_access(tool_name, tool_input):
         elif tool_name == 'Bash':
             command = tool_input.get('command', '').lower()
 
-            # Enhanced patterns to catch all .env variants and access methods
-            # Case-insensitive matching, catches globs and path variations
+            # Only block actual file access commands, not mentions in strings
+            # Enhanced patterns to catch .env file access
             env_patterns = [
-                # Basic .env access (all variants except .sample/.example)
-                # Catches: .env, .env.local, .ENV, ./env, path/.env*, etc.
-                r'\.env[^\s/]*(?!\.sample|\.example)\b',
-                r'\.env[^\s/]*(?!\.sample|\.example)["\']',  # With quotes
-                r'\.env\*',  # Glob patterns
+                # Read commands - must have command + path pattern
+                # Note: grep can have args before filename, so handle separately
+                r'(cat|less|more|head|tail|awk|sed)\s+[^\s]*\.env(?!\.sample|\.example)',
+                r'\bgrep\s+.*\.env(?!\.sample|\.example)',  # grep with any args
 
-                # Read commands
-                r'(cat|less|more|head|tail|grep|awk|sed)\s+.*\.env(?!\.sample|\.example)',
+                # Editor commands - must be followed by filename
+                r'(vim|vi|nano|emacs|code|subl|atom)\s+[^\s]*\.env(?!\.sample|\.example)',
 
-                # Editor commands
-                r'(vim|vi|nano|emacs|code|subl|atom)\s+.*\.env(?!\.sample|\.example)',
+                # Encoding/streaming commands - must be followed by filename
+                r'(base64|xxd|od|strings|hexdump)\s+[^\s]*\.env(?!\.sample|\.example)',
 
-                # Encoding/streaming commands
-                r'(base64|xxd|od|strings|hexdump)\s+.*\.env(?!\.sample|\.example)',
+                # Write/modify commands - must be targeting .env file
+                r'(echo|printf|tee)\s+.*>\s*[^\s]*\.env(?!\.sample|\.example)',
+                r'(touch|cp|mv)\s+[^\s]+\s+[^\s]*\.env(?!\.sample|\.example)',
 
-                # Write/modify commands
-                r'(echo|printf|tee)\s+.*>\s*.*\.env(?!\.sample|\.example)',
-                r'(touch|cp|mv)\s+.*\.env(?!\.sample|\.example)',
+                # Source command - loads env vars
+                r'\bsource\s+[^\s]*\.env(?!\.sample|\.example)',
+                r'\.\s+[^\s]*\.env(?!\.sample|\.example)',  # . command (source alias)
 
-                # Scripting languages
-                r'(python|ruby|perl|node|php)\s+.*\.env(?!\.sample|\.example)',
+                # Scripting languages accessing file
+                r'(python|ruby|perl|node|php)\s+[^\s]*\.env(?!\.sample|\.example)',
 
-                # Other access methods
-                r'(curl|wget)\s+.*-o.*\.env(?!\.sample|\.example)',
-                r'(zip|tar|gzip)\s+.*\.env(?!\.sample|\.example)',
+                # Other file operations
+                r'(curl|wget)\s+.*-o\s*[^\s]*\.env(?!\.sample|\.example)',
+                r'(zip|tar|gzip|bzip2)\s+[^\s]+\s+[^\s]*\.env(?!\.sample|\.example)',
             ]
 
             for pattern in env_patterns:
