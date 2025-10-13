@@ -96,7 +96,7 @@ const Navbar8 = () => {
   return (
     <section>
       <div
-        className="z-500 fixed top-0 w-full bg-transparent transition-colors duration-500"
+        className="z-40 fixed top-0 w-full bg-transparent transition-colors duration-500"
         ref={navRef}
       >
         <div className="container border-b">

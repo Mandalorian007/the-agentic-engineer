@@ -278,11 +278,14 @@
 .prose :where(code):not(:where([class~="not-prose"], pre *)) {
   position: relative;
   border-radius: 0.25rem;
-  border: 1px solid hsl(var(--border));
-  padding: 0.2rem 0.3rem;
+  padding: 0.2rem 0.4rem;
   font-family: var(--font-mono);
   font-size: 0.875rem;
-  background-color: hsl(var(--muted));
+  font-weight: 400;
+  /* oneDark theme colors - matches react-syntax-highlighter */
+  background-color: #282c34;
+  color: #abb2bf;
+  border: 1px solid rgba(171, 178, 191, 0.15);
 }
 
 .prose :where(code):not(:where([class~="not-prose"], pre *))::before,

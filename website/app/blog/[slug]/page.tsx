@@ -130,10 +130,15 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
                     );
                   }
 
-                  // Inline code with explicit styling
+                  // Inline code with oneDark theme styling (matches react-syntax-highlighter)
                   return (
                     <code
-                      className="relative rounded border px-[0.3rem] py-[0.2rem] font-mono text-sm bg-muted border-border"
+                      className="relative rounded px-[0.4rem] py-[0.2rem] font-mono text-sm font-normal border"
+                      style={{
+                        backgroundColor: '#282c34',
+                        color: '#abb2bf',
+                        borderColor: 'rgba(171, 178, 191, 0.15)',
+                      }}
                       {...rest}
                     >
                       {children}
