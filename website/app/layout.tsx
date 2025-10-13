@@ -34,6 +34,14 @@ export default function RootLayout({
       }}
     >
       <html lang="en" suppressHydrationWarning>
+        <head>
+          <link
+            rel="alternate"
+            type="application/rss+xml"
+            title="RSS Feed for The Agentic Engineer"
+            href="/feed.xml"
+          />
+        </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen flex-col`}
         >

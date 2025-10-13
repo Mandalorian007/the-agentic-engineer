@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { RssIcon } from "lucide-react";
 
 import {
   Accordion,
@@ -39,6 +40,15 @@ const Footer16 = () => {
             <p className="text-muted-foreground text-sm max-w-md">
               Exploring AI agents, automation, and engineering with practical insights and real-world examples.
             </p>
+            <Link
+              href="/feed.xml"
+              className="text-muted-foreground hover:text-foreground flex items-center gap-2 text-sm font-medium transition-colors duration-200 ease-in-out"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <RssIcon className="h-5 w-5" />
+              Subscribe via RSS
+            </Link>
           </div>
           <div>
             <div className="hidden md:flex md:gap-10 lg:gap-24 xl:gap-32">
