@@ -4,6 +4,8 @@ import "./globals.css";
 import { Navbar8 } from "@/components/navbar8";
 import { Footer16 } from "@/components/footer16";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ClerkProvider } from "@clerk/nextjs";
+import { shadcn } from "@clerk/themes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,21 +28,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen flex-col`}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
+    <ClerkProvider
+      appearance={{
+        baseTheme: shadcn,
+      }}
+    >
+      <html lang="en" suppressHydrationWarning>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen flex-col`}
         >
-          <Navbar8 />
-          <main className="flex-1 pt-20">{children}</main>
-          <Footer16 />
-        </ThemeProvider>
-      </body>
-    </html>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Navbar8 />
+            <main className="flex-1 pt-20">{children}</main>
+            <Footer16 />
+          </ThemeProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

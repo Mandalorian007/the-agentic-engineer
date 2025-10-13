@@ -310,42 +310,90 @@ class SetupChecker:
         if website_env.exists():
             print_success("website/.env.local exists")
 
-            # Check for SHADCNBLOCKS_API_KEY
+            # Parse environment variables
+            env_vars = {}
             try:
                 with open(website_env) as f:
                     env_content = f.read()
-                    if 'SHADCNBLOCKS_API_KEY' in env_content:
-                        # Extract the value (basic parsing)
-                        for line in env_content.splitlines():
-                            if line.startswith('SHADCNBLOCKS_API_KEY='):
-                                value = line.split('=', 1)[1].strip()
-                                if value and value.startswith('sk_live_'):
-                                    masked = value[:12] + '...'
-                                    print_success(f"  SHADCNBLOCKS_API_KEY set ({masked})")
-                                elif value:
-                                    print_warning("  SHADCNBLOCKS_API_KEY set but doesn't start with 'sk_live_'")
-                                    self.warnings.append("Shadcnblocks API key format may be incorrect")
-                                else:
-                                    print_warning("  SHADCNBLOCKS_API_KEY is empty")
-                                    self.warnings.append("Shadcnblocks API key is empty")
-                                break
-                        else:
-                            print_warning("  SHADCNBLOCKS_API_KEY not found in .env.local")
-                            self.warnings.append("Shadcnblocks API key not configured")
-                    else:
-                        print_warning("  SHADCNBLOCKS_API_KEY not found in .env.local")
-                        self.warnings.append("Shadcnblocks API key not configured")
-                        print_action("  Add to website/.env.local: SHADCNBLOCKS_API_KEY=sk_live_...")
-                        print_info("  Get key from: https://www.shadcnblocks.com/dashboard/api")
+                    for line in env_content.splitlines():
+                        line = line.strip()
+                        if line and not line.startswith('#') and '=' in line:
+                            key, value = line.split('=', 1)
+                            env_vars[key.strip()] = value.strip()
             except Exception as e:
-                print_warning(f"  Could not read website/.env.local: {e}")
-                self.warnings.append("Unable to read website/.env.local")
+                print_warning(f"  Could not parse website/.env.local: {e}")
+                self.warnings.append("Unable to parse website/.env.local")
+                return
+
+            # Check for Clerk Authentication (REQUIRED)
+            clerk_pub_key = env_vars.get('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', '')
+            clerk_secret_key = env_vars.get('CLERK_SECRET_KEY', '')
+
+            clerk_missing = []
+            if clerk_pub_key:
+                if clerk_pub_key.startswith('pk_test_') or clerk_pub_key.startswith('pk_live_'):
+                    masked = clerk_pub_key[:12] + '...'
+                    print_success(f"  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY set ({masked})")
+                else:
+                    print_warning("  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY format may be incorrect")
+                    self.warnings.append("Clerk publishable key format unexpected")
+            else:
+                print_error("  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY not set")
+                clerk_missing.append('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY')
+
+            if clerk_secret_key:
+                if clerk_secret_key.startswith('sk_test_') or clerk_secret_key.startswith('sk_live_'):
+                    masked = clerk_secret_key[:12] + '...'
+                    print_success(f"  CLERK_SECRET_KEY set ({masked})")
+                else:
+                    print_warning("  CLERK_SECRET_KEY format may be incorrect")
+                    self.warnings.append("Clerk secret key format unexpected")
+            else:
+                print_error("  CLERK_SECRET_KEY not set")
+                clerk_missing.append('CLERK_SECRET_KEY')
+
+            if clerk_missing:
+                self.issues.append("Missing Clerk authentication credentials")
+                print()
+                print_action("  Clerk authentication is REQUIRED for Next.js website")
+                print_action("  Add to website/.env.local:")
+                for key in clerk_missing:
+                    print(f"    {key}=")
+                print_info("  Setup guide:")
+                print("    1. Create account at https://clerk.com")
+                print("    2. Create new project in Clerk dashboard")
+                print("    3. Copy Publishable Key and Secret Key")
+                print("    4. Set callback URLs:")
+                print("       - Local: http://localhost:3000")
+                print("       - Production: https://the-agentic-engineer.com")
+
+            # Check for SHADCNBLOCKS_API_KEY
+            shadcn_key = env_vars.get('SHADCNBLOCKS_API_KEY', '')
+            if shadcn_key:
+                if shadcn_key.startswith('sk_live_'):
+                    masked = shadcn_key[:12] + '...'
+                    print_success(f"  SHADCNBLOCKS_API_KEY set ({masked})")
+                else:
+                    print_warning("  SHADCNBLOCKS_API_KEY set but doesn't start with 'sk_live_'")
+                    self.warnings.append("Shadcnblocks API key format may be incorrect")
+            else:
+                print_warning("  SHADCNBLOCKS_API_KEY not found in .env.local")
+                self.warnings.append("Shadcnblocks API key not configured")
+                print_action("  Add to website/.env.local: SHADCNBLOCKS_API_KEY=sk_live_...")
+                print_info("  Get key from: https://www.shadcnblocks.com/dashboard/api")
         else:
-            print_warning("website/.env.local not found")
-            self.warnings.append("Website environment file missing")
+            print_error("website/.env.local not found")
+            self.issues.append("Website environment file missing")
             print_action("Create website/.env.local with:")
-            print("  SHADCNBLOCKS_API_KEY=sk_live_your_api_key_here")
-            print_info("Get key from: https://www.shadcnblocks.com/dashboard/api")
+            print("  # Clerk Authentication (REQUIRED)")
+            print("  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...")
+            print("  CLERK_SECRET_KEY=sk_test_...")
+            print()
+            print("  # shadcnblocks Pro (REQUIRED for Pro blocks)")
+            print("  SHADCNBLOCKS_API_KEY=sk_live_...")
+            print()
+            print_info("Clerk setup: https://clerk.com")
+            print_info("shadcnblocks API key: https://www.shadcnblocks.com/dashboard/api")
 
         # Check components.json registry configuration
         components_json = website_dir / 'components.json'

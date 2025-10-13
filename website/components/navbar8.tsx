@@ -2,6 +2,13 @@
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import {
+  SignInButton,
+  SignUpButton,
+  SignedIn,
+  SignedOut,
+  UserButton,
+} from "@clerk/nextjs";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -117,13 +124,27 @@ const Navbar8 = () => {
             </NavigationMenu>
             <div className="flex items-center gap-3.5">
               <ThemeToggle />
-              {/* TODO: Replace with Clerk components when auth is implemented */}
-              <Button variant="ghost" size="sm" className="hidden md:flex" asChild>
-                <Link href="#login">Log in</Link>
-              </Button>
-              <Button size="sm" className="hidden md:flex" asChild>
-                <Link href="#signup">Sign up</Link>
-              </Button>
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <Button variant="ghost" size="sm" className="hidden md:flex">
+                    Log in
+                  </Button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button size="sm" className="hidden md:flex">
+                    Sign up
+                  </Button>
+                </SignUpButton>
+              </SignedOut>
+              <SignedIn>
+                <UserButton
+                  appearance={{
+                    elements: {
+                      avatarBox: "size-9",
+                    },
+                  }}
+                />
+              </SignedIn>
               <div className="lg:hidden">
                 <Button variant="ghost" size="icon" onClick={handleMobileMenu}>
                   <Menu className="size-5.5" />
@@ -177,12 +198,30 @@ const MobileNavigationMenu = ({ open, setOpen }: MobileNavigationMenuProps) => {
                 ))}
               </div>
               <div className="flex flex-col gap-4 pt-8">
-                <Button variant="outline" size="lg" asChild>
-                  <Link href="#login">Log in</Link>
-                </Button>
-                <Button size="lg" asChild>
-                  <Link href="#signup">Sign up</Link>
-                </Button>
+                <SignedOut>
+                  <SignInButton mode="modal">
+                    <Button variant="outline" size="lg">
+                      Log in
+                    </Button>
+                  </SignInButton>
+                  <SignUpButton mode="modal">
+                    <Button size="lg">Sign up</Button>
+                  </SignUpButton>
+                </SignedOut>
+                <SignedIn>
+                  <div className="flex items-center gap-3">
+                    <UserButton
+                      appearance={{
+                        elements: {
+                          avatarBox: "size-10",
+                        },
+                      }}
+                    />
+                    <span className="text-primary-foreground text-lg">
+                      Account
+                    </span>
+                  </div>
+                </SignedIn>
               </div>
             </div>
           </div>
