@@ -12,6 +12,7 @@ export interface Post {
   category: string;
   hashtags: string[];
   content: string;
+  heroImage?: string;
 }
 
 /**
@@ -35,6 +36,10 @@ export function getAllPosts(): Post[] {
       // Parse frontmatter
       const { data, content } = matter(fileContents);
 
+      // Extract hero image from content (first image reference)
+      const heroImageMatch = content.match(/!\[.*?\]\((\.\.\/\.\.\/public\/blog\/[^)]+)\)/);
+      const heroImage = heroImageMatch ? heroImageMatch[1].replace('../../public', '') : undefined;
+
       return {
         slug,
         title: data.title,
@@ -43,6 +48,7 @@ export function getAllPosts(): Post[] {
         category: data.category,
         hashtags: data.hashtags || [],
         content,
+        heroImage,
       } as Post;
     });
 
@@ -79,6 +85,10 @@ export function getPostBySlug(slug: string): Post | null {
 
     const { data, content } = matter(fileContents);
 
+    // Extract hero image from content (first image reference)
+    const heroImageMatch = content.match(/!\[.*?\]\((\.\.\/\.\.\/public\/blog\/[^)]+)\)/);
+    const heroImage = heroImageMatch ? heroImageMatch[1].replace('../../public', '') : undefined;
+
     return {
       slug,
       title: data.title,
@@ -87,10 +97,20 @@ export function getPostBySlug(slug: string): Post | null {
       category: data.category,
       hashtags: data.hashtags || [],
       content,
+      heroImage,
     } as Post;
   } catch {
     return null;
   }
+}
+
+/**
+ * Get recent published posts (limit to N posts)
+ * Only returns posts that are already published (not future-dated)
+ */
+export function getRecentPosts(limit: number = 3): Post[] {
+  const publishedPosts = getPublishedPosts();
+  return publishedPosts.slice(0, limit);
 }
 
 /**

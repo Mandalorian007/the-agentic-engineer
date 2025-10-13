@@ -38,6 +38,19 @@ export const CATEGORIES = {
 export type CategoryId = keyof typeof CATEGORIES;
 
 /**
+ * Simple category labels for display
+ */
+export const CATEGORY_LABELS: Record<CategoryId, string> = {
+  'tutorials': 'Tutorials & How-Tos',
+  'case-studies': 'Case Studies',
+  'guides': 'Guides & Fundamentals',
+  'lists': 'Lists & Tips',
+  'comparisons': 'Comparisons & Reviews',
+  'problem-solution': 'Problem & Solution',
+  'opinions': 'Opinions & Analysis',
+};
+
+/**
  * Get category metadata by ID
  */
 export function getCategoryById(categoryId: string) {
