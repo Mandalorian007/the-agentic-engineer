@@ -16,6 +16,7 @@ import { CodeBlock } from "@/components/code-block";
 import { ShareButtons } from "@/components/share-buttons";
 import { TableOfContents } from "@/components/table-of-contents";
 import { ReadingProgress } from "@/components/reading-progress";
+import { HeadingWithAnchor } from "@/components/heading-with-anchor";
 import { extractHeadings, generateHeadingId } from "@/lib/toc";
 import { formatReadingTime } from "@/lib/reading-time";
 
@@ -165,24 +166,24 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
-                // Add IDs to headings for Table of Contents
+                // Add IDs and anchor links to headings
                 h2(props) {
                   const { children } = props;
                   const text = String(children);
                   const id = generateHeadingId(text);
-                  return <h2 id={id}>{children}</h2>;
+                  return <HeadingWithAnchor id={id} level="h2">{children}</HeadingWithAnchor>;
                 },
                 h3(props) {
                   const { children } = props;
                   const text = String(children);
                   const id = generateHeadingId(text);
-                  return <h3 id={id}>{children}</h3>;
+                  return <HeadingWithAnchor id={id} level="h3">{children}</HeadingWithAnchor>;
                 },
                 h4(props) {
                   const { children } = props;
                   const text = String(children);
                   const id = generateHeadingId(text);
-                  return <h4 id={id}>{children}</h4>;
+                  return <HeadingWithAnchor id={id} level="h4">{children}</HeadingWithAnchor>;
                 },
                 // Custom code block with syntax highlighting
                 code(props) {
