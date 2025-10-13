@@ -1,6 +1,7 @@
 "use client";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import {
   SignInButton,
@@ -103,8 +104,15 @@ const Navbar8 = () => {
           <div className="flex items-center justify-between gap-3.5 py-5">
             <Link
               href={LOGO.url}
-              className="flex items-center gap-2 text-lg font-semibold tracking-tight"
+              className="flex items-center gap-3 text-lg font-semibold tracking-tight"
             >
+              <Image
+                src="/the-agentic-engineer-logo.webp"
+                alt="The Agentic Engineer Logo"
+                width={40}
+                height={40}
+                className="w-10 h-10"
+              />
               <span>{LOGO.title}</span>
             </Link>
             <NavigationMenu className="hidden lg:flex">

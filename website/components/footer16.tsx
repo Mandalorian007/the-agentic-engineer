@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { RssIcon } from "lucide-react";
 
 import {
@@ -34,8 +35,15 @@ const Footer16 = () => {
         <div className="grid gap-10 pb-6 md:grid-cols-2 md:pb-0">
           <div className="flex flex-col justify-start gap-8">
             {/* Logo/Brand */}
-            <Link href="/" className="text-2xl font-bold">
-              The Agentic Engineer
+            <Link href="/" className="flex items-center gap-3">
+              <Image
+                src="/the-agentic-engineer-logo.webp"
+                alt="The Agentic Engineer Logo"
+                width={48}
+                height={48}
+                className="w-12 h-12"
+              />
+              <span className="text-2xl font-bold">The Agentic Engineer</span>
             </Link>
             <p className="text-muted-foreground text-sm max-w-md">
               Exploring AI agents, automation, and engineering with practical insights and real-world examples.
