@@ -156,17 +156,17 @@ def is_dangerous_permission_change(command):
     if re.search(r'\bchmod\s+\+x\b', normalized):
         return False
 
-    # Block dangerous permission patterns
+    # Block dangerous permission patterns (patterns match on normalized lowercase string)
     perm_patterns = [
         r'\bchmod\s+777',                       # World-writable (major security risk)
-        r'\bchmod\s+.*-R\s+777',                # Recursive 777
+        r'\bchmod\s+.*-r\s+777',                # Recursive 777 (lowercase since normalized)
         r'\bchmod\s+.*a\+rwx',                  # All read/write/execute
         r'\bchmod\s+.*o\+w',                    # Others can write
-        r'\bchmod\s+.*-R.*[67][67][67]',        # Recursive permissive modes
+        r'\bchmod\s+.*-r.*[67][67][67]',        # Recursive permissive modes (lowercase -r)
         r'\bchmod\s+[0-7]*[4567][0-7]{3}\b',    # Setuid/setgid bit (4000, 6755, etc.)
         r'\bchmod\s+.*[ug]\+s',                 # Setuid/setgid symbolic (u+s, g+s)
-        r'\bchown\s+.*-R\s+root',               # Recursive root ownership
-        r'\bchown\s+.*-R\s+.*:.*',              # Recursive ownership change (risky)
+        r'\bchown\s+.*-r\s+root',               # Recursive root ownership (lowercase -r)
+        r'\bchown\s+.*-r\s+.*:.*',              # Recursive ownership change (lowercase -r)
         r'\bsudo\s+chmod\s+(?!\+x)',            # Sudo chmod (except +x)
         r'\bsudo\s+chown',                      # Sudo chown (system changes)
     ]
