@@ -65,7 +65,8 @@ class MarkdownConverter:
         Returns:
             HTML with syntax-highlighted code blocks
         """
-        # Pattern: <code class="language-python">...</code>
+        # Pattern: <pre><code class="language-python">...</code></pre>
+        # Only match code blocks inside <pre> tags, not inline <code>
         def replace_code(match):
             language = match.group(1) or ''
             code = match.group(2)
@@ -79,8 +80,8 @@ class MarkdownConverter:
 
             return self._highlight_code(code, language)
 
-        # Match code blocks with optional language class
-        pattern = r'<code(?:\s+class="language-([^"]*)")?>(.*?)</code>'
+        # Match code blocks inside <pre> tags only (not inline code)
+        pattern = r'<pre><code(?:\s+class="language-([^"]*)")?>(.*?)</code></pre>'
         return re.sub(pattern, replace_code, html, flags=re.DOTALL)
 
     def _highlight_code(self, code: str, language: str = '') -> str:
@@ -92,7 +93,7 @@ class MarkdownConverter:
             language: Language identifier (python, javascript, etc.)
 
         Returns:
-            HTML with syntax highlighting
+            HTML with syntax highlighting (wrapped in <pre><code>)
         """
         try:
             # Get lexer by language name
@@ -107,10 +108,11 @@ class MarkdownConverter:
                 style=self.highlight_style,
                 linenos=False,  # Disable line numbers
                 noclasses=True,  # Use inline styles instead of CSS classes
-                wrapcode=True
+                wrapcode=True,
+                nowrap=False  # Keep the <pre> wrapper
             )
 
-            # Highlight and return
+            # Highlight and return (Pygments adds <div class="highlight"><pre>...)
             highlighted = highlight(code, lexer, formatter)
             return highlighted
 
