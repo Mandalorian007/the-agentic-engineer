@@ -1,155 +1,175 @@
 # The Agentic Engineer
 
-Automated blog publishing system for Google Blogger with Cloudinary CDN integration.
+Next.js blog with automated content generation and AI-powered image creation.
 
 ## Features
 
-- ✅ **Automated Publishing**: Write in Markdown, publish to Blogger with one command
-- ✅ **Image CDN**: Automatic upload and optimization via Cloudinary
-- ✅ **AI Image Generation**: Generate blog images with OpenAI's GPT-Image-1
-- ✅ **Idempotent**: Safe to run multiple times, no duplicates
-- ✅ **Smart Updates**: Detects existing posts, updates instead of duplicating
-- ✅ **Path-Based Identity**: Directory name determines post URL
-- ✅ **Hash-Based Deduplication**: Only uploads changed images
-- ✅ **Syntax Highlighting**: Code blocks with Pygments
-- ✅ **Markdown Extensions**: Tables, strikethrough, task lists
+- ✅ **Next.js 15**: Modern static site generation with App Router
+- ✅ **MDX Content**: Write in MDX with frontmatter, deploy with git push
+- ✅ **AI Image Generation**: Generate blog images with OpenAI DALL-E
+- ✅ **Quality Checks**: SEO analysis + Vale prose linting
+- ✅ **Category System**: 7 hardcoded categories for consistent organization
+- ✅ **Theme Toggle**: Light/dark mode with next-themes
+- ✅ **Vercel Deploy**: Automatic deployment on git push
+- ✅ **Zero External APIs**: No Cloudinary, no Blogger - just Next.js + Vercel
 
 ## Quick Start
 
 ### 1. Setup (One-time)
 
-Follow the complete setup guide: [`specs/blog-google-auth.md`](specs/blog-google-auth.md)
+**Requirements:**
+- Node.js 18+ and pnpm
+- Python 3.10+ (for content generation tools)
+- OpenAI API key (for image generation)
+- Vale (optional, for prose linting): `brew install vale`
 
-**Summary**:
-1. Create Google Cloud project
-2. Enable Blogger API
-3. Configure OAuth consent screen
-4. Generate refresh token: `uv run tools/generate_refresh_token.py`
-5. Get Cloudinary credentials from cloudinary.com
-6. Configure `blog-config.yaml` and `.env.local`
-7. Install Vale prose linter: `brew install vale` (optional but recommended)
-8. Verify setup: `uv run tools/setup_check.py`
+**Configuration:**
+
+1. **Install dependencies:**
+   ```bash
+   # Python tools
+   uv sync
+
+   # Next.js site
+   cd website && pnpm install
+   ```
+
+2. **Configure environment:**
+   ```bash
+   # Create .env.local (root directory)
+   echo "OPENAI_API_KEY=your-key-here" > .env.local
+   ```
+
+3. **Verify setup:**
+   ```bash
+   uv run tools/setup_check.py
+   ```
+   This validates your entire setup and provides actionable feedback.
+
+4. **Start development server:**
+   ```bash
+   cd website && pnpm dev
+   ```
+   Visit http://localhost:3000
 
 ### 2. Create a Post
 
-```bash
-# Create post directory (format: YYYY-MM-DD-slug)
-mkdir -p posts/2025-10-12-my-first-post
-
-# Write your post
-cat > posts/2025-10-12-my-first-post/post.md <<'EOF'
----
-title: "My First Post"
-date: 2025-10-12T10:00:00Z
-tags: [tutorial, python]
-status: draft
----
-
-# Hello World
-
-This is my **first post**!
-EOF
-```
-
-### 3. Build and Publish
+Use the `/create-post` command in Claude Code:
 
 ```bash
-# Optional: Run quality checks (SEO + prose linting)
-/quality-check posts/2025-10-12-my-first-post/
-
-# Validate and preview
-/build posts/2025-10-12-my-first-post/
-
-# Publish to Blogger
-/publish posts/2025-10-12-my-first-post/
+/create-post Your blog post idea goes here
 ```
+
+This will:
+- Generate a complete MDX blog post with AI
+- Create hero images using DALL-E
+- Save to `website/content/posts/YYYY-MM-DD-slug.mdx`
+- Save images to `website/public/blog/YYYY-MM-DD-slug/*.webp`
+
+### 3. Quality Review
+
+```bash
+# Run quality review (SEO + Vale prose linting)
+/mdx-quality-review website/content/posts/YYYY-MM-DD-slug.mdx
+```
+
+### 4. Deploy
+
+```bash
+git add .
+git commit -m "Add new blog post: Your Title"
+git push origin main
+```
+
+Vercel automatically deploys on push! 🚀
 
 ## Workflow
 
-### Typical Workflow
-The recommended workflow for creating new blog posts:
+### Recommended Workflow
 
 ```bash
-# 1. First, sync publish status to ensure dates are up-to-date
-/sync-publish-status
-
-# 2. Then create and publish a new post (all in one command)
-/create-quality-build-publish Your blog post idea goes here
+# Complete workflow in one command
+/create-quality-review Your blog post idea goes here
 ```
 
-This ensures the next Monday date calculation is accurate and the complete workflow (create → quality check → build → publish) runs automatically.
+This runs:
+1. Gets next available Monday publish date
+2. Creates MDX post with AI-generated content
+3. Generates and converts images to WebP
+4. Runs quality review (SEO + Vale)
+5. Reminds you to commit and push
 
 ### Available Commands
 
-**End-to-End Workflow:**
-- **`/create-quality-build-publish <idea>`**: Complete workflow - gets next Monday date, creates post, runs quality checks, builds preview, and publishes to Blogger
+**End-to-End:**
+- `/create-quality-review <idea>` - Complete workflow (create → review → remind to deploy)
 
 **Individual Steps:**
-- **`/create-post <idea>`**: Create a blog post from voice/text input (generates content + images automatically)
-- **`/quality-check <path>`**: Run SEO analysis and Vale prose linting
-- **`/build <path>`**: Validate and generate preview (no external changes)
-- **`/publish <path>`**: Upload images, create/update post on Blogger (supports scheduling)
-- **`/sync-publish-status`**: Sync post status from Blogger to local frontmatter
+- `/create-post <idea>` - Generate MDX blog post with AI
+- `/mdx-quality-review <path>` - Run SEO + Vale prose linting
 
-### First Publish
+### Scheduling Posts
 
-```bash
-/publish posts/2025-10-12-new-post/
-```
-
-Result: Post **CREATED** on Blogger as DRAFT
-
-### Update Existing Post
-
-Edit `post.md`, then:
-
-```bash
-/publish posts/2025-10-12-new-post/
-```
-
-Result: Post **UPDATED** (detected via `blogger_id` or path)
-
-### Publish Live
-
-Change `status: draft` to `status: published`, then republish.
-
-### Schedule Posts
-
-To schedule a post for future publishing, simply set the `date` field in frontmatter to a future date:
+Posts with future dates are automatically hidden until that date:
 
 ```yaml
 ---
 title: "My Future Post"
-date: 2025-12-25T10:00:00Z  # Future date
-tags: [tutorial]
-status: published  # Will be scheduled, not published immediately
+description: "This post won't appear until the date arrives"
+date: "2025-12-25T10:00:00Z"  # Future date
+category: "tutorials"
+hashtags: ["next.js", "automation"]
 ---
 ```
 
-When you run `/publish`:
-- If `date` is in the **future**: Post is **scheduled** on Blogger
-- If `date` is in the **past or present**: Post publishes immediately
+Next.js ISR (Incremental Static Regeneration) rebuilds pages hourly, so posts appear within ~1 hour of their scheduled time.
 
-### Sync Post Status
+## Post Format
 
-If you've been away or made changes in Blogger's UI, sync your local files with actual published status:
+### File Structure
 
-```bash
-/sync-publish-status
+```
+website/
+├── content/posts/
+│   └── 2025-10-12-my-post.mdx          # Single MDX file
+└── public/blog/2025-10-12-my-post/
+    ├── hero-automation.webp            # Images in WebP
+    └── diagram-architecture.webp
 ```
 
-**When to sync:**
-- You manually changed post status in Blogger's UI
-- Scheduled posts went live while you were away
-- You're returning to the project after a break
-- You want to verify local state matches Blogger
+### Frontmatter Schema
 
-The sync tool updates:
-- Post status (draft → published or vice versa)
-- Published date
-- Updated timestamp
+```yaml
+---
+title: "Post Title"                              # Required, 30-60 chars optimal
+description: "SEO description for meta tags"     # Required, 150-160 chars
+date: "2025-10-12T10:00:00Z"                    # Required, ISO 8601 with quotes
+category: "tutorials"                            # Required, one of 7 categories
+hashtags: ["python", "automation", "ai"]         # Optional, freeform display-only
+---
+```
 
-**Note:** The setup check script (`uv run tools/setup-check.py`) automatically runs sync if you have published posts, so you'll always see the latest status when verifying your setup.
+### Categories (Required)
+
+Every post must have ONE category:
+
+- **tutorials** - Step-by-step how-to guides
+- **case-studies** - Real-world project showcases
+- **guides** - Beginner-friendly fundamentals
+- **lists** - Tips, tools, strategies
+- **comparisons** - Product/approach comparisons
+- **problem-solution** - Addressing pain points
+- **opinions** - Perspectives, myth-busting
+
+### Image References
+
+Use relative paths in MDX:
+
+```markdown
+![Alt text describing image](./hero-automation.webp)
+```
+
+Images are automatically optimized by Next.js `next/image` component.
 
 ## Configuration
 
@@ -157,224 +177,212 @@ The sync tool updates:
 
 ```yaml
 blog_name: "The Agentic Engineer"
-blogger_blog_id: "your-blog-id-here"
+domain: "the-agentic-engineer.com"
 
-image_optimization:
-  max_width: 1200
+website_dir: "website"
+content_dir: "website/content/posts"
+public_images_dir: "website/public/blog"
+
+image_generation:
+  default_size: "1024x1024"
+  format: "webp"
   quality: 85
 
-cloudinary:
-  folder: "blog-posts"
-  format: "webp"
-  quality: "auto:good"
+categories:
+  - tutorials
+  - case-studies
+  - guides
+  - lists
+  - comparisons
+  - problem-solution
+  - opinions
 ```
 
 ### .env.local
 
 ```bash
-BLOGGER_CLIENT_ID=xxx
-BLOGGER_CLIENT_SECRET=xxx
-BLOGGER_REFRESH_TOKEN=xxx
-CLOUDINARY_CLOUD_NAME=xxx
-CLOUDINARY_API_KEY=xxx
-CLOUDINARY_API_SECRET=xxx
-OPENAI_API_KEY=xxx  # Optional: for AI image generation
+# Required for AI image generation
+OPENAI_API_KEY=your-key-here
 ```
-
-## Post Format
-
-### Directory Naming
-
-`YYYY-MM-DD-slug` → `/YYYY/MM/slug.html`
-
-Example: `2025-10-12-hello-world` → `/2025/10/hello-world.html`
-
-### Frontmatter
-
-```yaml
----
-title: "Post Title"              # Required
-date: 2025-10-12T10:00:00Z      # Required
-tags: [python, tutorial]         # Optional (must be in tag-registry.yaml)
-status: draft                    # draft or published
----
-```
-
-After publishing, `blogger_id`, `updated`, and `images` fields are added automatically.
 
 ## Quality Checks
 
 ### SEO Analysis
 
-Check your posts for SEO best practices:
-
 ```bash
-uv run tools/seo_check.py posts/2025-10-12-my-first-post/
+uv run tools/seo_check.py website/content/posts/2025-10-12-my-post.mdx
 ```
 
 **Checks:**
-- ✅ Title length (30-60 characters optimal for Google)
-- ✅ Meta description (150-160 characters)
+- ✅ Title length (30-60 chars)
+- ✅ Description (150-160 chars, required)
+- ✅ Category validation (one of 7 options)
 - ✅ Heading structure (single H1, proper hierarchy)
-- ✅ Content length (300+ words recommended)
+- ✅ Content length (300+ words)
 - ✅ Image alt text
 - ✅ Internal/external links
 
 ### Prose Linting with Vale
 
-Vale checks writing style, catches common errors, and ensures readability.
+Vale checks writing style and readability:
 
-**Installation:**
 ```bash
+# Install
 brew install vale
-vale sync  # Download style packages
+vale sync
+
+# Lint a post
+vale website/content/posts/2025-10-12-my-post.mdx
 ```
 
-**Usage:**
-```bash
-# Lint a single post
-vale posts/2025-10-12-my-first-post/post.md
-
-# Run full quality check (SEO + Vale)
-# Use /quality-check command in Claude Code
-```
-
-**Configuration:**
-
-Vale is configured in `.vale.ini` with:
-- **write-good** rules for clear, concise writing
-- **SEO** custom rules for search optimization
-- Relaxed settings for technical content
+Vale configuration in `.vale.ini`:
+- **write-good** rules for clear writing
+- **SEO** custom rules
 - Ignores code blocks and frontmatter
-
-Alert levels:
-- 💡 **Suggestion**: Consider but not required (passive voice, weasel words)
-- ⚠️ **Warning**: Should fix (too wordy, clichés, title length)
-- ❌ **Error**: Must fix (multiple H1 headings)
 
 ## Image Generation
 
-Generate AI images for your blog posts using OpenAI's GPT-Image-1:
+Generate AI images using OpenAI DALL-E:
 
 ```bash
-uv run tools/generate_image.py "your detailed prompt" posts/YYYY-MM-DD-slug/image.png
+uv run tools/generate_image.py "detailed prompt" website/public/blog/YYYY-MM-DD-slug/image.png
 ```
 
 **Example:**
 ```bash
-uv run tools/generate_image.py "modern minimalist illustration of AI automation with robotic arms assembling puzzle pieces, blue and teal gradient background, clean tech aesthetic, slightly isometric perspective, professional and futuristic mood" posts/2025-10-12-my-post/hero.png
+uv run tools/generate_image.py "modern minimalist illustration of AI automation, blue and purple gradient, clean tech aesthetic, isometric view" website/public/blog/2025-10-12-my-post/hero.png
 ```
 
+Images are automatically converted to WebP format.
+
 **Prompt Tips:**
-- Be specific about style (minimalist, modern, flat design, realistic, abstract)
-- Include colors or color schemes (blue gradient, warm tones, monochrome)
-- Specify perspective (isometric, top-down, close-up, wide angle)
-- Add mood descriptors (professional, playful, serious, energetic)
-- Detail the subject (what objects, actions, composition)
-
-**Features:**
-- Uses GPT-Image-1 (latest model, high quality)
-- Generates 1024x1024 images
-- Cost: ~$0.015 per image
-- Automatically creates directories
-- More detailed prompts = better results
-
-**Note:** Requires `OPENAI_API_KEY` in `.env.local`
+- Specify style (minimalist, modern, flat design)
+- Include colors (blue gradient, warm tones)
+- Add perspective (isometric, top-down)
+- Describe mood (professional, energetic)
 
 ## Publishing Schedule
 
-### Next Monday Publish Date
-
-Maintain a consistent Monday publishing schedule:
+Get the next available Monday for consistent publishing:
 
 ```bash
 uv run tools/next_publish_date.py
 ```
 
-**Features**:
-- Scans all post directories to find the next available Monday
-- Skips Mondays that already have scheduled posts
-- Provides both directory name format and frontmatter date format
-
-**Example output**:
+Output:
 ```
 Next available Monday for publishing:
 ----------------------------------------
 Directory name: 2025-10-20-your-slug-here
 Frontmatter date: 2025-10-20T10:00:00Z
 Day: Monday, October 20, 2025
-----------------------------------------
-
-Latest scheduled post: 2025-10-12 (Sunday)
-Days until next post: 8
 ```
 
-## Tag Management
+## Local Development
 
-### Tag Registry
+### Start Dev Server
 
-All tags must be approved in `tag-registry.yaml` to ensure consistency.
-
-**View approved tags**:
 ```bash
-uv run tools/list_tags.py
+cd website && pnpm dev
 ```
 
-**Add a new tag**:
+Visit http://localhost:3000 for live preview with hot-reload.
+
+### Build for Production
+
 ```bash
-uv run tools/add_tag.py <tag-name>
-
-# Example
-uv run tools/add_tag.py docker
+cd website && pnpm run build
 ```
 
-**Tag validation**:
-- Build command validates tags against registry
-- Unapproved tags fail validation with suggestions
-- Intentional workflow to prevent tag sprawl
+Validates TypeScript, MDX, and generates static pages.
 
-**Example error**:
-```
-❌ Unapproved tags used: docker, kubernetes
+## Python Tools (Advanced)
 
-To use these tags:
-  1. Add them to tag-registry.yaml
-  2. Run build again
-```
+Direct tool usage without Claude Code commands:
 
-## Python Scripts (Advanced)
+**Content Generation:**
+- `uv run tools/generate_image.py <prompt> <path>` - Generate AI images
+- `uv run tools/convert_to_webp.py <input>` - Convert images to WebP
 
-If you need to run the underlying Python scripts directly without Claude Code:
-
-**Build & Publish:**
-- `uv run tools/build.py <post-directory>` - Validate and generate preview
-- `uv run tools/publish.py <post-directory>` - Upload images and publish to Blogger
+**Validation:**
+- `uv run tools/seo_check.py <mdx-file>` - SEO analysis
+- `vale <mdx-file>` - Prose linting
 
 **Utilities:**
-- `uv run tools/generate_image.py <prompt> <output-path>` - Generate AI images
-- `uv run tools/seo_check.py <post-directory>` - Run SEO analysis
-- `uv run tools/next_publish_date.py` - Get next available Monday
-- `uv run tools/sync-publish-status.py` - Sync post status from Blogger
-- `uv run tools/list_tags.py` - View approved tags
-- `uv run tools/add_tag.py <tag-name>` - Add new tag to registry
-- `uv run tools/setup_check.py` - Verify setup configuration
-- `uv run tools/test_auth.py` - Test authentication
-
-## Troubleshooting
-
-Run verification:
-```bash
-uv run tools/test_auth.py
-```
-
-See [`specs/blog-google-auth.md`](specs/blog-google-auth.md) for detailed troubleshooting.
+- `uv run tools/next_publish_date.py` - Get next Monday date
 
 ## Architecture
 
-See [`specs/blog-flow.md`](specs/blog-flow.md) for complete design documentation.
+### Tech Stack
 
-## Using Claude Code with this project
+- **Frontend**: Next.js 15 (App Router) + Tailwind CSS
+- **Content**: MDX files with gray-matter frontmatter
+- **Styling**: shadcn/ui + @tailwindcss/typography
+- **Deployment**: Vercel (auto-deploy on push)
+- **Images**: next/image + Vercel CDN
+- **Code**: react-syntax-highlighter (oneLight/oneDark themes)
+
+### Project Structure
+
+```
+the-agentic-engineer/
+├── .claude/                      # Claude Code commands and hooks
+├── lib/                          # Python modules (config, validation, frontmatter)
+├── tools/                        # Python CLI tools
+├── specs/                        # Architecture docs
+└── website/                      # Next.js app (deployed to Vercel)
+    ├── app/                      # Routes and layouts
+    ├── components/               # React components (shadcn/ui)
+    ├── content/posts/            # MDX blog posts
+    ├── public/blog/              # Post images (WebP)
+    └── lib/                      # TypeScript utilities
+```
+
+## Migration from Blogger
+
+This project was migrated from Blogger + Cloudinary to Next.js + Vercel. See [`specs/content-pipeline-migration.md`](specs/content-pipeline-migration.md) for full migration details.
+
+**Benefits of migration:**
+- ✅ Simpler workflow (git push vs API calls)
+- ✅ Faster (no external API latency)
+- ✅ Cheaper (no Cloudinary costs)
+- ✅ More reliable (no OAuth tokens, no rate limits)
+- ✅ Better DX (local preview, hot-reload, TypeScript)
+
+## Troubleshooting
+
+### Build Errors
 
 ```bash
-env $(grep -v "^#" .env | grep -v "^$" | xargs) claude --dangerously-skip-permissions
+cd website && pnpm run build
 ```
+
+Check for:
+- TypeScript errors
+- Missing images
+- Invalid frontmatter
+- Invalid categories
+
+### Quality Review Failures
+
+```bash
+/mdx-quality-review website/content/posts/your-post.mdx
+```
+
+Common issues:
+- Description too short/long (need 150-160 chars)
+- Invalid category (must be one of 7 options)
+- Missing alt text on images
+- Multiple H1 headings
+
+### Vale Linting
+
+Vale warnings are suggestions, not blockers. Focus on errors first.
+
+## Contributing
+
+This is a personal blog system. For questions or issues, see the migration documentation or architecture specs in `specs/`.
+
+## License
+
+Private project - not licensed for reuse.

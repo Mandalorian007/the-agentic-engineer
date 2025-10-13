@@ -1,23 +1,35 @@
 #!/usr/bin/env python3
 """
-SEO checker for blog posts.
+SEO checker for blog posts (MDX format).
 
-Analyzes Markdown content for SEO best practices:
+Analyzes MDX content for SEO best practices:
 - Title length (30-60 characters optimal for Google)
-- Meta description (150-160 characters)
+- Meta description (150-160 characters, required)
+- Category validation (must be one of 7 hardcoded options)
 - Heading structure (single H1, proper hierarchy)
 - Content length (minimum 300 words recommended)
-- Keyword density
 - Image alt text
+- Links
 
 Usage:
-    uv run tools/seo_check.py posts/2025-10-12-hello-world/post.md
+    uv run tools/seo_check.py website/content/posts/2025-10-12-hello-world.mdx
 """
 
 import re
 import sys
 from pathlib import Path
 from lib.frontmatter import parse_frontmatter
+
+# Hardcoded valid categories
+VALID_CATEGORIES = [
+    'tutorials',
+    'case-studies',
+    'guides',
+    'lists',
+    'comparisons',
+    'problem-solution',
+    'opinions'
+]
 
 
 class Color:
@@ -82,7 +94,7 @@ def analyze_seo(post_path: Path):
         print_error("No title found in frontmatter")
         issues.append("Missing title in frontmatter")
 
-    # 2. Meta description check
+    # 2. Meta description check (REQUIRED for Next.js)
     description = frontmatter.get('description', '')
     if description:
         desc_len = len(description)
@@ -95,10 +107,22 @@ def analyze_seo(post_path: Path):
             print_error(f"Meta description: {desc_len} characters (too long, recommend 150-160)")
             issues.append(f"Description is {desc_len} chars - Google may truncate it")
     else:
-        print_warning("No meta description in frontmatter")
-        warnings.append("Add 'description' field to frontmatter for better SEO")
+        print_error("No meta description in frontmatter")
+        issues.append("REQUIRED: Add 'description' field to frontmatter (150-160 chars)")
 
-    # 3. Heading structure
+    # 3. Category validation (REQUIRED for Next.js)
+    category = frontmatter.get('category', '')
+    if category:
+        if category in VALID_CATEGORIES:
+            print_success(f"Category: '{category}' (valid)")
+        else:
+            print_error(f"Category: '{category}' (invalid)")
+            issues.append(f"Invalid category '{category}'. Must be one of: {', '.join(VALID_CATEGORIES)}")
+    else:
+        print_error("No category in frontmatter")
+        issues.append(f"REQUIRED: Add 'category' field. Valid options: {', '.join(VALID_CATEGORIES)}")
+
+    # 4. Heading structure
     # Remove code blocks first to avoid counting comments as headings
     body_no_code_blocks = re.sub(r'```.*?```', '', body, flags=re.DOTALL)
 
@@ -128,7 +152,7 @@ def analyze_seo(post_path: Path):
                 warnings.append("Maintain proper heading hierarchy (don't skip levels)")
                 break
 
-    # 4. Content length
+    # 5. Content length
     # Remove code blocks and count words
     body_no_code = re.sub(r'```.*?```', '', body, flags=re.DOTALL)
     words = re.findall(r'\b\w+\b', body_no_code)
@@ -140,7 +164,7 @@ def analyze_seo(post_path: Path):
         print_warning(f"Word count: {word_count} words (below 300 minimum)")
         warnings.append(f"Content is short ({word_count} words) - aim for 300+ for better SEO")
 
-    # 5. Image alt text check
+    # 6. Image alt text check
     images = re.findall(r'!\[(.*?)\]\((.+?)\)', body)
     if images:
         images_with_alt = [img for img in images if img[0]]
@@ -153,7 +177,7 @@ def analyze_seo(post_path: Path):
     else:
         print_info("No images found")
 
-    # 6. Internal/external links
+    # 7. Internal/external links
     links = re.findall(r'\[([^\]]+)\]\(([^\)]+)\)', body)
     links = [l for l in links if not l[1].startswith('!')]  # Exclude images
 
@@ -187,14 +211,20 @@ def analyze_seo(post_path: Path):
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: uv run tools/seo_check.py <path-to-post.md>")
+        print("Usage: uv run tools/seo_check.py <path-to-post.mdx>")
         sys.exit(1)
 
     post_path = Path(sys.argv[1])
 
-    # Handle directory input
+    # Handle MDX files
     if post_path.is_dir():
-        post_path = post_path / "post.md"
+        # Look for .mdx file in directory
+        mdx_files = list(post_path.glob("*.mdx"))
+        if mdx_files:
+            post_path = mdx_files[0]
+        else:
+            print(f"Error: No .mdx file found in {post_path}")
+            sys.exit(1)
 
     sys.exit(analyze_seo(post_path))
 

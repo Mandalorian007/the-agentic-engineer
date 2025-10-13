@@ -1,19 +1,11 @@
 [project]
 name = "agentic-engineer-blog"
-version = "0.1.0"
+version = "2.0.0"
 requires-python = ">=3.10"
 dependencies = [
-    "google-auth>=2.36.0",
-    "google-auth-oauthlib>=1.2.1",
-    "google-api-python-client>=2.155.0",
-    "markdown-it-py>=3.0.0",
-    "mdit-py-plugins>=0.4.2",
     "Pillow>=11.0.0",
-    "cloudinary>=1.41.0",
     "PyYAML>=6.0.2",
     "python-dotenv>=1.0.1",
-    "python-dateutil>=2.8.2",
-    "Pygments>=2.18.0",
     "openai>=1.0.0",
     "requests>=2.31.0",
 ]

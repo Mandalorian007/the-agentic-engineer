@@ -1,4 +1,4 @@
-"""Configuration loading and validation"""
+"""Configuration loading and validation for Next.js blog"""
 
 import os
 import yaml
@@ -22,24 +22,17 @@ def load_config() -> Dict[str, Any]:
     Raises:
         ConfigError: If configuration is invalid or missing
     """
-    # Load environment variables from .env.local
+    # Load environment variables from .env.local (optional now)
     env_path = Path('.env.local')
-    if not env_path.exists():
-        raise ConfigError(
-            "❌ .env.local not found\n"
-            "Create .env.local with your credentials.\n"
-            "See specs/blog-google-auth.md for setup instructions."
-        )
-
-    load_dotenv(env_path)
+    if env_path.exists():
+        load_dotenv(env_path)
 
     # Load YAML configuration
     config_path = Path('blog-config.yaml')
     if not config_path.exists():
         raise ConfigError(
             "❌ blog-config.yaml not found\n"
-            "Create blog-config.yaml in project root.\n"
-            "See specs/blog-flow.md for configuration format."
+            "Create blog-config.yaml in project root."
         )
 
     try:
@@ -47,22 +40,6 @@ def load_config() -> Dict[str, Any]:
             config = yaml.safe_load(f)
     except yaml.YAMLError as e:
         raise ConfigError(f"❌ Invalid YAML in blog-config.yaml: {e}")
-
-    # Add credentials from environment
-    config['blogger_credentials'] = {
-        'client_id': os.getenv('BLOGGER_CLIENT_ID'),
-        'client_secret': os.getenv('BLOGGER_CLIENT_SECRET'),
-        'refresh_token': os.getenv('BLOGGER_REFRESH_TOKEN')
-    }
-
-    # Merge Cloudinary credentials with existing config from YAML
-    cloudinary_config = config.get('cloudinary', {})
-    cloudinary_config.update({
-        'cloud_name': os.getenv('CLOUDINARY_CLOUD_NAME'),
-        'api_key': os.getenv('CLOUDINARY_API_KEY'),
-        'api_secret': os.getenv('CLOUDINARY_API_SECRET')
-    })
-    config['cloudinary'] = cloudinary_config
 
     # Validate configuration
     validate_config(config)
@@ -81,101 +58,50 @@ def validate_config(config: Dict[str, Any]) -> None:
         ConfigError: If required fields are missing or invalid
     """
     # Required top-level fields
-    required_fields = ['blog_name', 'blogger_blog_id']
+    required_fields = ['blog_name', 'domain']
     missing = [f for f in required_fields if f not in config or not config[f]]
 
     if missing:
         raise ConfigError(
             f"❌ Missing required fields in blog-config.yaml: {', '.join(missing)}\n"
             f"Example:\n"
-            f"  blog_name: \"My Blog\"\n"
-            f"  blogger_blog_id: \"1234567890\""
+            f"  blog_name: \"The Agentic Engineer\"\n"
+            f"  domain: \"the-agentic-engineer.com\""
         )
 
-    # Validate Blogger credentials
-    blogger_creds = config.get('blogger_credentials', {})
-    required_creds = ['client_id', 'client_secret', 'refresh_token']
-    missing_creds = [
-        f for f in required_creds
-        if not blogger_creds.get(f)
+    # Validate categories list
+    categories = config.get('categories', [])
+    expected_categories = [
+        'tutorials',
+        'case-studies',
+        'guides',
+        'lists',
+        'comparisons',
+        'problem-solution',
+        'opinions'
     ]
 
-    if missing_creds:
+    if set(categories) != set(expected_categories):
         raise ConfigError(
-            f"❌ Missing Blogger credentials in .env.local:\n"
-            f"   {', '.join(f'BLOGGER_{f.upper()}' for f in missing_creds)}\n"
-            f"Run: uv run tools/generate_refresh_token.py"
+            f"❌ Invalid categories in blog-config.yaml\n"
+            f"Expected: {expected_categories}\n"
+            f"Found: {categories}"
         )
 
-    # Validate Cloudinary credentials
-    cloudinary = config.get('cloudinary', {})
-    required_cloudinary = ['cloud_name', 'api_key', 'api_secret']
-    missing_cloudinary = [
-        f for f in required_cloudinary
-        if not cloudinary.get(f)
+
+def get_categories() -> list:
+    """
+    Get the list of valid categories
+
+    Returns:
+        List of valid category slugs
+    """
+    return [
+        'tutorials',
+        'case-studies',
+        'guides',
+        'lists',
+        'comparisons',
+        'problem-solution',
+        'opinions'
     ]
-
-    if missing_cloudinary:
-        raise ConfigError(
-            f"❌ Missing Cloudinary credentials in .env.local:\n"
-            f"   {', '.join(f'CLOUDINARY_{f.upper()}' for f in missing_cloudinary)}\n"
-            f"Sign up at cloudinary.com and add credentials to .env.local"
-        )
-
-    # Validate blog ID format (should be numeric)
-    blog_id = str(config['blogger_blog_id'])
-    if not blog_id.isdigit():
-        raise ConfigError(
-            f"❌ Invalid blogger_blog_id: {blog_id}\n"
-            f"Blog ID should be a numeric string (e.g., '1234567890123456789')\n"
-            f"Find it at: https://www.blogger.com/blog/posts/YOUR_BLOG_ID"
-        )
-
-
-def get_image_optimization_config(config: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Get image optimization settings with defaults
-
-    Args:
-        config: Full configuration dict
-
-    Returns:
-        Image optimization settings
-    """
-    defaults = {
-        'max_width': 1200,
-        'max_height': 1200,
-        'quality': 85,
-        'format': 'JPEG'
-    }
-
-    user_config = config.get('image_optimization', {})
-    return {**defaults, **user_config}
-
-
-def get_markdown_config(config: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Get markdown processing settings with defaults
-
-    Args:
-        config: Full configuration dict
-
-    Returns:
-        Markdown processing settings
-    """
-    defaults = {
-        'extensions': ['tables', 'strikethrough', 'tasklists'],
-        'syntax_highlighting': {
-            'style': 'monokai',
-            'line_numbers': True
-        }
-    }
-
-    user_config = config.get('markdown', {})
-
-    # Merge syntax_highlighting separately to handle nested dict
-    if 'syntax_highlighting' in user_config:
-        defaults['syntax_highlighting'].update(user_config['syntax_highlighting'])
-        user_config = {k: v for k, v in user_config.items() if k != 'syntax_highlighting'}
-
-    return {**defaults, **user_config}

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Interactive setup checker for the Agentic Engineer Blog automation.
+Interactive setup checker for The Agentic Engineer Blog (Next.js).
 Guides you through configuration step-by-step with actionable instructions.
 """
 
@@ -8,6 +8,7 @@ from pathlib import Path
 import os
 import sys
 import yaml
+import subprocess
 from dotenv import load_dotenv
 
 # Color codes for terminal output
@@ -45,30 +46,29 @@ def print_action(text):
 
 
 class SetupChecker:
-    """Orchestrates setup validation"""
+    """Orchestrates setup validation for Next.js blog"""
 
     def __init__(self):
         self.issues = []
         self.warnings = []
-        self.env_vars = {}
         self.blog_config = {}
 
     def run(self):
         """Run all setup checks"""
         print(f"{Color.BOLD}{'='*60}")
-        print("🚀 Agentic Engineer Blog - Setup Verification")
+        print("🚀 The Agentic Engineer - Setup Verification")
+        print("   Next.js Blog + Vercel Deployment")
         print(f"{'='*60}{Color.END}\n")
 
         # Check in order of setup flow
         checks = [
-            ("Dependencies", self.check_dependencies),
+            ("Python Dependencies", self.check_python_dependencies),
+            ("Node.js Dependencies", self.check_node_dependencies),
             ("Configuration Files", self.check_config_files),
-            ("Google OAuth Setup", self.check_google_oauth),
-            ("Cloudinary Setup", self.check_cloudinary),
             ("OpenAI Setup", self.check_openai),
             ("Blog Configuration", self.check_blog_config),
-            ("Next.js Website Setup", self.check_website_setup),
-            ("Connectivity Test", self.test_connectivity),
+            ("Next.js Website", self.check_website),
+            ("Build Test", self.test_nextjs_build),
         ]
 
         for section, check_func in checks:
@@ -78,10 +78,8 @@ class SetupChecker:
         # Final summary
         self.print_summary()
 
-    def check_dependencies(self):
-        """Check if required dependencies are installed"""
-        import subprocess
-
+    def check_python_dependencies(self):
+        """Check if Python dependencies are installed"""
         # Check if uv environment is set up
         venv_path = Path('.venv')
         if venv_path.exists():
@@ -90,8 +88,9 @@ class SetupChecker:
             print_error("Virtual environment not found")
             self.issues.append("Missing virtual environment")
             print_action("Run: uv sync")
+            return
 
-        # Check for Vale prose linter
+        # Check for Vale prose linter (optional but recommended)
         try:
             result = subprocess.run(['vale', '--version'],
                                   capture_output=True,
@@ -101,7 +100,7 @@ class SetupChecker:
                 version = result.stdout.strip().split('\n')[0]
                 print_success(f"Vale prose linter installed ({version})")
 
-                # Sync Vale styles to ensure they're up to date
+                # Sync Vale styles
                 print_info("   Syncing Vale style packages...")
                 sync_result = subprocess.run(['vale', 'sync'],
                                             capture_output=True,
@@ -110,144 +109,117 @@ class SetupChecker:
                 if sync_result.returncode == 0:
                     print_success("   Vale styles synced")
                 else:
-                    print_warning("   Vale sync had issues (may be okay if styles already exist)")
+                    print_warning("   Vale sync had issues (may be okay if styles exist)")
             else:
                 print_warning("Vale installed but version check failed")
                 self.warnings.append("Vale may not be properly configured")
         except FileNotFoundError:
-            print_warning("Vale prose linter not found")
+            print_warning("Vale prose linter not found (optional)")
             self.warnings.append("Vale not installed - prose linting unavailable")
-            print_action("Install Vale: brew install vale")
+            print_info("   Optional: Install with: brew install vale")
             print_info("   Then run: vale sync")
         except subprocess.TimeoutExpired:
             print_warning("Vale check timed out")
             self.warnings.append("Vale may not be working correctly")
 
+    def check_node_dependencies(self):
+        """Check if Node.js and pnpm are installed"""
+        # Check for Node.js
+        try:
+            result = subprocess.run(['node', '--version'],
+                                  capture_output=True,
+                                  text=True,
+                                  timeout=5)
+            if result.returncode == 0:
+                version = result.stdout.strip()
+                print_success(f"Node.js installed ({version})")
+
+                # Check version is 18+
+                major_version = int(version.lstrip('v').split('.')[0])
+                if major_version < 18:
+                    print_warning(f"Node.js {version} is below recommended 18+")
+                    self.warnings.append("Node.js version should be 18 or higher")
+            else:
+                print_error("Node.js check failed")
+                self.issues.append("Node.js may not be working correctly")
+        except FileNotFoundError:
+            print_error("Node.js not found")
+            self.issues.append("Node.js is required for Next.js")
+            print_action("Install Node.js 18+: https://nodejs.org/")
+            return
+        except subprocess.TimeoutExpired:
+            print_warning("Node.js check timed out")
+            self.warnings.append("Node.js may not be working correctly")
+
+        # Check for pnpm
+        try:
+            result = subprocess.run(['pnpm', '--version'],
+                                  capture_output=True,
+                                  text=True,
+                                  timeout=5)
+            if result.returncode == 0:
+                version = result.stdout.strip()
+                print_success(f"pnpm installed ({version})")
+            else:
+                print_error("pnpm check failed")
+                self.issues.append("pnpm may not be working correctly")
+        except FileNotFoundError:
+            print_error("pnpm not found")
+            self.issues.append("pnpm is required for Next.js dependencies")
+            print_action("Install pnpm: npm install -g pnpm")
+            return
+        except subprocess.TimeoutExpired:
+            print_warning("pnpm check timed out")
+            self.warnings.append("pnpm may not be working correctly")
+
+        # Check if website dependencies are installed
+        website_node_modules = Path('website/node_modules')
+        if website_node_modules.exists():
+            print_success("Next.js dependencies installed (website/node_modules exists)")
+        else:
+            print_warning("Next.js dependencies not installed")
+            self.warnings.append("Website dependencies missing")
+            print_action("Run: cd website && pnpm install")
+
     def check_config_files(self):
         """Check if required config files exist"""
-        files = {
-            '.env.local': 'Environment variables (credentials)',
-            'blog-config.yaml': 'Blog configuration',
-            'client_secret.json': 'Google OAuth client secret (if not yet converted to refresh token)',
-        }
+        # Root .env.local (for Python tools)
+        env_path = Path('.env.local')
+        if env_path.exists():
+            print_success(".env.local exists (for Python tools)")
+        else:
+            print_warning(".env.local not found (optional)")
+            print_info("   Only needed if using AI image generation")
+            print_info("   Create with: OPENAI_API_KEY=your-key-here")
 
-        for filename, description in files.items():
-            path = Path(filename)
-            if path.exists():
-                print_success(f"{filename} exists - {description}")
-            else:
-                if filename == 'client_secret.json':
-                    # This is optional if refresh token already exists
-                    print_warning(f"{filename} not found (optional if refresh token already set)")
-                else:
-                    print_error(f"{filename} not found - {description}")
-                    self.issues.append(f"Missing {filename}")
+        # blog-config.yaml
+        config_path = Path('blog-config.yaml')
+        if config_path.exists():
+            print_success("blog-config.yaml exists")
+        else:
+            print_error("blog-config.yaml not found")
+            self.issues.append("Missing blog-config.yaml")
+            print_action("Create blog-config.yaml with blog settings")
+            print_info("   See README.md for configuration format")
 
-                    if filename == '.env.local':
-                        print_action("Create .env.local with the following template:")
-                        print("    BLOGGER_CLIENT_ID=")
-                        print("    BLOGGER_CLIENT_SECRET=")
-                        print("    BLOGGER_REFRESH_TOKEN=")
-                        print("    CLOUDINARY_CLOUD_NAME=")
-                        print("    CLOUDINARY_API_KEY=")
-                        print("    CLOUDINARY_API_SECRET=")
-                        print("    OPENAI_API_KEY=")
-                        print_info("See: specs/blog-google-auth.md for detailed setup")
-
-                    elif filename == 'blog-config.yaml':
-                        print_action("Create blog-config.yaml with blog settings")
-                        print_info("See: specs/blog-flow.md for configuration format")
-
-    def check_google_oauth(self):
-        """Check Google OAuth setup"""
-        # Load .env.local if it exists
+    def check_openai(self):
+        """Check OpenAI API key setup"""
         env_path = Path('.env.local')
         if env_path.exists():
             load_dotenv(env_path)
 
-        required_vars = {
-            'BLOGGER_CLIENT_ID': 'OAuth Client ID from Google Cloud Console',
-            'BLOGGER_CLIENT_SECRET': 'OAuth Client Secret from Google Cloud Console',
-            'BLOGGER_REFRESH_TOKEN': 'Long-lived refresh token for API access',
-        }
-
-        all_present = True
-        for var, description in required_vars.items():
-            value = os.getenv(var)
-            self.env_vars[var] = value
-
-            if value:
-                # Mask secrets in output
-                masked = value[:8] + '...' if len(value) > 8 else '***'
-                print_success(f"{var} set ({masked})")
-            else:
-                print_error(f"{var} not set - {description}")
-                all_present = False
-
-        if not all_present:
-            self.issues.append("Missing Google OAuth credentials")
-            print()
-            print_action("To set up Google OAuth:")
-
-            if not os.getenv('BLOGGER_CLIENT_ID') or not os.getenv('BLOGGER_CLIENT_SECRET'):
-                print("  1. Go to Google Cloud Console: https://console.cloud.google.com/")
-                print("  2. Create project → Enable Blogger API → Create OAuth credentials")
-                print("  3. Download client_secret.json to project root")
-                print_info("Detailed guide: specs/blog-google-auth.md")
-
-            if not os.getenv('BLOGGER_REFRESH_TOKEN'):
-                if Path('client_secret.json').exists():
-                    print("  4. Generate refresh token:")
-                    print_action("     uv run tools/generate_refresh_token.py")
-                else:
-                    print("  4. First download client_secret.json, then run:")
-                    print_action("     uv run tools/generate_refresh_token.py")
-
-    def check_cloudinary(self):
-        """Check Cloudinary setup"""
-        required_vars = {
-            'CLOUDINARY_CLOUD_NAME': 'Your Cloudinary cloud name',
-            'CLOUDINARY_API_KEY': 'Cloudinary API key',
-            'CLOUDINARY_API_SECRET': 'Cloudinary API secret',
-        }
-
-        all_present = True
-        for var, description in required_vars.items():
-            value = os.getenv(var)
-            self.env_vars[var] = value
-
-            if value:
-                masked = value[:6] + '...' if len(value) > 6 else '***'
-                print_success(f"{var} set ({masked})")
-            else:
-                print_error(f"{var} not set - {description}")
-                all_present = False
-
-        if not all_present:
-            self.issues.append("Missing Cloudinary credentials")
-            print()
-            print_action("To set up Cloudinary:")
-            print("  1. Sign up at https://cloudinary.com/ (free tier available)")
-            print("  2. Go to Dashboard → Account Details")
-            print("  3. Copy Cloud Name, API Key, and API Secret")
-            print("  4. Add them to .env.local")
-
-    def check_openai(self):
-        """Check OpenAI API key setup"""
         api_key = os.getenv('OPENAI_API_KEY')
 
         if api_key:
             masked = api_key[:8] + '...' if len(api_key) > 8 else '***'
             print_success(f"OPENAI_API_KEY set ({masked})")
+            print_info("   Used by: tools/generate_image.py")
         else:
-            print_warning("OPENAI_API_KEY not set - Image generation unavailable")
+            print_warning("OPENAI_API_KEY not set")
             self.warnings.append("OpenAI API key not configured")
-            print()
-            print_action("To set up OpenAI API (optional for image generation):")
-            print("  1. Sign up at https://platform.openai.com/")
-            print("  2. Generate API key at: https://platform.openai.com/api-keys")
-            print("  3. Add OPENAI_API_KEY to .env.local")
-            print_info("   Used by: uv run tools/generate_image.py")
+            print_info("   Image generation will not work without this")
+            print_action("Optional: Add OPENAI_API_KEY to .env.local")
+            print_info("   Get key from: https://platform.openai.com/api-keys")
 
     def check_blog_config(self):
         """Check blog-config.yaml"""
@@ -269,328 +241,175 @@ class SetupChecker:
         # Check required fields
         required_fields = {
             'blog_name': 'Your blog name',
-            'blogger_blog_id': 'Numeric blog ID from Blogger',
+            'domain': 'Your domain name',
+            'categories': 'List of 7 categories',
         }
 
         for field, description in required_fields.items():
             if field in self.blog_config and self.blog_config[field]:
-                print_success(f"{field}: {self.blog_config[field]}")
+                if field == 'categories':
+                    categories = self.blog_config[field]
+                    expected = [
+                        'tutorials', 'case-studies', 'guides', 'lists',
+                        'comparisons', 'problem-solution', 'opinions'
+                    ]
+                    if set(categories) == set(expected):
+                        print_success(f"categories: All 7 required categories present")
+                    else:
+                        print_error(f"categories: Missing or extra categories")
+                        self.issues.append("Invalid categories in blog-config.yaml")
+                        print_info(f"   Expected: {expected}")
+                        print_info(f"   Found: {categories}")
+                else:
+                    print_success(f"{field}: {self.blog_config[field]}")
             else:
                 print_error(f"{field} not set - {description}")
                 self.issues.append(f"Missing {field} in blog-config.yaml")
 
-        # Validate blog ID format
-        blog_id = self.blog_config.get('blogger_blog_id')
-        if blog_id:
-            blog_id_str = str(blog_id)
-            if not blog_id_str.isdigit():
-                print_error(f"Invalid blogger_blog_id: {blog_id}")
-                print_action("Blog ID must be numeric (e.g., '1234567890123456789')")
-                self.issues.append("Invalid blog ID format")
-
-        if not blog_id:
-            print()
-            print_action("To find your blog ID:")
-            print("  Check Blogger dashboard URL:")
-            print("    https://www.blogger.com/blog/posts/[YOUR_BLOG_ID]")
-
-    def check_website_setup(self):
-        """Check Next.js website configuration"""
+    def check_website(self):
+        """Check Next.js website directory structure"""
         website_dir = Path('website')
 
         if not website_dir.exists():
-            print_warning("website/ directory not found - Next.js site not initialized")
-            self.warnings.append("Next.js website not set up")
+            print_error("website/ directory not found")
+            self.issues.append("Next.js website directory missing")
+            print_action("Initialize Next.js site or clone from repository")
             return
 
         print_success("website/ directory exists")
 
-        # Check for website/.env.local file
-        website_env = website_dir / '.env.local'
-        if website_env.exists():
-            print_success("website/.env.local exists")
+        # Check key directories
+        required_dirs = {
+            'app': 'Next.js app directory (routes)',
+            'components': 'React components',
+            'content/posts': 'MDX blog posts',
+            'public/blog': 'Blog post images',
+            'lib': 'TypeScript utilities',
+        }
 
-            # Parse environment variables
-            env_vars = {}
-            try:
-                with open(website_env) as f:
-                    env_content = f.read()
-                    for line in env_content.splitlines():
-                        line = line.strip()
-                        if line and not line.startswith('#') and '=' in line:
-                            key, value = line.split('=', 1)
-                            env_vars[key.strip()] = value.strip()
-            except Exception as e:
-                print_warning(f"  Could not parse website/.env.local: {e}")
-                self.warnings.append("Unable to parse website/.env.local")
-                return
-
-            # Check for Clerk Authentication (REQUIRED)
-            clerk_pub_key = env_vars.get('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY', '')
-            clerk_secret_key = env_vars.get('CLERK_SECRET_KEY', '')
-
-            clerk_missing = []
-            if clerk_pub_key:
-                if clerk_pub_key.startswith('pk_test_') or clerk_pub_key.startswith('pk_live_'):
-                    masked = clerk_pub_key[:12] + '...'
-                    print_success(f"  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY set ({masked})")
-                else:
-                    print_warning("  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY format may be incorrect")
-                    self.warnings.append("Clerk publishable key format unexpected")
+        for dir_path, description in required_dirs.items():
+            full_path = website_dir / dir_path
+            if full_path.exists():
+                print_success(f"  {dir_path}/ exists - {description}")
             else:
-                print_error("  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY not set")
-                clerk_missing.append('NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY')
+                print_warning(f"  {dir_path}/ not found - {description}")
+                self.warnings.append(f"Missing {dir_path}/ directory")
 
-            if clerk_secret_key:
-                if clerk_secret_key.startswith('sk_test_') or clerk_secret_key.startswith('sk_live_'):
-                    masked = clerk_secret_key[:12] + '...'
-                    print_success(f"  CLERK_SECRET_KEY set ({masked})")
-                else:
-                    print_warning("  CLERK_SECRET_KEY format may be incorrect")
-                    self.warnings.append("Clerk secret key format unexpected")
-            else:
-                print_error("  CLERK_SECRET_KEY not set")
-                clerk_missing.append('CLERK_SECRET_KEY')
+        # Check for package.json
+        package_json = website_dir / 'package.json'
+        if package_json.exists():
+            print_success("  package.json exists")
 
-            if clerk_missing:
-                self.issues.append("Missing Clerk authentication credentials")
-                print()
-                print_action("  Clerk authentication is REQUIRED for Next.js website")
-                print_action("  Add to website/.env.local:")
-                for key in clerk_missing:
-                    print(f"    {key}=")
-                print_info("  Setup guide:")
-                print("    1. Create account at https://clerk.com")
-                print("    2. Create new project in Clerk dashboard")
-                print("    3. Copy Publishable Key and Secret Key")
-                print("    4. Set callback URLs:")
-                print("       - Local: http://localhost:3000")
-                print("       - Production: https://the-agentic-engineer.com")
-
-            # Check for SHADCNBLOCKS_API_KEY
-            shadcn_key = env_vars.get('SHADCNBLOCKS_API_KEY', '')
-            if shadcn_key:
-                if shadcn_key.startswith('sk_live_'):
-                    masked = shadcn_key[:12] + '...'
-                    print_success(f"  SHADCNBLOCKS_API_KEY set ({masked})")
-                else:
-                    print_warning("  SHADCNBLOCKS_API_KEY set but doesn't start with 'sk_live_'")
-                    self.warnings.append("Shadcnblocks API key format may be incorrect")
-            else:
-                print_warning("  SHADCNBLOCKS_API_KEY not found in .env.local")
-                self.warnings.append("Shadcnblocks API key not configured")
-                print_action("  Add to website/.env.local: SHADCNBLOCKS_API_KEY=sk_live_...")
-                print_info("  Get key from: https://www.shadcnblocks.com/dashboard/api")
+            # Check if dependencies are installed
+            node_modules = website_dir / 'node_modules'
+            if not node_modules.exists():
+                print_warning("  node_modules not found - dependencies not installed")
+                self.warnings.append("Website dependencies not installed")
+                print_action("  Run: cd website && pnpm install")
         else:
-            print_error("website/.env.local not found")
-            self.issues.append("Website environment file missing")
-            print_action("Create website/.env.local with:")
-            print("  # Clerk Authentication (REQUIRED)")
-            print("  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...")
-            print("  CLERK_SECRET_KEY=sk_test_...")
-            print()
-            print("  # shadcnblocks Pro (REQUIRED for Pro blocks)")
-            print("  SHADCNBLOCKS_API_KEY=sk_live_...")
-            print()
-            print_info("Clerk setup: https://clerk.com")
-            print_info("shadcnblocks API key: https://www.shadcnblocks.com/dashboard/api")
+            print_error("  package.json not found")
+            self.issues.append("package.json missing")
 
-        # Check components.json registry configuration
-        components_json = website_dir / 'components.json'
-        if components_json.exists():
-            print_success("website/components.json exists")
+        # Check for existing posts
+        content_dir = website_dir / 'content/posts'
+        if content_dir.exists():
+            mdx_files = list(content_dir.glob('*.mdx'))
+            if mdx_files:
+                print_success(f"  Found {len(mdx_files)} MDX post(s)")
+            else:
+                print_info("  No MDX posts found yet (expected for new setup)")
 
-            try:
-                import json
-                with open(components_json) as f:
-                    config = json.load(f)
-
-                # Check for registries configuration
-                if 'registries' in config:
-                    print_success("  registries section found")
-
-                    if '@shadcnblocks' in config['registries']:
-                        registry = config['registries']['@shadcnblocks']
-                        print_success("  @shadcnblocks registry configured")
-
-                        # Check URL format
-                        url = registry.get('url', '')
-                        if url == 'https://shadcnblocks.com/r/{name}':
-                            print_success("  Registry URL is correct")
-                        else:
-                            print_warning(f"  Registry URL may be incorrect: {url}")
-                            print_warning(f"  Expected: https://shadcnblocks.com/r/{{name}}")
-                            self.warnings.append("Shadcnblocks registry URL format may be incorrect")
-                            print_action("  Update components.json registry URL")
-
-                        # Check for Authorization header
-                        headers = registry.get('headers', {})
-                        if 'Authorization' in headers:
-                            print_success("  Authorization header configured")
-                        else:
-                            print_warning("  Authorization header missing")
-                            self.warnings.append("Shadcnblocks registry missing Authorization header")
-                            print_action("  Add to components.json:")
-                            print('    "headers": {"Authorization": "Bearer ${SHADCNBLOCKS_API_KEY}"}')
-                    else:
-                        print_warning("  @shadcnblocks registry not found")
-                        self.warnings.append("Shadcnblocks registry not configured")
-                        print_action("  See: specs/shadcnblocks-setup.md")
-                else:
-                    print_warning("  No registries section in components.json")
-                    self.warnings.append("Shadcnblocks registry section missing")
-                    print_action("  See: specs/shadcnblocks-setup.md")
-            except json.JSONDecodeError as e:
-                print_warning(f"  Invalid JSON in components.json: {e}")
-                self.warnings.append("components.json has invalid JSON")
-            except Exception as e:
-                print_warning(f"  Could not check components.json: {e}")
-                self.warnings.append("Unable to validate components.json")
+        # Check for next.config.ts
+        next_config = website_dir / 'next.config.ts'
+        if next_config.exists():
+            print_success("  next.config.ts exists")
         else:
-            print_warning("website/components.json not found")
-            self.warnings.append("components.json missing")
-            print_action("Run in website/: pnpm dlx shadcn@latest init")
+            print_warning("  next.config.ts not found")
+            self.warnings.append("Next.js config missing")
 
-    def test_connectivity(self):
-        """Test actual API connectivity if everything is configured"""
+    def test_nextjs_build(self):
+        """Test if Next.js build works"""
         if self.issues:
-            print_warning("Skipping connectivity test - fix configuration issues first")
+            print_warning("Skipping build test - fix configuration issues first")
             return
 
-        print_info("Testing API connectivity...")
+        website_dir = Path('website')
+        if not website_dir.exists():
+            print_warning("Cannot test build - website/ directory not found")
+            return
 
-        # Test Blogger API
-        try:
-            from google.oauth2.credentials import Credentials
-            from google.auth.transport.requests import Request
-            from googleapiclient.discovery import build
+        node_modules = website_dir / 'node_modules'
+        if not node_modules.exists():
+            print_warning("Cannot test build - dependencies not installed")
+            print_action("Run: cd website && pnpm install")
+            return
 
-            creds = Credentials(
-                token=None,
-                refresh_token=self.env_vars.get('BLOGGER_REFRESH_TOKEN'),
-                client_id=self.env_vars.get('BLOGGER_CLIENT_ID'),
-                client_secret=self.env_vars.get('BLOGGER_CLIENT_SECRET'),
-                token_uri='https://oauth2.googleapis.com/token'
-            )
-
-            # Refresh to get access token
-            creds.refresh(Request())
-            print_success("Blogger API: Refresh token is valid")
-
-            # Test API call
-            service = build('blogger', 'v3', credentials=creds)
-            blog = service.blogs().get(blogId=self.blog_config['blogger_blog_id']).execute()
-            print_success(f"Blogger API: Connected to '{blog['name']}'")
-            print_info(f"   URL: {blog['url']}")
-            print_info(f"   Posts: {blog.get('posts', {}).get('totalItems', 0)}")
-
-        except Exception as e:
-            print_error(f"Blogger API connection failed: {e}")
-            self.issues.append("Blogger API connectivity issue")
-
-            # Provide specific troubleshooting
-            error_str = str(e).lower()
-            if 'invalid_grant' in error_str:
-                print_action("Refresh token expired or invalid. Regenerate it:")
-                print_action("  uv run tools/generate_refresh_token.py")
-            elif 'not found' in error_str or '404' in error_str:
-                print_action("Blog ID not found. Check your Blogger dashboard URL:")
-                print_action("  https://www.blogger.com/blog/posts/[YOUR_BLOG_ID]")
-            elif 'unauthorized' in error_str or '401' in error_str:
-                print_action("Authorization failed. Check OAuth consent screen test users:")
-                print_action("  https://console.cloud.google.com/apis/credentials/consent")
-            else:
-                print_info("See: specs/blog-google-auth.md for troubleshooting")
-
-        # Test Cloudinary
-        try:
-            import cloudinary
-            cloudinary.config(
-                cloud_name=self.env_vars.get('CLOUDINARY_CLOUD_NAME'),
-                api_key=self.env_vars.get('CLOUDINARY_API_KEY'),
-                api_secret=self.env_vars.get('CLOUDINARY_API_SECRET')
-            )
-            print_success(f"Cloudinary: Configuration valid")
-            print_info(f"   Cloud: {self.env_vars.get('CLOUDINARY_CLOUD_NAME')}")
-
-        except Exception as e:
-            print_error(f"Cloudinary configuration failed: {e}")
-            self.issues.append("Cloudinary configuration issue")
-            print_action("Verify credentials at: https://cloudinary.com/console")
-
-    def sync_published_posts(self):
-        """Sync published post status from Blogger by calling the sync script"""
-        if self.issues:
-            return  # Skip if there are configuration issues
-
-        posts_dir = Path('posts')
-        if not posts_dir.exists():
-            return  # No posts to sync
-
-        # Check if there are any posts with blogger_id (quick check to avoid unnecessary subprocess call)
-        has_published = False
-        for post_dir in posts_dir.iterdir():
-            if post_dir.is_dir() and (post_dir / 'post.md').exists():
-                with open(post_dir / 'post.md', 'r') as f:
-                    content = f.read()
-                    if 'blogger_id:' in content:
-                        has_published = True
-                        break
-
-        if not has_published:
-            return  # No published posts to sync
+        print_info("Testing Next.js build (this may take a minute)...")
 
         try:
-            import subprocess
             result = subprocess.run(
-                ['uv', 'run', 'tools/sync-publish-status.py'],
+                ['pnpm', 'run', 'build'],
+                cwd=website_dir,
                 capture_output=True,
                 text=True,
-                timeout=60
+                timeout=120
             )
 
-            # Show the sync output directly
-            if result.stdout:
-                print(result.stdout, end='')
+            if result.returncode == 0:
+                print_success("Next.js build succeeded!")
+                print_info("   Site is ready for deployment to Vercel")
+            else:
+                print_error("Next.js build failed")
+                self.issues.append("Build errors detected")
 
-            if result.returncode != 0 and result.stderr:
-                print_warning("Sync had issues:")
-                print(result.stderr, end='')
+                # Show relevant error lines
+                if result.stderr:
+                    error_lines = result.stderr.split('\n')
+                    print_info("   Error details:")
+                    for line in error_lines[-10:]:  # Last 10 lines
+                        if line.strip():
+                            print(f"   {line}")
+
+                print_action("Fix build errors and run: cd website && pnpm run build")
 
         except subprocess.TimeoutExpired:
-            print_warning("Sync timed out (you can run manually later)")
-            print_action("Run manually: uv run tools/sync-publish-status.py")
+            print_warning("Build test timed out (may be normal for first build)")
+            self.warnings.append("Build test exceeded 2 minutes")
+            print_info("   Try running manually: cd website && pnpm run build")
         except Exception as e:
-            print_warning(f"Could not run sync: {e}")
-            print_action("Run manually: uv run tools/sync-publish-status.py")
+            print_error(f"Could not test build: {e}")
+            self.warnings.append("Unable to run build test")
 
     def print_summary(self):
         """Print final summary"""
-        # Try to sync posts if setup is complete
-        self.sync_published_posts()
-
         print_header("📊 Summary")
 
         if not self.issues:
             print_success("All checks passed! 🎉")
             print()
-            print_info("You're ready to create and publish posts:")
-            print("  1. Create a post: posts/YYYY-MM-DD-slug/post.md")
-            print("  2. Validate: uv run tools/build.py posts/YYYY-MM-DD-slug/")
-            print("  3. Publish: uv run tools/publish.py posts/YYYY-MM-DD-slug/")
+            print_info("Your Next.js blog is ready to use:")
             print()
-            print_info("Example:")
-            print_action("  mkdir -p posts/2025-10-12-my-first-post")
-            print_action("  # Edit posts/2025-10-12-my-first-post/post.md")
-            print_action("  uv run tools/build.py posts/2025-10-12-my-first-post/")
-            print_action("  uv run tools/publish.py posts/2025-10-12-my-first-post/")
+            print("  Development workflow:")
+            print_action("    cd website && pnpm dev")
+            print_info("    Visit: http://localhost:3000")
+            print()
+            print("  Create a blog post:")
+            print_action("    /create-post Your blog post idea here")
+            print()
+            print("  Quality check and build:")
+            print_action("    /quality-check website/content/posts/YYYY-MM-DD-slug.mdx")
+            print_action("    /build")
+            print()
+            print("  Deploy to Vercel:")
+            print_action("    git add . && git commit -m 'Add post' && git push")
+            print_info("    Vercel auto-deploys on push!")
 
         else:
             print_error(f"Found {len(self.issues)} issue(s) to fix:")
             for i, issue in enumerate(self.issues, 1):
                 print(f"  {i}. {issue}")
             print()
-            print_info("📖 Detailed setup guide: specs/blog-google-auth.md")
+            print_info("📖 Documentation: README.md")
             print_info("🔧 After fixing issues, run this script again:")
             print_action("   uv run tools/setup_check.py")
 
@@ -614,6 +433,8 @@ def main():
         sys.exit(1)
     except Exception as e:
         print_error(f"Unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
         sys.exit(1)
 
 
