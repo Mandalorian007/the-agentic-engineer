@@ -1,11 +1,12 @@
 /**
  * Navbar Component
  * Inspired by shadcnblocks navbar8 design
- * Features: Logo, navigation links, auth buttons (placeholder for future Clerk integration)
+ * Features: Logo, navigation links, theme toggle, auth buttons (placeholder for future Clerk integration)
  */
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Navbar() {
   return (
@@ -32,8 +33,9 @@ export function Navbar() {
           </Link>
         </nav>
 
-        {/* Auth Buttons - Placeholder for future Clerk integration */}
-        <div className="flex items-center space-x-4">
+        {/* Right side: Theme Toggle + Auth Buttons */}
+        <div className="flex items-center space-x-2">
+          <ThemeToggle />
           {/* TODO: Replace with Clerk components when auth is implemented
               <SignedOut>
                 <SignInButton />

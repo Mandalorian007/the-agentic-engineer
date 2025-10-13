@@ -43,6 +43,7 @@ website/
 - [x] Next.js 15 + TypeScript setup
 - [x] Tailwind CSS v4 configuration
 - [x] shadcn/ui with Clean Slate theme
+- [x] **Light/dark theme toggle** with next-themes
 - [x] Navbar component (with auth placeholders for future Clerk integration)
 - [x] Footer component
 - [x] Root layout with navbar/footer
@@ -50,6 +51,7 @@ website/
 - [x] Blog listing page with placeholder posts
 - [x] Category filter pages (7 hardcoded categories)
 - [x] Individual blog post pages
+- [x] Container layout fixes
 - [x] Build test - all pages compile successfully
 
 ### 🔄 Phase 2: Content Integration (TODO)

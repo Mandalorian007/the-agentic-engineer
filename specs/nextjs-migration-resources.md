@@ -495,14 +495,16 @@ export const revalidate = 3600; // 1 hour
 - [x] Initialize Next.js 15 project with TypeScript (in `website/` subdirectory)
 - [x] Configure Tailwind CSS + @tailwindcss/typography
 - [x] Set up shadcn/ui with Clean Slate theme (Neutral base color)
-- [x] Install shadcn/ui components (button, card, badge, separator)
+- [x] Install shadcn/ui components (button, card, badge, separator, dropdown-menu)
 - [x] Implement navbar component with auth placeholders
 - [x] Implement footer component
 - [x] Create root layout with navbar and footer
+- [x] **Add light/dark theme toggle** (next-themes integration)
 - [x] Create homepage with hero section
 - [x] Create blog listing page (`/blog`) with placeholder posts
 - [x] Create category filter page (`/blog/category/[category]`)
 - [x] Create individual blog post page (`/blog/[slug]`)
+- [x] Fix container layout issues
 - [x] Test build - all pages compile successfully
 - [ ] Install markdown dependencies (react-markdown, remark-gfm, react-syntax-highlighter)
 - [ ] Configure next.config.mjs with MDX support
