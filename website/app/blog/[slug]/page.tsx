@@ -14,6 +14,8 @@ import { getCategoryById } from "@/lib/categories";
 import Image from "next/image";
 import { CodeBlock } from "@/components/code-block";
 import { ShareButtons } from "@/components/share-buttons";
+import { TableOfContents } from "@/components/table-of-contents";
+import { extractHeadings, generateHeadingId } from "@/lib/toc";
 
 // ISR: Revalidate every 1 hour (3600 seconds)
 export const revalidate = 3600;
@@ -62,6 +64,9 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
   }
 
   const category = getCategoryById(post.category);
+
+  // Extract headings for Table of Contents
+  const headings = extractHeadings(post.content);
 
   // Generate JSON-LD structured data for SEO
   const jsonLd = {
@@ -153,6 +158,25 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
+                // Add IDs to headings for Table of Contents
+                h2(props) {
+                  const { children } = props;
+                  const text = String(children);
+                  const id = generateHeadingId(text);
+                  return <h2 id={id}>{children}</h2>;
+                },
+                h3(props) {
+                  const { children } = props;
+                  const text = String(children);
+                  const id = generateHeadingId(text);
+                  return <h3 id={id}>{children}</h3>;
+                },
+                h4(props) {
+                  const { children } = props;
+                  const text = String(children);
+                  const id = generateHeadingId(text);
+                  return <h4 id={id}>{children}</h4>;
+                },
                 // Custom code block with syntax highlighting
                 code(props) {
                   const { children, className, ...rest } = props;
@@ -226,49 +250,8 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
             title={post.title}
           />
 
-          {/* About This Post */}
-          <div className="border rounded-lg p-6">
-            <h3 className="font-semibold mb-4">About This Post</h3>
-            <div className="space-y-3 text-sm">
-              <div>
-                <p className="text-muted-foreground mb-1">Category</p>
-                <Link href={`/blog/category/${post.category}`}>
-                  <Badge variant="secondary" className="cursor-pointer hover:bg-secondary/80">
-                    {category?.name || post.category}
-                  </Badge>
-                </Link>
-              </div>
-              <div>
-                <p className="text-muted-foreground mb-1">Published</p>
-                <p className="font-medium">
-                  {new Date(post.date).toLocaleDateString("en-US", {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Navigation */}
-          <div className="border rounded-lg p-6">
-            <h3 className="font-semibold mb-4">Navigation</h3>
-            <div className="space-y-2 text-sm">
-              <Link
-                href="/blog"
-                className="block text-muted-foreground hover:text-foreground"
-              >
-                ← All Posts
-              </Link>
-              <Link
-                href={`/blog/category/${post.category}`}
-                className="block text-muted-foreground hover:text-foreground"
-              >
-                More in {category?.name}
-              </Link>
-            </div>
-          </div>
+          {/* Table of Contents */}
+          <TableOfContents headings={headings} />
         </aside>
       </div>
     </div>
