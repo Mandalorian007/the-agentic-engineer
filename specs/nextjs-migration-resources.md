@@ -617,7 +617,8 @@ export const revalidate = 3600; // 1 hour
   - [x] Custom img component (relative path → next/image)
   - [x] Custom code component (react-syntax-highlighter with oneDark theme)
   - [x] Custom inline code styling (matches oneDark theme)
-- [ ] Build `app/sitemap.ts` (sitemap generation including category pages)
+- [x] Build `app/sitemap.ts` (sitemap generation including category pages)
+- [x] Build `app/robots.ts` (robots.txt generation)
 - [x] Implement root layout with navbar/footer
 - [ ] Add ISR revalidation (1 hour) to blog pages
 
@@ -640,13 +641,14 @@ export const revalidate = 3600; // 1 hour
   - [x] All markdown elements - handled by typography plugin with minimal theme overrides
   - [x] Custom H2 styling - bottom border for visual hierarchy
 
-### Phase 5: SEO & Polish ⚠️ IN PROGRESS (20%)
+### Phase 5: SEO & Polish ⚠️ IN PROGRESS (40%)
 - [x] Implement `generateMetadata()` for dynamic SEO (blog posts)
   - [x] Title, description, Open Graph metadata
   - [x] Published time for articles
 - [ ] Add `generateMetadata()` for category pages
 - [ ] Add JSON-LD structured data (BlogPosting schema)
-- [ ] Build `app/sitemap.ts` (sitemap generation including category pages)
+- [x] Build `app/sitemap.ts` (sitemap generation including category pages)
+- [x] Build `app/robots.ts` (robots.txt generation)
 - [ ] Test sitemap generation (verify all routes included)
 - [x] Verify image optimization (next/image working with WebP, responsive, lazy loading)
 - [x] Test all internal links (category links, post links working)
@@ -716,8 +718,9 @@ export const revalidate = 3600; // 1 hour
 - **Phase 4**: UI Components (100%)
 
 **⚠️ Phases In Progress:**
-- **Phase 5**: SEO & Polish (20%)
-  - Missing: Sitemap, RSS feed, JSON-LD, ISR configuration
+- **Phase 5**: SEO & Polish (40%)
+  - ✅ Complete: Sitemap, robots.txt
+  - Missing: RSS feed, JSON-LD, ISR configuration, category metadata
 - **Phase 6**: Deployment (0%)
   - Not started
 
@@ -751,10 +754,11 @@ export const revalidate = 3600; // 1 hour
 ### **Critical Path to Launch:**
 
 **Priority 1 - SEO (Required for launch):**
-1. Build `app/sitemap.ts` - Generate XML sitemap
-2. Add JSON-LD structured data to blog posts
-3. Add `generateMetadata()` to category pages
-4. Configure ISR revalidation (1 hour) on blog pages
+1. ✅ ~~Build `app/sitemap.ts` - Generate XML sitemap~~ DONE
+2. ✅ ~~Build `app/robots.ts` - Generate robots.txt~~ DONE
+3. Add JSON-LD structured data to blog posts
+4. Add `generateMetadata()` to category pages
+5. Configure ISR revalidation (1 hour) on blog pages
 
 **Priority 2 - Deployment:**
 1. Create Vercel project
