@@ -1,4 +1,4 @@
-# Agentic Engineer Blog Automation
+# The Agentic Engineer
 
 Automated blog publishing system for Google Blogger with Cloudinary CDN integration.
 
@@ -156,7 +156,7 @@ The sync tool updates:
 ### blog-config.yaml
 
 ```yaml
-blog_name: "Agentic Engineer Blog"
+blog_name: "The Agentic Engineer"
 blogger_blog_id: "your-blog-id-here"
 
 image_optimization:
