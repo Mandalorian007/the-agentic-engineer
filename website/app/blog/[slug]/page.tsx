@@ -115,17 +115,27 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
                   // Destructure incompatible props to avoid type conflicts
                   const { children, className, style, ref, ...rest } = props;
                   const match = /language-(\w+)/.exec(className || '');
-                  return match ? (
-                    <SyntaxHighlighter
-                      style={oneDark}
-                      language={match[1]}
-                      PreTag="div"
+
+                  // Multi-line code block with syntax highlighting
+                  if (match) {
+                    return (
+                      <SyntaxHighlighter
+                        style={oneDark}
+                        language={match[1]}
+                        PreTag="div"
+                        {...rest}
+                      >
+                        {String(children).replace(/\n$/, '')}
+                      </SyntaxHighlighter>
+                    );
+                  }
+
+                  // Inline code with explicit styling
+                  return (
+                    <code
+                      className="relative rounded border px-[0.3rem] py-[0.2rem] font-mono text-sm bg-muted border-border"
                       {...rest}
                     >
-                      {String(children).replace(/\n$/, '')}
-                    </SyntaxHighlighter>
-                  ) : (
-                    <code className={className} {...rest}>
                       {children}
                     </code>
                   );
