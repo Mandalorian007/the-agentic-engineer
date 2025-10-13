@@ -521,7 +521,12 @@ const BlogCard = ({ category, title, thumbnail, summary, link, cta }: Post) => {
   );
 };
 
-const Blog27 = () => {
+interface Blog27Props {
+  primaryPost?: Post | null;
+  posts?: Array<Post>;
+}
+
+const Blog27 = ({ primaryPost = PRIMARY_POST, posts = POSTS }: Blog27Props) => {
   return (
     <section className="pb-32">
       <div className="bg-muted bg-[url('https://deifkwefumgah.cloudfront.net/shadcnblocks/block/patterns/dot-pattern-2.svg')] bg-[length:3.125rem_3.125rem] bg-repeat">
@@ -540,9 +545,11 @@ const Blog27 = () => {
             </div>
           </div>
 
-          <div className="w-full max-w-[27.5rem]">
-            <BlogCard {...PRIMARY_POST} />
-          </div>
+          {primaryPost && (
+            <div className="w-full max-w-[27.5rem]">
+              <BlogCard {...primaryPost} />
+            </div>
+          )}
         </div>
       </div>
       <div className="py-20">
@@ -551,7 +558,7 @@ const Blog27 = () => {
             All Blogs
           </h2>
           <div>
-            <BlogsResult posts={POSTS} categories={CATEGORIES} />
+            <BlogsResult posts={posts} categories={CATEGORIES} />
           </div>
         </div>
       </div>
