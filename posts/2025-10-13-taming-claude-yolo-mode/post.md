@@ -11,7 +11,7 @@ tags:
 - python
 status: draft
 blogger_id: '8904582180231394338'
-updated: '2025-10-12T23:38:06.639705'
+updated: '2025-10-13T00:27:02.989220'
 images:
   hero-safe-yolo-mode.png:
     url: https://res.cloudinary.com/drdtiykkg/image/upload/v1760312226/agentic-engineer-blog/taming-claude-yolo-mode/hero-safe-yolo-mode.webp
