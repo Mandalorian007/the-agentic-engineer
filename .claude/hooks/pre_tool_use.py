@@ -239,6 +239,10 @@ def is_credential_file_access(tool_name, tool_input):
         elif tool_name == 'Bash':
             command = tool_input.get('command', '').lower()
 
+            # Skip git commands with -m (commit messages) - don't block .env mentions in messages
+            if re.search(r'\bgit\s+\w+\s+-m\s+["\']', command):
+                return False
+
             # Only block actual file access commands, not mentions in strings
             # Enhanced patterns to catch .env file access
             env_patterns = [
