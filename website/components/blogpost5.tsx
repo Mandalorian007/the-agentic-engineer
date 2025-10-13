@@ -2,6 +2,7 @@
 
 import { Facebook, Home, Lightbulb, Linkedin, Twitter } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 
@@ -99,11 +100,14 @@ const Blogpost5 = () => {
         <div className="relative mt-12 grid max-w-7xl gap-14 lg:mt-14 lg:grid lg:grid-cols-12 lg:gap-6">
           <div className="order-2 lg:order-none lg:col-span-8">
             <div>
-              <img
-                src="https://deifkwefumgah.cloudfront.net/shadcnblocks/block/placeholder-1.svg"
-                alt="placeholder"
-                className="mb-8 mt-0 aspect-video w-full rounded-lg border object-cover"
-              />
+              <div className="relative mb-8 mt-0 aspect-video w-full overflow-hidden rounded-lg border">
+                <Image
+                  src="https://deifkwefumgah.cloudfront.net/shadcnblocks/block/placeholder-1.svg"
+                  alt="placeholder"
+                  fill
+                  className="object-cover"
+                />
+              </div>
               <p className="text-muted-foreground text-sm">
                 In a kingdom far away, there lived a ruler who faced a peculiar
                 challenge. After much contemplation, he devised an unusual

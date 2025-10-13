@@ -4,6 +4,7 @@ import { ArrowRight, Slash } from "lucide-react";
 import { Fragment, useCallback, useMemo, useState } from "react";
 import { ControllerRenderProps, useForm } from "react-hook-form";
 import { z } from "zod";
+import Image from "next/image";
 
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
@@ -493,10 +494,11 @@ const BlogCard = ({ category, title, thumbnail, summary, link, cta }: Post) => {
             {category}
           </div>
           <AspectRatio ratio={1.520833333} className="overflow-hidden">
-            <img
+            <Image
               src={thumbnail}
               alt={title}
-              className="block size-full object-cover object-center"
+              fill
+              className="object-cover object-center"
             />
           </AspectRatio>
           <div className="flex w-full flex-col gap-5 p-5">
