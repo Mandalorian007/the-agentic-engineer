@@ -4,7 +4,6 @@
  */
 
 import { getPublishedPosts } from "@/lib/posts";
-import { getCategoryById } from "@/lib/categories";
 import { Blog27 } from "@/components/blog27";
 
 // Enable ISR with 1-hour revalidation (future-dated posts will appear within an hour)
@@ -16,7 +15,6 @@ export default function BlogListingPage() {
 
   // Transform posts to blog27 format
   const transformedPosts = posts.map((post) => {
-    const category = getCategoryById(post.category);
     // Extract first hero image from content for thumbnail
     const imageMatch = post.content.match(/!\[.*?\]\(\.\.\/\.\.\/public\/(.*?\.webp)\)/);
     const thumbnail = imageMatch
@@ -24,7 +22,7 @@ export default function BlogListingPage() {
       : "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/placeholder-1.svg";
 
     return {
-      category: category?.name || post.category,
+      category: post.category, // Pass category ID for filtering (e.g., "case-studies")
       title: post.title,
       summary: post.description,
       link: `/blog/${post.slug}`,

@@ -392,13 +392,20 @@ const FilterForm = ({ categories, onCategoryChange }: FilterFormProps) => {
                     className="flex flex-row items-start space-x-3 space-y-0"
                   >
                     <FormControl>
-                      <Label className="bg-muted flex cursor-pointer items-center gap-2.5 rounded-full px-2.5 py-1.5">
-                        <div>{category.label}</div>
+                      <Label
+                        className={`flex cursor-pointer items-center gap-2.5 rounded-full px-4 py-2 transition-all ${
+                          isChecked
+                            ? 'bg-primary text-primary-foreground shadow-sm'
+                            : 'bg-muted hover:bg-muted/70'
+                        }`}
+                      >
+                        <span className="text-sm font-medium">{category.label}</span>
                         <Checkbox
                           checked={isChecked}
                           onCheckedChange={(checked) =>
                             handleCheckboxChange(checked, category.value, field)
                           }
+                          className="sr-only"
                         />
                       </Label>
                     </FormControl>
@@ -427,14 +434,18 @@ const BlogsResult = ({ posts, categories }: BlogsResultProps) => {
     setVisibleCount((prev) => prev + POSTS_PER_PAGE);
   }, []);
   const filteredPosts = useMemo(() => {
-    return posts.filter(
-      (post) =>
-        selectedCategories.includes(post.category.toLowerCase()) ||
-        selectedCategories.includes("all"),
+    // If "all" is selected, show all posts
+    if (selectedCategories.includes("all")) {
+      return posts;
+    }
+
+    // Otherwise filter by selected categories
+    return posts.filter((post) =>
+      selectedCategories.includes(post.category.toLowerCase())
     );
   }, [posts, selectedCategories]);
 
-  const postsToDisplay = filteredPosts.length > 0 ? filteredPosts : posts;
+  const postsToDisplay = filteredPosts;
 
   const hasMore = visibleCount < postsToDisplay.length;
 
@@ -445,18 +456,40 @@ const BlogsResult = ({ posts, categories }: BlogsResultProps) => {
         onCategoryChange={handleCategoryChange}
       />
       <div className="flex w-full flex-col gap-4 py-8 lg:gap-8">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-          {postsToDisplay.slice(0, visibleCount).map((post) => (
-            <BlogCard key={post.title} {...post} />
-          ))}
-        </div>
-        <div className="flex justify-center">
-          {hasMore && (
-            <Button variant="secondary" onClick={handleLoadMore}>
-              Load More
-            </Button>
-          )}
-        </div>
+        {postsToDisplay.length === 0 ? (
+          <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-dashed">
+            <div className="text-center space-y-4 p-8">
+              <p className="text-muted-foreground text-lg font-medium">
+                No posts found in the selected categories.
+              </p>
+              <p className="text-muted-foreground text-sm">
+                Try selecting different categories or view all posts.
+              </p>
+              <Button
+                variant="outline"
+                className="mt-2"
+                onClick={() => handleCategoryChange(["all"])}
+              >
+                Show All Posts
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
+              {postsToDisplay.slice(0, visibleCount).map((post) => (
+                <BlogCard key={post.title} {...post} />
+              ))}
+            </div>
+            <div className="flex justify-center">
+              {hasMore && (
+                <Button variant="secondary" onClick={handleLoadMore}>
+                  Load More
+                </Button>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -486,12 +519,26 @@ const BreadcrumbBlog = ({ breadcrumb }: BreadcrumbBlogProps) => {
 };
 
 const BlogCard = ({ category, title, thumbnail, summary, link, cta }: Post) => {
+  /**
+   * Format category ID to display name
+   * Examples:
+   *   "case-studies" -> "Case Studies"
+   *   "tutorials" -> "Tutorials"
+   *   "problem-solution" -> "Problem Solution"
+   */
+  const formatCategory = (cat: string): string => {
+    return cat
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
   return (
     <a href={link} className="block h-full w-full">
       <Card className="size-full rounded-lg border py-0">
         <CardContent className="p-0">
           <div className="text-muted-foreground border-b p-2.5 text-sm font-medium leading-[1.2]">
-            {category}
+            {formatCategory(category)}
           </div>
           <AspectRatio ratio={1.520833333} className="overflow-hidden">
             <Image
