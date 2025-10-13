@@ -492,10 +492,10 @@ export const revalidate = 3600; // 1 hour
 ## Migration Checklist
 
 ### Phase 1: Project Setup
-- [ ] Initialize Next.js 15 project with TypeScript
-- [ ] Configure Tailwind CSS + @tailwindcss/typography
+- [x] Initialize Next.js 15 project with TypeScript (in `website/` subdirectory)
+- [x] Configure Tailwind CSS + @tailwindcss/typography
+- [x] Set up shadcn/ui with Clean Slate theme (Neutral base color)
 - [ ] Install dependencies (react-markdown, remark-gfm, react-syntax-highlighter, etc.)
-- [ ] Set up shadcn/ui with Clean Slate theme
 - [ ] Configure next.config.mjs with MDX support
 
 ### Phase 2: Content Migration
@@ -543,6 +543,7 @@ export const revalidate = 3600; // 1 hour
 
 ### Phase 6: Deployment
 - [ ] Create Vercel project
+- [ ] **Configure root directory**: Set to `website/` in Vercel project settings (since Next.js app is in subdirectory)
 - [ ] Configure domain (the-agentic-engineer.com)
 - [ ] Set up environment variables (if needed)
 - [ ] Deploy to production
@@ -551,6 +552,25 @@ export const revalidate = 3600; // 1 hour
 ---
 
 ## Notes & Ideas
+
+### Project Structure Note
+- **Next.js app location**: `website/` subdirectory
+- **Reason**: Separates Next.js site from Python blog automation tools to avoid conflicts
+- **Critical**: All Next.js development happens in `website/` subdirectory - this isolation prevents interference with existing Python tooling layer (lib/, tools/, posts/)
+- **Vercel deployment**: Must configure root directory to `website/` in Vercel project settings
+- **Git structure**:
+  ```
+  the-agentic-engineer/          # Git repo root
+  ├── lib/                       # Python modules
+  ├── tools/                     # Publishing scripts
+  ├── posts/                     # Source posts (to be migrated)
+  ├── specs/                     # Documentation
+  └── website/                   # Next.js app (deployed to Vercel)
+      ├── app/
+      ├── components/
+      ├── content/               # MDX posts
+      └── public/                # Static assets
+  ```
 
 ### Branding Consistency
 - Use "The Agentic Engineer" across all UI components
