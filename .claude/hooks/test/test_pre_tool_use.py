@@ -2,13 +2,18 @@
 """
 Test suite for pre_tool_use.py hook
 
-Run with: python3 .claude/hooks/test_pre_tool_use.py
+Run with: uv run .claude/hooks/test/test_pre_tool_use.py
 """
 
 import sys
+import os
 import json
 from io import StringIO
 import unittest
+
+# Add parent directory to path to import pre_tool_use module
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 from pre_tool_use import (
     is_dangerous_rm_command,
     is_dangerous_chained_command,
