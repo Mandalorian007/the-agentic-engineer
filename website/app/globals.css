@@ -218,9 +218,6 @@
   --tw-prose-headings: hsl(var(--foreground));
   --tw-prose-links: hsl(var(--primary));
   --tw-prose-bold: hsl(var(--foreground));
-  --tw-prose-code: hsl(var(--foreground));
-  --tw-prose-pre-code: hsl(var(--foreground));
-  --tw-prose-pre-bg: hsl(var(--muted));
   --tw-prose-quotes: hsl(var(--muted-foreground));
   --tw-prose-quote-borders: hsl(var(--border));
   --tw-prose-borders: hsl(var(--border));
@@ -230,6 +227,40 @@
 .prose :where(h2):not(:where([class~="not-prose"] *)) {
   border-bottom: 1px solid hsl(var(--border));
   padding-bottom: 0.25rem;
+}
+
+/*
+ * Inline code styling - matches react-syntax-highlighter oneDark theme
+ * Adapts to light/dark mode while maintaining consistent code aesthetic
+ */
+.prose :where(code):not(:where([class~="not-prose"], pre *)) {
+  position: relative;
+  border-radius: 0.25rem;
+  padding: 0.2rem 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 400;
+  border: 1px solid;
+}
+
+/* Light mode - subtle oneDark-inspired colors */
+.prose :where(code):not(:where([class~="not-prose"], pre *)) {
+  background-color: #f5f5f5;
+  color: #383a42;
+  border-color: #e0e0e0;
+}
+
+/* Dark mode - true oneDark colors matching react-syntax-highlighter */
+.dark .prose :where(code):not(:where([class~="not-prose"], pre *)) {
+  background-color: #282c34;
+  color: #abb2bf;
+  border-color: rgba(171, 178, 191, 0.15);
+}
+
+/* Remove default backticks from typography plugin */
+.prose :where(code):not(:where([class~="not-prose"], pre *))::before,
+.prose :where(code):not(:where([class~="not-prose"], pre *))::after {
+  content: none;
 }
 
 @media (min-width: 640px) {

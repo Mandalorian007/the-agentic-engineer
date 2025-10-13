@@ -7,13 +7,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { getPostBySlug, getAllPostSlugs } from "@/lib/posts";
 import { getCategoryById } from "@/lib/categories";
 import Image from "next/image";
+import { CodeBlock } from "@/components/code-block";
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -115,16 +114,12 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
                   const { children, className, ...rest } = props;
                   const match = /language-(\w+)/.exec(className || '');
 
-                  // Multi-line code block with syntax highlighting
+                  // Multi-line code block with theme-aware syntax highlighting
                   if (match) {
                     return (
-                      <SyntaxHighlighter
-                        style={oneDark as { [key: string]: React.CSSProperties }}
-                        language={match[1]}
-                        PreTag="div"
-                      >
+                      <CodeBlock language={match[1]}>
                         {String(children).replace(/\n$/, '')}
-                      </SyntaxHighlighter>
+                      </CodeBlock>
                     );
                   }
 

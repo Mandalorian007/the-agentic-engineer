@@ -628,10 +628,15 @@ export const revalidate = 3600; // 1 hour
 - [x] Integrate shadcnblocks footer16
 - [x] Integrate shadcnblocks blog27 (blog listing layout with category filters)
 - [x] ~~Integrate shadcnblocks blogpost5~~ - Using custom layout in app/blog/[slug]/page.tsx
-- [x] Style code blocks with react-syntax-highlighter (oneDark theme for multi-line)
+- [x] Style code blocks with react-syntax-highlighter (theme-aware)
 - [x] Typography styling using @tailwindcss/typography plugin (maintainable defaults)
-  - [x] Inline code - theme-aware via typography plugin
-  - [x] Multi-line code blocks - SyntaxHighlighter with oneDark theme
+  - [x] Inline code - custom styling matching syntax highlighter, theme-aware (light/dark modes)
+    - Light mode: `#f5f5f5` background, `#383a42` text (subtle oneDark-inspired)
+    - Dark mode: `#282c34` background, `#abb2bf` text (true oneDark colors)
+  - [x] Multi-line code blocks - Theme-aware SyntaxHighlighter via CodeBlock component
+    - Light mode: oneLight theme
+    - Dark mode: oneDark theme
+    - Client component with useTheme hook for automatic switching
   - [x] All markdown elements - handled by typography plugin with minimal theme overrides
   - [x] Custom H2 styling - bottom border for visual hierarchy
 
