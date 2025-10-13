@@ -177,24 +177,18 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <li>✅ <strong>Publishes to Google Blogger as a draft</strong></li>
 <li>✅ <strong>Updates instead of duplicating</strong> (it's idempotent!)</li>
 </ol>
-<p>Then you review it, change <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">status</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> draft</span>
-</code></pre></div>
- to <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">status</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> published</span>
-</code></pre></div>
-, run one command, and <strong>you're live</strong>.</p>
+<p>Then you review it, change <code>status: draft</code> to <code>status: published</code>, run one command, and <strong>you're live</strong>.</p>
 <p>That's it. That's the whole workflow.</p>
 <h2>How It Works: The Four-Command Workflow</h2>
 <p>Here's the actual workflow I use now:</p>
 <h3>Step 1: Create the Post (Voice or Text)</h3>
-<p>I have a Claude Code slash command called <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/create-post
-</code></pre></div>
-. I just talk about my idea:</p>
-<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/create-post<span style="color: #F8F8F2"> </span>So<span style="color: #F8F8F2"> </span>today<span style="color: #F8F8F2"> </span>I<span style="color: #F8F8F2"> </span>made<span style="color: #F8F8F2"> </span>a<span style="color: #F8F8F2"> </span>really<span style="color: #F8F8F2"> </span>cool<span style="color: #F8F8F2"> </span>tech<span style="color: #F8F8F2"> </span>thing.<span style="color: #F8F8F2"> </span>It<span style="color: #E6DB74">&#39;s for blogging.</span>
+<p>I have a Claude Code slash command called <code>/create-post</code>. I just talk about my idea:</p>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/create-post<span style="color: #F8F8F2"> </span>So<span style="color: #F8F8F2"> </span>today<span style="color: #F8F8F2"> </span>I<span style="color: #F8F8F2"> </span>made<span style="color: #F8F8F2"> </span>a<span style="color: #F8F8F2"> </span>really<span style="color: #F8F8F2"> </span>cool<span style="color: #F8F8F2"> </span>tech<span style="color: #F8F8F2"> </span>thing.<span style="color: #F8F8F2"> </span>It<span style="color: #E6DB74">&#39;s for blogging.</span>
 <span style="color: #E6DB74">All I have to do is ramble about whatever I want to write about—I don&#39;</span>t
 even<span style="color: #F8F8F2"> </span>have<span style="color: #F8F8F2"> </span>to<span style="color: #F8F8F2"> </span>structure<span style="color: #F8F8F2"> </span>it.<span style="color: #F8F8F2"> </span>The<span style="color: #F8F8F2"> </span>system<span style="color: #F8F8F2"> </span>takes<span style="color: #F8F8F2"> </span>my<span style="color: #F8F8F2"> </span>blurb,<span style="color: #F8F8F2"> </span>converts<span style="color: #F8F8F2"> </span>it<span style="color: #F8F8F2"> </span>into
 proper<span style="color: #F8F8F2"> </span>markdown,<span style="color: #F8F8F2"> </span>and<span style="color: #F8F8F2"> </span>even<span style="color: #F8F8F2"> </span>generates<span style="color: #F8F8F2"> </span>images<span style="color: #F8F8F2"> </span><span style="color: #66D9EF">for</span><span style="color: #F8F8F2"> </span>it...
 </code></pre></div>
-</pre>
+
 <p>Claude Code (powered by Anthropic's Sonnet) then:</p>
 <ul>
 <li>Analyzes my rambling and identifies the core story</li>
@@ -202,27 +196,21 @@ proper<span style="color: #F8F8F2"> </span>markdown,<span style="color: #F8F8F2"
 <li>Writes a complete, structured blog post in markdown</li>
 <li><strong>Generates images automatically</strong> using the image generation tool</li>
 <li>Suggests detailed AI prompts for each image (hero images, diagrams, etc.)</li>
-<li>Saves everything to <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>posts/YYYY-MM-DD-slug/post.md
-</code></pre></div>
-</li>
+<li>Saves everything to <code>posts/YYYY-MM-DD-slug/post.md</code></li>
 </ul>
-<p>Here's the magic: the <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/create-post
-</code></pre></div>
- command doesn't just write text—it <strong>actively generates the images</strong> as part of the workflow. The command has access to the <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>generate_image.py
-</code></pre></div>
- tool, so it crafts detailed prompts and creates the images while writing the post.</p>
+<p>Here's the magic: the <code>/create-post</code> command doesn't just write text—it <strong>actively generates the images</strong> as part of the workflow. The command has access to the <code>generate_image.py</code> tool, so it crafts detailed prompts and creates the images while writing the post.</p>
 <h3>Step 2: Generate Images (If Needed)</h3>
 <p>If you want more images beyond what the command created, you can run:</p>
-<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>uv<span style="color: #F8F8F2"> </span>run<span style="color: #F8F8F2"> </span>tools/generate_image.py<span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;modern minimalist illustration of</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>uv<span style="color: #F8F8F2"> </span>run<span style="color: #F8F8F2"> </span>tools/generate_image.py<span style="color: #F8F8F2"> </span><span style="color: #E6DB74">&quot;modern minimalist illustration of</span>
 <span style="color: #E6DB74">AI automation pipeline with voice input, markdown documents, and blog</span>
 <span style="color: #E6DB74">publishing, blue and purple gradient, clean tech aesthetic, isometric</span>
 <span style="color: #E6DB74">view, professional futuristic mood&quot;</span><span style="color: #F8F8F2"> </span>posts/2025-10-12-my-post/hero.png
 </code></pre></div>
-</pre>
+
 <p>Each image costs about <strong>$0.015</strong> (less than two cents) and looks way better than stock photos. We save the images directly in the post directory.</p>
 <h3>Step 3: Quality Check, Build, and Publish</h3>
 <p>With the post written and images generated, I run three more slash commands:</p>
-<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># Optional: Check quality (SEO + prose linting)</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># Optional: Check quality (SEO + prose linting)</span>
 /quality-check<span style="color: #F8F8F2"> </span>posts/2025-10-12-my-post/
 
 <span style="color: #959077"># Validate and preview locally</span>
@@ -231,38 +219,24 @@ proper<span style="color: #F8F8F2"> </span>markdown,<span style="color: #F8F8F2"
 <span style="color: #959077"># Publish to Blogger (creates draft)</span>
 /publish<span style="color: #F8F8F2"> </span>posts/2025-10-12-my-post/
 </code></pre></div>
-</pre>
-<p><strong>The <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/quality-check
-</code></pre></div>
- command</strong> runs both Vale prose linting and SEO analysis, catching issues like passive voice, wordy phrases, missing meta descriptions, and title length problems.</p>
-<p><strong>The <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/build
-</code></pre></div>
- command</strong> validates everything:</p>
+
+<p><strong>The <code>/quality-check</code> command</strong> runs both Vale prose linting and SEO analysis, catching issues like passive voice, wordy phrases, missing meta descriptions, and title length problems.</p>
+<p><strong>The <code>/build</code> command</strong> validates everything:</p>
 <ul>
 <li>Checks frontmatter and tag registry</li>
 <li>Validates image references</li>
 <li>Converts markdown to HTML with syntax highlighting</li>
 <li>Generates a local preview HTML file</li>
 </ul>
-<p><strong>The <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/publish
-</code></pre></div>
- command</strong> does the actual publishing:</p>
+<p><strong>The <code>/publish</code> command</strong> does the actual publishing:</p>
 <ul>
 <li>Uploads images to Cloudinary CDN (with hash-based deduplication)</li>
 <li>Converts markdown to HTML with Pygments syntax highlighting</li>
 <li>Detects if the post already exists (via directory path)</li>
 <li>Creates OR updates the post on Blogger (no duplicates!)</li>
-<li>Saves the <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>blogger_id
-</code></pre></div>
- back to frontmatter for future updates</li>
+<li>Saves the <code>blogger_id</code> back to frontmatter for future updates</li>
 </ul>
-<p>When I'm ready to go live, I just change <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">status</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> draft</span>
-</code></pre></div>
- to <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #F8F8F2">status</span><span style="color: #FF4689">:</span><span style="color: #F8F8F2"> published</span>
-</code></pre></div>
- in the markdown and run <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/publish
-</code></pre></div>
- again. <strong>One command. Live blog post.</strong></p>
+<p>When I'm ready to go live, I just change <code>status: draft</code> to <code>status: published</code> in the markdown and run <code>/publish</code> again. <strong>One command. Live blog post.</strong></p>
 <h2>The Technical Stack</h2>
 <p>Here's what makes this work:</p>
 <h3>AI Content Generation</h3>
@@ -272,9 +246,7 @@ proper<span style="color: #F8F8F2"> </span>markdown,<span style="color: #F8F8F2"
 </ul>
 <h3>Content Pipeline</h3>
 <ul>
-<li><strong>Python 3.13</strong> with <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>uv
-</code></pre></div>
- for dependency management</li>
+<li><strong>Python 3.13</strong> with <code>uv</code> for dependency management</li>
 <li><strong>Markdown → HTML</strong> conversion with Python-Markdown</li>
 <li><strong>Pygments</strong> for code syntax highlighting</li>
 <li><strong>YAML frontmatter</strong> for metadata (title, date, tags, status)</li>
@@ -291,19 +263,13 @@ proper<span style="color: #F8F8F2"> </span>markdown,<span style="color: #F8F8F2"
 <li><strong>Idempotent publishing</strong> - Detects existing posts by directory path, updates instead of duplicating</li>
 <li><strong>Hash-based image deduplication</strong> - Only uploads changed images to Cloudinary</li>
 <li><strong>Tag registry</strong> - Enforced tag consistency (no tag sprawl!)</li>
-<li><strong>Path-based URLs</strong> - <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #AE81FF">2025</span><span style="color: #FF4689">-</span><span style="color: #AE81FF">10</span><span style="color: #FF4689">-</span><span style="color: #AE81FF">12</span><span style="color: #FF4689">-</span><span style="color: #F8F8F2">hello</span><span style="color: #FF4689">-</span><span style="color: #F8F8F2">world</span>
-</code></pre></div>
- → <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/2025/10/hello-world.html
-</code></pre></div>
-</li>
+<li><strong>Path-based URLs</strong> - <code>2025-10-12-hello-world</code> → <code>/2025/10/hello-world.html</code></li>
 </ul>
 <h2>The Architecture: How Everything Fits Together</h2>
 <p><img src="./diagram-blog-automation-architecture.png" alt="Blog automation architecture diagram" /></p>
 <p>Here's the flow:</p>
 <ol>
-<li><strong>Voice/Text Input</strong> → Claude Code <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/create-post
-</code></pre></div>
- command</li>
+<li><strong>Voice/Text Input</strong> → Claude Code <code>/create-post</code> command</li>
 <li><strong>AI Processing</strong> → Structured markdown + image prompts + frontmatter</li>
 <li><strong>Image Generation</strong> → OpenAI API → Saved to post directory</li>
 <li><strong>Build Step</strong> → Validates tags, converts markdown, generates preview HTML</li>
@@ -313,29 +279,21 @@ proper<span style="color: #F8F8F2"> </span>markdown,<span style="color: #F8F8F2"
 <li>Upload images to Cloudinary (if changed)</li>
 <li>Convert markdown to HTML with Pygments</li>
 <li>Create/update post via Blogger API</li>
-<li>Save <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>blogger_id
-</code></pre></div>
- to frontmatter</li>
+<li>Save <code>blogger_id</code> to frontmatter</li>
 </ul>
 </li>
-<li><strong>Status Toggle</strong> → Change <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>draft
-</code></pre></div>
- → <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>published
-</code></pre></div>
- and republish</li>
+<li><strong>Status Toggle</strong> → Change <code>draft</code> → <code>published</code> and republish</li>
 </ol>
 <p>Everything is idempotent—you can run commands many times safely. The system is smart enough to:</p>
 <ul>
 <li>Detect existing posts by directory name</li>
 <li>Only upload images when their hashes change</li>
 <li>Update instead of duplicate</li>
-<li>Preserve your <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>blogger_id
-</code></pre></div>
- across runs</li>
+<li>Preserve your <code>blogger_id</code> across runs</li>
 </ul>
 <h2>What This Actually Looks Like in Practice</h2>
 <p>Let me show you a real example. Here's my actual workflow for creating <strong>this exact post</strong> (my first blog post ever):</p>
-<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># 1. Talk about my idea (literally just rambled into Claude Code)</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code><span style="color: #959077"># 1. Talk about my idea (literally just rambled into Claude Code)</span>
 /create-post<span style="color: #F8F8F2"> </span>So<span style="color: #F8F8F2"> </span>today<span style="color: #F8F8F2"> </span>I<span style="color: #F8F8F2"> </span>made<span style="color: #F8F8F2"> </span>a<span style="color: #F8F8F2"> </span>really<span style="color: #F8F8F2"> </span>cool<span style="color: #F8F8F2"> </span>tech<span style="color: #F8F8F2"> </span>thing...
 
 <span style="color: #959077"># 2. Claude wrote the post AND generated the images automatically!</span>
@@ -353,7 +311,7 @@ proper<span style="color: #F8F8F2"> </span>markdown,<span style="color: #F8F8F2"
 <span style="color: #959077"># (Edit status: draft → published in post.md)</span>
 /publish<span style="color: #F8F8F2"> </span>posts/2025-10-12-voice-to-blog-automation/
 </code></pre></div>
-</pre>
+
 <p><strong>Total hands-on time: ~5 minutes</strong> (most of it reviewing the AI output—the images generated automatically!)</p>
 <p>This is my <strong>first blog post ever</strong>. It took 5 minutes of actual work. The system I built to enable it took a day to build, but now the barrier to writing is gone.</p>
 <p>Compare that to traditional blogging:</p>
@@ -367,9 +325,7 @@ proper<span style="color: #F8F8F2"> </span>markdown,<span style="color: #F8F8F2"
 <p><strong>Traditional first post: 2+ hours of friction. This approach: Build once, write forever in 5 minutes.</strong></p>
 <h2>The Quality Checks: Making Sure It's Actually Good</h2>
 <p>One concern with AI-generated content: is it any good? Will it rank? Is it readable?</p>
-<p>The <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/quality-check
-</code></pre></div>
- command runs two automated checks:</p>
+<p>The <code>/quality-check</code> command runs two automated checks:</p>
 <h3>1. SEO Analysis</h3>
 <p>Checks for search optimization best practices:</p>
 <ul>
@@ -382,13 +338,13 @@ proper<span style="color: #F8F8F2"> </span>markdown,<span style="color: #F8F8F2"
 <li>✅ Keyword density</li>
 </ul>
 <p><strong>Example output:</strong></p>
-<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>✅<span style="color: #F8F8F2"> Title length</span>:<span style="color: #F8F8F2"> </span><span style="color: #AE81FF">52</span><span style="color: #F8F8F2"> characters </span><span style="color: #E6DB74">(</span><span style="color: #F8F8F2">optimal</span><span style="color: #E6DB74">)</span>
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>✅<span style="color: #F8F8F2"> Title length</span>:<span style="color: #F8F8F2"> </span><span style="color: #AE81FF">52</span><span style="color: #F8F8F2"> characters </span><span style="color: #E6DB74">(</span><span style="color: #F8F8F2">optimal</span><span style="color: #E6DB74">)</span>
 ✅<span style="color: #F8F8F2"> Single H1 heading found</span>
 ✅<span style="color: #F8F8F2"> Content length</span>:<span style="color: #F8F8F2"> </span><span style="color: #AE81FF">1</span>,<span style="color: #AE81FF">847</span><span style="color: #F8F8F2"> words</span>
 ⚠️<span style="color: #F8F8F2">  Add meta description </span><span style="color: #66D9EF">for</span><span style="color: #F8F8F2"> search results</span>
 ✅<span style="color: #F8F8F2"> </span><span style="color: #AE81FF">3</span><span style="color: #F8F8F2"> images with alt text</span>
 </code></pre></div>
-</pre>
+
 <h3>2. Prose Linting with Vale</h3>
 <p>Vale checks writing quality automatically:</p>
 <ul>
@@ -398,13 +354,11 @@ proper<span style="color: #F8F8F2"> </span>markdown,<span style="color: #F8F8F2"
 <li>Technical writing best practices</li>
 </ul>
 <p><strong>Example output:</strong></p>
-<pre><div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code> 12:34  suggestion  &#39;really&#39; is a weasel word  write-good.Weasel
+<div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code> 12:34  suggestion  &#39;really&#39; is a weasel word  write-good.Weasel
  45:12  warning     This sentence is too long  write-good.TooWordy
 </code></pre></div>
-</pre>
-<p>You can ignore suggestions, but the system catches common mistakes before publishing. Run <div class="highlight" style="background: #272822"><pre style="line-height: 125%;"><span></span><code>/quality-check
-</code></pre></div>
- on any post to get instant feedback.</p>
+
+<p>You can ignore suggestions, but the system catches common mistakes before publishing. Run <code>/quality-check</code> on any post to get instant feedback.</p>
 <h2>Why This Matters: Starting Is the Hardest Part</h2>
 <p>Here's the truth: <strong>I'd been putting off starting a blog for years</strong>.</p>
 <p>Not because I didn't have ideas. Not because I couldn't write. But because every time I thought about starting, I'd get overwhelmed by the setup:</p>
