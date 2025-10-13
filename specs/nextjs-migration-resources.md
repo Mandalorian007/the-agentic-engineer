@@ -412,6 +412,25 @@ export const revalidate = 3600; // 1 hour
 
 **Important**: Pro blocks have image slots which are crucial for the blog design. The current custom components are placeholders without proper image support.
 
+#### Clerk Authentication with shadcn Theming
+- **Package**: `@clerk/nextjs`, `@clerk/themes`
+- **Installation**: `pnpm add @clerk/nextjs @clerk/themes`
+- **Description**: Authentication with shadcn/ui theme integration
+- **Setup**:
+  1. Install packages: `pnpm add @clerk/nextjs @clerk/themes`
+  2. Import shadcn CSS in `globals.css`: `@import "@clerk/themes/shadcn.css";`
+  3. Import theme in layout: `import { shadcn } from "@clerk/themes"`
+  4. Apply to ClerkProvider: `<ClerkProvider appearance={{ baseTheme: shadcn }}>`
+  5. Create middleware.ts with `clerkMiddleware()`
+  6. Integrate auth components in navbar (SignInButton, SignUpButton, UserButton)
+- **Features**:
+  - Automatic light/dark mode sync with shadcn theme
+  - Matches Clean Slate theme colors (purple/blue accents)
+  - Uses shadcn CSS variables for consistent styling
+  - No manual CSS customization needed
+- **Official Docs**: https://clerk.com/docs/customization/themes
+- **Category**: Authentication, Styling & UI
+
 #### Markdown Processing
 - **Libraries**:
   - `react-markdown`: Core markdown rendering
@@ -516,8 +535,13 @@ export const revalidate = 3600; // 1 hour
 
 - **Clerk**: Authentication and user management (for future features)
   - Components: SignInButton, SignOutButton, UserButton
-  - Will integrate with navbar8 from shadcnblocks
+  - Integrated with navbar8 from shadcnblocks
   - Handles signin/signout flows
+  - **Theming**: Uses shadcn theme via `@clerk/themes` package
+    - Import `shadcn` theme from `@clerk/themes`
+    - Import `@clerk/themes/shadcn.css` in `globals.css`
+    - Apply `baseTheme: shadcn` to `<ClerkProvider>` appearance prop
+    - Automatically adapts to light/dark mode from shadcn/ui configuration
   - **Note**: Auth is included in navbar but NOT required for any features initially
   - **Purpose**: Enables future comments system or subscription features
   - Login UI will be present but no gated content
@@ -551,6 +575,8 @@ export const revalidate = 3600; // 1 hour
 - [x] **Replace footer with footer16 Pro block** - Includes accordion on mobile, social links
 - [x] Create root layout with navbar and footer
 - [x] **Add light/dark theme toggle** (next-themes integration)
+- [x] **Install Clerk authentication** (@clerk/nextjs, @clerk/themes)
+- [x] **Configure Clerk with shadcn theming** - Import shadcn theme, apply to ClerkProvider
 - [x] Create homepage with hero section
 - [x] **Update blog listing page (`/blog`) to use blog27 Pro component**
 - [x] **Wire up blog27 with actual categories from spec** (7 categories aligned with /create-post)
