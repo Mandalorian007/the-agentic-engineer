@@ -1,36 +1,114 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Agentic Engineer - Next.js Website
 
-## Getting Started
+Next.js 15 website for The Agentic Engineer blog, built with TypeScript, Tailwind CSS, and shadcn/ui.
 
-First, run the development server:
+## 🎨 Design
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Theme**: Clean Slate (from [tweakcn.com](https://tweakcn.com/editor/theme?theme=clean-slate))
+- **Base Color**: Neutral
+- **Style**: New York (shadcn/ui)
+- **Theme documentation**: See `app/globals.css` header comment
+
+## 📁 Project Structure
+
+```
+website/
+├── app/
+│   ├── layout.tsx              # Root layout with navbar and footer
+│   ├── page.tsx                # Homepage
+│   ├── blog/
+│   │   ├── page.tsx            # Blog listing (all posts)
+│   │   ├── [slug]/
+│   │   │   └── page.tsx        # Individual blog post
+│   │   └── category/
+│   │       └── [category]/
+│   │           └── page.tsx    # Category filtered posts
+│   └── globals.css             # Global styles + theme variables
+├── components/
+│   ├── navbar.tsx              # Navigation with auth placeholders
+│   ├── footer.tsx              # Footer with links
+│   └── ui/                     # shadcn/ui components
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── badge.tsx
+│       └── separator.tsx
+└── lib/
+    └── utils.ts                # shadcn/ui utilities
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🚀 Current Status
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### ✅ Phase 1: Basic Scaffolding (COMPLETE)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [x] Next.js 15 + TypeScript setup
+- [x] Tailwind CSS v4 configuration
+- [x] shadcn/ui with Clean Slate theme
+- [x] Navbar component (with auth placeholders for future Clerk integration)
+- [x] Footer component
+- [x] Root layout with navbar/footer
+- [x] Homepage with hero section
+- [x] Blog listing page with placeholder posts
+- [x] Category filter pages (7 hardcoded categories)
+- [x] Individual blog post pages
+- [x] Build test - all pages compile successfully
 
-## Learn More
+### 🔄 Phase 2: Content Integration (TODO)
 
-To learn more about Next.js, take a look at the following resources:
+- [ ] Install markdown processing libraries
+- [ ] Configure MDX support
+- [ ] Implement content loading utilities
+- [ ] Wire up real content to pages
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🔧 Development
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+# Install dependencies
+pnpm install
 
-## Deploy on Vercel
+# Run development server
+pnpm dev
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Build for production
+pnpm build
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Visit [http://localhost:3000](http://localhost:3000) to view the site.
+
+## 📝 Routes
+
+| Route                          | Description                      |
+| ------------------------------ | -------------------------------- |
+| `/`                            | Homepage                         |
+| `/blog`                        | Blog listing (all posts)         |
+| `/blog/[slug]`                 | Individual blog post             |
+| `/blog/category/[category]`    | Posts filtered by category       |
+
+## 🎨 Categories
+
+The blog uses 7 hardcoded categories:
+
+1. **Tutorials & How-Tos** (`tutorials`)
+2. **Case Studies** (`case-studies`)
+3. **Guides & Fundamentals** (`guides`)
+4. **Lists & Tips** (`lists`)
+5. **Comparisons & Reviews** (`comparisons`)
+6. **Problem & Solution** (`problem-solution`)
+7. **Opinions & Analysis** (`opinions`)
+
+## 🔐 Authentication
+
+Authentication UI is present but not functional yet. Placeholders exist for future [Clerk](https://clerk.com) integration. See `components/navbar.tsx` for TODO comments.
+
+## 🚢 Deployment
+
+Deploy to **Vercel** with these settings:
+- **Root Directory**: `website/` (since Next.js app is in subdirectory)
+- **Build Command**: `pnpm build`
+- **Output Directory**: `.next`
+
+## 📚 Resources
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [shadcn/ui Documentation](https://ui.shadcn.com)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [tweakcn Theme Editor](https://tweakcn.com/editor/theme?theme=clean-slate)

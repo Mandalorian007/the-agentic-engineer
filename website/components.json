@@ -1,6 +1,5 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
-  "_comment": "Theme: Clean Slate from https://tweakcn.com/editor/theme?theme=clean-slate",
   "style": "new-york",
   "rsc": true,
   "tsx": true,
