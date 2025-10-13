@@ -565,11 +565,11 @@ export const revalidate = 3600; // 1 hour
 
 ## Migration Checklist
 
-### Phase 1: Project Setup
+### Phase 1: Project Setup ✅ COMPLETE
 - [x] Initialize Next.js 15 project with TypeScript (in `website/` subdirectory)
-- [x] Configure Tailwind CSS + @tailwindcss/typography
+- [x] Configure Tailwind CSS v4 + @tailwindcss/typography
 - [x] Set up shadcn/ui with Clean Slate theme (Neutral base color)
-- [x] Install shadcn/ui components (button, card, badge, separator, dropdown-menu)
+- [x] Install shadcn/ui components (button, card, badge, separator, dropdown-menu, etc.)
 - [x] **Install shadcnblocks Pro components** (blog27, blogpost5, navbar8, footer16)
 - [x] **Replace navbar with navbar8 Pro block** - Includes theme toggle, responsive mobile menu
 - [x] **Replace footer with footer16 Pro block** - Includes accordion on mobile, social links
@@ -584,51 +584,71 @@ export const revalidate = 3600; // 1 hour
 - [x] Create individual blog post page (`/blog/[slug]`)
 - [x] Fix container layout issues
 - [x] **Test build - all pages compile successfully with Pro components**
-- [ ] Install markdown dependencies (react-markdown, remark-gfm, react-syntax-highlighter)
-- [ ] Configure next.config.mjs with MDX support
+- [x] Install markdown dependencies (react-markdown, remark-gfm, react-syntax-highlighter, gray-matter)
+- [x] Configure next.config.mjs with Turbopack
 
-### Phase 2: Content Migration
-- [ ] Analyze existing posts and assign categories (from 7 hardcoded options)
-- [ ] Convert existing posts from `posts/YYYY-MM-DD-slug/post.md` → `content/posts/YYYY-MM-DD-slug.mdx`
-- [ ] Add `category` field to each post's frontmatter (validate against hardcoded list)
-- [ ] Rename `tags` field to `hashtags` in frontmatter
-- [ ] Update frontmatter (remove `blogger_id`, `updated`, `images`, `status` fields)
-- [ ] Move images from `posts/*/` → `public/blog/[slug]/`
-- [ ] Convert images to WebP format
-- [ ] Update image references to use relative paths (`./image.webp`)
+### Phase 2: Content Migration ✅ COMPLETE
+- [x] Analyze existing posts and assign categories (from 7 hardcoded options)
+- [x] Convert existing posts from `posts/YYYY-MM-DD-slug/post.md` → `content/posts/YYYY-MM-DD-slug.mdx`
+  - [x] 2025-10-12-voice-to-blog-automation.mdx
+  - [x] 2025-10-13-taming-claude-yolo-mode.mdx
+- [x] Add `category` field to each post's frontmatter (validate against hardcoded list)
+- [x] Rename `tags` field to `hashtags` in frontmatter
+- [x] Update frontmatter (remove `blogger_id`, `updated`, `images`, `status` fields)
+- [x] Move images from `posts/*/` → `public/blog/[slug]/`
+  - [x] 2025-10-12 images (hero + diagram)
+  - [x] 2025-10-13 images (hero + diagram)
+- [x] Convert images to WebP format (already in WebP)
+- [x] Update image references to use relative paths (`./image.webp`)
 
-### Phase 3: Core Implementation
-- [ ] Implement `lib/posts.ts` (post loading/parsing with date filtering)
-- [ ] Implement `lib/categories.ts` (hardcoded categories + validation)
-- [ ] Implement `lib/remark-image-path.ts` (image path rewriting)
-- [ ] Create `mdx-components.tsx` (next/image wrapper)
-- [ ] Build `app/page.tsx` (homepage)
-- [ ] Build `app/blog/page.tsx` (blog listing with category filter tabs)
-- [ ] Build `app/blog/category/[category]/page.tsx` (category filter page)
-- [ ] Build `app/blog/[slug]/page.tsx` (dynamic post page with category/hashtags)
+### Phase 3: Core Implementation ✅ COMPLETE
+- [x] Implement `lib/posts.ts` (post loading/parsing with date filtering)
+  - [x] getAllPosts(), getPublishedPosts(), getPostBySlug(), getAllPostSlugs()
+- [x] Implement `lib/categories.ts` (hardcoded categories + validation)
+  - [x] CATEGORIES const, getCategoryById(), getPostsByCategory(), getCategoryCounts()
+- [x] ~~Implement `lib/remark-image-path.ts` (image path rewriting)~~ - Handled inline in blog post page component
+- [x] ~~Create `mdx-components.tsx` (next/image wrapper)~~ - Custom img component in blog post page
+- [x] Build `app/page.tsx` (homepage)
+- [x] Build `app/blog/page.tsx` (blog listing with category filter tabs)
+- [x] Build `app/blog/category/[category]/page.tsx` (category filter page)
+- [x] Build `app/blog/[slug]/page.tsx` (dynamic post page with category/hashtags)
+  - [x] generateStaticParams() for SSG
+  - [x] generateMetadata() for SEO
+  - [x] Custom img component (relative path → next/image)
+  - [x] Custom code component (react-syntax-highlighter with oneDark theme)
+  - [x] Custom inline code styling (matches oneDark theme)
 - [ ] Build `app/sitemap.ts` (sitemap generation including category pages)
-- [ ] Implement root layout with navbar/footer
+- [x] Implement root layout with navbar/footer
 - [ ] Add ISR revalidation (1 hour) to blog pages
 
-### Phase 4: UI Components
-- [ ] Create `components/category-filter.tsx` (horizontal category tabs)
-- [ ] Create `components/hashtag-badge.tsx` (display-only hashtag badges, NOT clickable)
-- [ ] Integrate shadcnblocks navbar8 (with Clerk auth placeholders for future use)
-- [ ] Integrate shadcnblocks footer16
-- [ ] Integrate shadcnblocks blog27 (blog listing layout with category filters)
-- [ ] Integrate shadcnblocks blogpost5 (post page layout)
-- [ ] Style code blocks with react-syntax-highlighter (enable line numbers, use monokai theme)
+### Phase 4: UI Components ✅ COMPLETE
+- [x] ~~Create `components/category-filter.tsx`~~ - Category tabs integrated in blog27 component
+- [x] ~~Create `components/hashtag-badge.tsx`~~ - Using shadcn/ui Badge component directly
+- [x] Integrate shadcnblocks navbar8 (with Clerk auth placeholders for future use)
+- [x] Integrate shadcnblocks footer16
+- [x] Integrate shadcnblocks blog27 (blog listing layout with category filters)
+- [x] ~~Integrate shadcnblocks blogpost5~~ - Using custom layout in app/blog/[slug]/page.tsx
+- [x] Style code blocks with react-syntax-highlighter (oneDark theme for multi-line)
+- [x] Typography styling using @tailwindcss/typography plugin (maintainable defaults)
+  - [x] Inline code - theme-aware via typography plugin
+  - [x] Multi-line code blocks - SyntaxHighlighter with oneDark theme
+  - [x] All markdown elements - handled by typography plugin with minimal theme overrides
+  - [x] Custom H2 styling - bottom border for visual hierarchy
 
-### Phase 5: SEO & Polish
-- [ ] Implement `generateMetadata()` for dynamic SEO (posts, categories)
+### Phase 5: SEO & Polish ⚠️ IN PROGRESS (20%)
+- [x] Implement `generateMetadata()` for dynamic SEO (blog posts)
+  - [x] Title, description, Open Graph metadata
+  - [x] Published time for articles
+- [ ] Add `generateMetadata()` for category pages
 - [ ] Add JSON-LD structured data (BlogPosting schema)
-- [ ] Add category metadata to sitemap
+- [ ] Build `app/sitemap.ts` (sitemap generation including category pages)
 - [ ] Test sitemap generation (verify all routes included)
-- [ ] Verify image optimization (WebP, responsive, lazy loading)
-- [ ] Test all internal links (category links, post links)
+- [x] Verify image optimization (next/image working with WebP, responsive, lazy loading)
+- [x] Test all internal links (category links, post links working)
 - [ ] Add RSS feed (`app/rss.xml/route.ts`)
-- [ ] Test scheduled post filtering (future dates hidden)
-- [ ] Verify ISR revalidation works correctly (1-hour refresh)
+- [x] Implement scheduled post filtering (future dates hidden via getPublishedPosts())
+- [ ] Add ISR revalidation (1 hour) to blog pages
+- [ ] Test ISR revalidation works correctly
 
 ### Phase 6: Deployment
 - [ ] Create Vercel project

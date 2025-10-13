@@ -112,38 +112,24 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
               components={{
                 // Custom code block with syntax highlighting
                 code(props) {
-                  // Destructure incompatible props to avoid type conflicts
-                  const { children, className, style, ref, ...rest } = props;
+                  const { children, className, ...rest } = props;
                   const match = /language-(\w+)/.exec(className || '');
 
                   // Multi-line code block with syntax highlighting
                   if (match) {
                     return (
                       <SyntaxHighlighter
-                        style={oneDark}
+                        style={oneDark as { [key: string]: React.CSSProperties }}
                         language={match[1]}
                         PreTag="div"
-                        {...rest}
                       >
                         {String(children).replace(/\n$/, '')}
                       </SyntaxHighlighter>
                     );
                   }
 
-                  // Inline code with oneDark theme styling (matches react-syntax-highlighter)
-                  return (
-                    <code
-                      className="relative rounded px-[0.4rem] py-[0.2rem] font-mono text-sm font-normal border"
-                      style={{
-                        backgroundColor: '#282c34',
-                        color: '#abb2bf',
-                        borderColor: 'rgba(171, 178, 191, 0.15)',
-                      }}
-                      {...rest}
-                    >
-                      {children}
-                    </code>
-                  );
+                  // Inline code - let @tailwindcss/typography handle styling
+                  return <code {...rest}>{children}</code>;
                 },
                 // Custom image component with Next.js Image
                 img({ src, alt }) {
