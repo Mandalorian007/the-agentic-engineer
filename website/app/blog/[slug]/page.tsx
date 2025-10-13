@@ -13,6 +13,7 @@ import { getPostBySlug, getAllPostSlugs } from "@/lib/posts";
 import { getCategoryById } from "@/lib/categories";
 import Image from "next/image";
 import { CodeBlock } from "@/components/code-block";
+import { ShareButtons } from "@/components/share-buttons";
 
 // ISR: Revalidate every 1 hour (3600 seconds)
 export const revalidate = 3600;
@@ -218,7 +219,14 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
         </article>
 
         {/* Sidebar */}
-        <aside className="lg:sticky lg:top-24 h-fit">
+        <aside className="lg:sticky lg:top-24 h-fit space-y-6">
+          {/* Share This Article */}
+          <ShareButtons
+            url={`https://the-agentic-engineer.com/blog/${params.slug}`}
+            title={post.title}
+          />
+
+          {/* About This Post */}
           <div className="border rounded-lg p-6">
             <h3 className="font-semibold mb-4">About This Post</h3>
             <div className="space-y-3 text-sm">
@@ -244,7 +252,7 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
           </div>
 
           {/* Navigation */}
-          <div className="mt-6 border rounded-lg p-6">
+          <div className="border rounded-lg p-6">
             <h3 className="font-semibold mb-4">Navigation</h3>
             <div className="space-y-2 text-sm">
               <Link

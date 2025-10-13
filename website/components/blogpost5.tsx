@@ -1,6 +1,7 @@
 "use client";
 
-import { Facebook, Home, Lightbulb, Linkedin, Twitter } from "lucide-react";
+import { Home, Lightbulb } from "lucide-react";
+import { FaFacebookF, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
@@ -279,7 +280,7 @@ const Blogpost5 = () => {
                     className="group rounded-full"
                   >
                     <a href="#">
-                      <Facebook className="fill-muted-foreground text-muted-foreground group-hover:fill-primary group-hover:text-primary h-4 w-4 transition-colors" />
+                      <FaFacebookF className="text-muted-foreground group-hover:text-primary h-4 w-4 transition-colors" />
                     </a>
                   </Button>
                 </li>
@@ -290,7 +291,7 @@ const Blogpost5 = () => {
                     className="group rounded-full"
                   >
                     <a href="#">
-                      <Linkedin className="fill-muted-foreground text-muted-foreground group-hover:fill-primary group-hover:text-primary h-4 w-4 transition-colors" />
+                      <FaLinkedinIn className="text-muted-foreground group-hover:text-primary h-4 w-4 transition-colors" />
                     </a>
                   </Button>
                 </li>
@@ -301,7 +302,7 @@ const Blogpost5 = () => {
                     className="group rounded-full"
                   >
                     <a href="#">
-                      <Twitter className="fill-muted-foreground text-muted-foreground group-hover:fill-primary group-hover:text-primary h-4 w-4 transition-colors" />
+                      <FaXTwitter className="text-muted-foreground group-hover:text-primary h-4 w-4 transition-colors" />
                     </a>
                   </Button>
                 </li>
