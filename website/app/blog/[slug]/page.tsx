@@ -1,6 +1,6 @@
 /**
  * Individual Blog Post Page
- * Features: Real MDX content rendering, metadata, hashtags
+ * Features: Real MDX content rendering, metadata, hashtags, JSON-LD, ISR revalidation
  */
 
 import Link from "next/link";
@@ -13,6 +13,9 @@ import { getPostBySlug, getAllPostSlugs } from "@/lib/posts";
 import { getCategoryById } from "@/lib/categories";
 import Image from "next/image";
 import { CodeBlock } from "@/components/code-block";
+
+// ISR: Revalidate every 1 hour (3600 seconds)
+export const revalidate = 3600;
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -59,8 +62,48 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
 
   const category = getCategoryById(post.category);
 
+  // Generate JSON-LD structured data for SEO
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.description,
+    "image": post.content.match(/!\[.*?\]\((\.\/.*?)\)/g)?.map(img => {
+      const match = img.match(/!\[.*?\]\((\.\/.*?)\)/);
+      return match ? `https://the-agentic-engineer.com/blog/${params.slug}/${match[1].slice(2)}` : null;
+    }).filter(Boolean) || [],
+    "datePublished": post.date,
+    "dateModified": post.date,
+    "author": {
+      "@type": "Person",
+      "name": "The Agentic Engineer"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "The Agentic Engineer",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://the-agentic-engineer.com/logo.png"
+      }
+    },
+    "url": `https://the-agentic-engineer.com/blog/${params.slug}`,
+    "keywords": post.hashtags?.join(", ") || "",
+    "articleSection": category?.name || post.category,
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://the-agentic-engineer.com/blog/${params.slug}`
+    }
+  };
+
   return (
-    <div className="container py-12">
+    <>
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
+      <div className="container py-12">
       {/* Breadcrumb */}
       <nav className="mb-8 text-sm text-muted-foreground">
         <Link href="/" className="hover:text-foreground">
@@ -214,5 +257,6 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
         </aside>
       </div>
     </div>
+    </>
   );
 }

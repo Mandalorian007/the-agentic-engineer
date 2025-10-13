@@ -1,78 +1,62 @@
 /**
  * Category Filter Page
- * Filters blog posts by category
- * TODO: Wire up with getPostsByCategory() from lib/categories.ts in Phase 3
+ * Filters blog posts by category with ISR revalidation
  */
 
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getCategoryById, getPostsByCategory, getAllCategoryIds } from "@/lib/categories";
 
-// Placeholder - will be replaced with lib/categories.ts
-const CATEGORIES: Record<string, { name: string; description: string }> = {
-  tutorials: {
-    name: "Tutorials & How-Tos",
-    description: "Step-by-step guides teaching skills and processes",
-  },
-  "case-studies": {
-    name: "Case Studies",
-    description: "Real-world project showcases and results",
-  },
-  guides: {
-    name: "Guides & Fundamentals",
-    description: "Beginner-friendly introductions to complex topics",
-  },
-  lists: {
-    name: "Lists & Tips",
-    description: "Curated collections of tools, tips, and strategies",
-  },
-  comparisons: {
-    name: "Comparisons & Reviews",
-    description: "Side-by-side comparisons and product reviews",
-  },
-  "problem-solution": {
-    name: "Problem & Solution",
-    description: "Addressing pain points with practical solutions",
-  },
-  opinions: {
-    name: "Opinions & Analysis",
-    description: "Perspectives, analysis, and myth debunking",
-  },
-};
+// ISR: Revalidate every 1 hour (3600 seconds)
+export const revalidate = 3600;
 
-// Placeholder posts - will be filtered by category in Phase 3
-const PLACEHOLDER_POSTS = [
-  {
-    slug: "example-post-1",
-    title: "Getting Started with AI Agents",
-    description:
-      "Learn the fundamentals of building AI agents from scratch with practical examples.",
-    date: "2025-10-12",
-    category: "tutorials",
-    hashtags: ["ai-agents", "python", "tutorial"],
-  },
-];
+interface CategoryPageProps {
+  params: Promise<{
+    category: string;
+  }>;
+}
 
-export default function CategoryPage({
-  params,
-}: {
-  params: { category: string };
-}) {
-  const categoryInfo = CATEGORIES[params.category];
+// Generate static params for all categories
+export async function generateStaticParams() {
+  const categoryIds = getAllCategoryIds();
+  return categoryIds.map((categoryId) => ({ category: categoryId }));
+}
+
+// Generate metadata for SEO
+export async function generateMetadata(props: CategoryPageProps) {
+  const params = await props.params;
+  const categoryInfo = getCategoryById(params.category);
 
   if (!categoryInfo) {
-    return (
-      <div className="container py-12">
-        <h1 className="text-4xl font-bold">Category not found</h1>
-        <p className="mt-4">
-          <Link href="/blog" className="text-primary hover:underline">
-            ← Back to all posts
-          </Link>
-        </p>
-      </div>
-    );
+    return {
+      title: "Category Not Found",
+    };
   }
+
+  return {
+    title: `${categoryInfo.name} | The Agentic Engineer`,
+    description: categoryInfo.description,
+    openGraph: {
+      title: `${categoryInfo.name} | The Agentic Engineer`,
+      description: categoryInfo.description,
+      type: "website",
+    },
+  };
+}
+
+export default async function CategoryPage(props: CategoryPageProps) {
+  const params = await props.params;
+  const categoryInfo = getCategoryById(params.category);
+
+  if (!categoryInfo) {
+    notFound();
+  }
+
+  // Get posts for this category
+  const posts = getPostsByCategory(params.category);
 
   return (
     <div className="container py-12">
@@ -106,35 +90,38 @@ export default function CategoryPage({
 
       {/* Post Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {PLACEHOLDER_POSTS.filter((post) => post.category === params.category)
-          .length > 0 ? (
-          PLACEHOLDER_POSTS.filter((post) => post.category === params.category).map(
-            (post) => (
-              <Link key={post.slug} href={`/blog/${post.slug}`}>
-                <Card className="h-full hover:border-foreground/50 transition-colors cursor-pointer">
-                  <CardHeader>
-                    <div className="mb-2">
-                      <Badge variant="secondary">{post.category}</Badge>
-                    </div>
-                    <h2 className="text-2xl font-semibold mb-2">
-                      {post.title}
-                    </h2>
-                    <p className="text-muted-foreground">{post.description}</p>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {post.hashtags.map((tag) => (
-                        <Badge key={tag} variant="outline">
-                          #{tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    <p className="text-sm text-muted-foreground">{post.date}</p>
-                  </CardContent>
-                </Card>
-              </Link>
-            )
-          )
+        {posts.length > 0 ? (
+          posts.map((post) => (
+            <Link key={post.slug} href={`/blog/${post.slug}`}>
+              <Card className="h-full hover:border-foreground/50 transition-colors cursor-pointer">
+                <CardHeader>
+                  <div className="mb-2">
+                    <Badge variant="secondary">{categoryInfo.name}</Badge>
+                  </div>
+                  <h2 className="text-2xl font-semibold mb-2">
+                    {post.title}
+                  </h2>
+                  <p className="text-muted-foreground">{post.description}</p>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {post.hashtags.map((tag) => (
+                      <Badge key={tag} variant="outline">
+                        #{tag}
+                      </Badge>
+                    ))}
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(post.date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))
         ) : (
           <div className="col-span-full text-center py-12">
             <p className="text-muted-foreground">
