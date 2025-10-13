@@ -38,8 +38,8 @@ const NAVIGATION = [
   {
     title: "Legal",
     links: [
-      { name: "Privacy", href: "#" },
-      { name: "Terms", href: "#" },
+      { name: "Privacy", href: "/privacy" },
+      { name: "Terms", href: "/terms" },
     ],
   },
 ];
