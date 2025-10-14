@@ -24,9 +24,11 @@ def get_next_monday(date: datetime) -> datetime:
     return next_monday.replace(hour=10, minute=0, second=0, microsecond=0)
 
 
-def extract_date_from_dirname(dirname: str) -> Optional[datetime]:
-    """Extract date from post directory name (YYYY-MM-DD-slug format)."""
-    parts = dirname.split('-')
+def extract_date_from_filename(filename: str) -> Optional[datetime]:
+    """Extract date from post filename (YYYY-MM-DD-slug.mdx format)."""
+    # Remove .mdx extension if present
+    name = filename.replace('.mdx', '')
+    parts = name.split('-')
     if len(parts) < 4:  # Need at least YYYY-MM-DD-slug
         return None
 
@@ -40,15 +42,15 @@ def extract_date_from_dirname(dirname: str) -> Optional[datetime]:
 
 
 def get_all_post_dates(posts_dir: Path) -> List[datetime]:
-    """Get all post dates from directory names."""
+    """Get all post dates from MDX filenames."""
     dates = []
 
     if not posts_dir.exists():
         return dates
 
     for item in posts_dir.iterdir():
-        if item.is_dir():
-            date = extract_date_from_dirname(item.name)
+        if item.is_file() and item.suffix == '.mdx':
+            date = extract_date_from_filename(item.name)
             if date:
                 dates.append(date)
 
@@ -66,7 +68,7 @@ def format_date_for_frontmatter(date: datetime) -> str:
 
 
 def main():
-    posts_dir = Path("posts")
+    posts_dir = Path("website/content/posts")
 
     # Get all existing post dates
     post_dates = get_all_post_dates(posts_dir)
