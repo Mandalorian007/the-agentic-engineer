@@ -203,6 +203,9 @@ categories:
 ```bash
 # Required for AI image generation
 OPENAI_API_KEY=your-key-here
+
+# Optional: Discord webhook for low content buffer notifications
+LOW_CONTENT_WEBHOOK=https://discord.com/api/webhooks/...
 ```
 
 ## Quality Checks
@@ -277,6 +280,38 @@ Directory name: 2025-10-20-your-slug-here
 Frontmatter date: 2025-10-20T10:00:00Z
 Day: Monday, October 20, 2025
 ```
+
+## Content Buffer Monitoring
+
+Get a weekly Discord notification every Saturday showing your content pipeline status.
+
+### Setup
+
+1. **Add Discord webhook to `.env.local`:**
+   ```bash
+   LOW_CONTENT_WEBHOOK=https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE
+   ```
+
+2. **Add as GitHub secret:**
+   - Go to Settings → Secrets and variables → Actions
+   - Add secret: `LOW_CONTENT_WEBHOOK`
+
+3. **GitHub Action runs every Saturday at 8am EST**
+   - Sends weekly status update to Discord
+   - Shows: weeks of buffer, scheduled posts, last post date
+
+### Manual Testing
+
+```bash
+# Send test notification to Discord (auto-loads .env.local)
+uv run tools/buffer_check.py --force
+```
+
+Each weekly notification shows:
+- 🚨 Status level (color-coded: red < 2 weeks, orange < 4 weeks, green ≥ 4 weeks)
+- 📅 Date of last scheduled post
+- ✍️ When you need new content by
+- 📝 Complete list of scheduled posts
 
 ## Local Development
 

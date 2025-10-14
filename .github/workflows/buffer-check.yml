@@ -1,0 +1,36 @@
+name: Content Buffer Check
+
+on:
+  schedule:
+    # Run every Saturday at 12pm UTC (8am EST / 5am PST)
+    - cron: '0 12 * * 6'
+
+  workflow_dispatch:  # Allow manual trigger for testing
+
+jobs:
+  check-buffer:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          uv sync
+
+      - name: Send weekly content buffer status
+        env:
+          LOW_CONTENT_WEBHOOK: ${{ secrets.LOW_CONTENT_WEBHOOK }}
+        run: |
+          uv run tools/buffer_check.py --force

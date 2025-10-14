@@ -58,6 +58,7 @@ the-agentic-engineer/
 │   ├── convert_to_webp.py        # Image format conversion
 │   ├── next_publish_date.py      # Calculate next Monday publish date
 │   ├── seo_check.py              # SEO analysis & validation
+│   ├── buffer_check.py           # Weekly content buffer monitoring
 │   └── setup_check.py            # Environment validation
 │
 ├── website/                      # Next.js application (deployed to Vercel)
@@ -328,6 +329,39 @@ https://the-agentic-engineer.com/blog/{slug}
 
 **Error Handling:**
 Tweet failures are caught and logged but never block the page from rendering. This ensures the blog remains functional even if Twitter API is down or rate-limited.
+
+---
+
+## Content Buffer Monitoring
+
+### How It Works
+
+A GitHub Action runs every **Saturday at 8am EST** to monitor the content pipeline and send a weekly status update via Discord webhook.
+
+**Implementation** (`.github/workflows/buffer-check.yml` + `tools/buffer_check.py`):
+
+```bash
+# Runs weekly via GitHub Actions
+uv run tools/buffer_check.py --force
+```
+
+**Discord Notification Format:**
+- 🎨 **Color-coded urgency** (green ≥4 weeks, orange 2-4 weeks, red <2 weeks)
+- 📊 **Buffer status** (weeks remaining, number of scheduled posts)
+- 📅 **Last scheduled post date**
+- ✍️ **When new content is needed**
+- 📝 **Complete list of scheduled posts with titles**
+
+**Key Features:**
+- ✅ **Weekly check-in** - Always know your content status without manual tracking
+- ✅ **Auto-loads .env.local** - Works locally and in GitHub Actions with same command
+- ✅ **Title extraction** - Parses MDX frontmatter for readable post titles
+- ✅ **Zero manual work** - Set and forget monitoring
+
+**Setup:**
+1. Add `LOW_CONTENT_WEBHOOK` to GitHub secrets (Settings → Secrets → Actions)
+2. Workflow runs automatically every Saturday morning
+3. Test locally: `uv run tools/buffer_check.py --force`
 
 ---
 
@@ -656,6 +690,26 @@ uv run tools/setup_check.py
 - ✅ Required directories exist
 
 **Use Case:** First-time setup verification and troubleshooting
+
+#### buffer_check.py
+```bash
+uv run tools/buffer_check.py --force
+```
+
+**Purpose:** Monitor content buffer and send Discord notification
+**Output:** Weekly status update with scheduled posts
+**Requires:** `LOW_CONTENT_WEBHOOK` in `.env.local` or GitHub secrets
+
+**Automated Usage:**
+- GitHub Action runs every Saturday at 8am EST
+- Sends color-coded Discord notification
+- Shows weeks of buffer, scheduled posts, and deadlines
+
+**Manual Testing:**
+```bash
+# Send test notification (auto-loads .env.local)
+uv run tools/buffer_check.py --force
+```
 
 ---
 
