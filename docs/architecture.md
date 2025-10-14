@@ -24,6 +24,7 @@ The Agentic Engineer is a modern blogging platform built with Next.js 15, featur
 | **Code Highlighting** | react-syntax-highlighter | Theme-aware syntax highlighting (oneLight/oneDark) |
 | **Theme** | next-themes | Light/dark mode toggle |
 | **Content Tools** | Python (uv) | CLI tools for generation & validation |
+| **Social Distribution** | twitter-api-v2 | Automated tweet posting on publish |
 
 ---
 
@@ -94,6 +95,7 @@ the-agentic-engineer/
 │   ├── lib/                      # TypeScript utilities
 │   │   ├── posts.ts              # Post loading with date filtering
 │   │   ├── categories.ts         # Category management & validation
+│   │   ├── twitter.ts            # Twitter API integration for auto-tweeting
 │   │   └── utils.ts              # Helper functions
 │   │
 │   └── package.json              # npm dependencies
@@ -271,6 +273,61 @@ export const revalidate = 3600; // 1 hour
 ```
 
 Posts appear within ~1 hour of their scheduled time without manual intervention.
+
+---
+
+## Automated Twitter Distribution
+
+### How It Works
+
+When ISR runs hourly, newly published posts are automatically tweeted to [@MatthewCFontana](https://twitter.com/MatthewCFontana).
+
+**Implementation** (`website/lib/twitter.ts` + `app/blog/page.tsx`):
+
+```typescript
+// Check for newly published posts (within last 90 minutes)
+for (const post of posts) {
+  if (isRecentlyPublished(post.date)) {
+    try {
+      await tweetNewPost({
+        title: post.title,
+        description: post.description,
+        slug: post.slug,
+        date: post.date,
+      });
+    } catch (error) {
+      // Log error but don't fail page render
+      console.error(`Failed to tweet about ${post.slug}:`, error);
+    }
+  }
+}
+```
+
+**Tweet Format:**
+```
+{title}
+
+{description (truncated to fit 280 chars)}
+
+https://the-agentic-engineer.com/blog/{slug}
+```
+
+**Key Features:**
+- ✅ **90-minute detection window** - Accounts for ISR timing variance
+- ✅ **Smart truncation** - Descriptions automatically truncated with "..." to stay under 280 characters
+- ✅ **Non-blocking** - Tweet failures logged but don't break page rendering
+- ✅ **Zero manual work** - Posts tweet automatically when they go live
+
+**Dependencies:**
+- `twitter-api-v2` - Twitter API client for Node.js
+- Environment variables (set in Vercel):
+  - `TWITTER_API_KEY`
+  - `TWITTER_API_KEY_SECRET`
+  - `TWITTER_ACCESS_TOKEN`
+  - `TWITTER_ACCESS_TOKEN_SECRET`
+
+**Error Handling:**
+Tweet failures are caught and logged but never block the page from rendering. This ensures the blog remains functional even if Twitter API is down or rate-limited.
 
 ---
 
@@ -479,7 +536,8 @@ Next.js dependencies:
     "react-markdown": "^9.0.1",
     "remark-gfm": "^4.0.0",
     "react-syntax-highlighter": "^15.6.1",
-    "gray-matter": "^4.0.3"
+    "gray-matter": "^4.0.3",
+    "twitter-api-v2": "^1.27.0"
   }
 }
 ```

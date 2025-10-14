@@ -6,13 +6,32 @@
 import { getPublishedPosts } from "@/lib/posts";
 import { Blog27 } from "@/components/blog27";
 import { formatReadingTime } from "@/lib/reading-time";
+import { tweetNewPost, isRecentlyPublished } from "@/lib/twitter";
 
 // Enable ISR with 1-hour revalidation (future-dated posts will appear within an hour)
 export const revalidate = 3600;
 
-export default function BlogListingPage() {
+export default async function BlogListingPage() {
   // Get real published posts (excludes future-dated posts)
   const posts = getPublishedPosts();
+
+  // Check for newly published posts and tweet about them
+  // This runs when ISR regenerates the page (hourly)
+  for (const post of posts) {
+    if (isRecentlyPublished(post.date)) {
+      try {
+        await tweetNewPost({
+          title: post.title,
+          description: post.description,
+          slug: post.slug,
+          date: post.date,
+        });
+      } catch (error) {
+        // Log error but don't fail the page render
+        console.error(`Failed to tweet about ${post.slug}:`, error);
+      }
+    }
+  }
 
   // Transform posts to blog27 format
   const transformedPosts = posts.map((post) => {
