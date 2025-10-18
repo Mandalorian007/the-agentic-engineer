@@ -297,6 +297,29 @@ Day: Thursday, November 20, 2025
 
 **Changing frequency:** Just edit `blog-config.yaml` to change publish days. The entire content pipeline (date calculation, buffer monitoring) automatically adapts.
 
+### Moving Posts to New Dates
+
+Need to reschedule a post? Use the move tool:
+
+```bash
+# Preview what will change (dry run)
+uv run tools/move_post_date.py 2025-10-27 2025-10-23 --dry-run
+
+# Actually move the post
+uv run tools/move_post_date.py 2025-10-27 2025-10-23
+```
+
+**What it does:**
+- ✅ Renames MDX file with new date
+- ✅ Updates frontmatter `date` field
+- ✅ Renames image directory
+- ✅ Updates all image references in content
+
+**Use cases:**
+- Adjusting to a new publishing schedule (e.g., weekly → twice-weekly)
+- Filling gaps in the content calendar
+- Moving posts earlier/later based on priorities
+
 ## Content Buffer Monitoring
 
 Get a weekly Discord notification every Saturday showing your content pipeline status.
@@ -360,7 +383,8 @@ Direct tool usage without Claude Code commands:
 - `vale <mdx-file>` - Prose linting
 
 **Utilities:**
-- `uv run tools/next_publish_date.py` - Get next Monday date
+- `uv run tools/next_publish_date.py` - Get next available publish date
+- `uv run tools/move_post_date.py <old-date> <new-date>` - Move a post to a new date (with `--dry-run` to preview)
 
 ## Architecture
 

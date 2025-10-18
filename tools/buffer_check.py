@@ -111,14 +111,17 @@ def calculate_buffer_stats(scheduled_posts: List[Dict], posts_per_week: int) -> 
     last_post = scheduled_posts[-1]
     last_post_date = last_post["date"]
 
-    # Calculate weeks of buffer based on actual posts per week
+    # Calculate weeks of buffer based on actual time span
+    # This is more accurate than just dividing posts by posts_per_week
     posts_scheduled = len(scheduled_posts)
-    weeks_of_buffer = posts_scheduled / posts_per_week
+    time_until_last_post = last_post_date - now
+    days_of_buffer = time_until_last_post.days
+    weeks_of_buffer = days_of_buffer / 7.0
 
-    # Calculate when content runs out (day after last post)
+    # Calculate when content runs out (the last post date)
     content_runs_out = last_post_date
 
-    # Need new content by 1 week before last post (to maintain buffer)
+    # Need new content by the last post date (to maintain buffer)
     need_content_by = content_runs_out
 
     return {

@@ -1,11 +1,15 @@
 ---
-title: "Taming Context Windows: Disable Auto-Compact for Better AI"
-description: "Claude's auto-compact steals 22.5% of your context and makes sessions dumber. Learn workflow patterns that reclaim tokens and maximize AI coding power."
-date: "2025-11-03T10:00:00Z"
-category: "tutorials"
-hashtags: ["claude-code", "context-management", "ai-workflow", "developer-tools"]
+title: 'Taming Context Windows: Disable Auto-Compact for Better AI'
+description: Claude's auto-compact steals 22.5% of your context and makes sessions
+  dumber. Learn workflow patterns that reclaim tokens and maximize AI coding power.
+date: '2025-10-28T10:00:00Z'
+category: tutorials
+hashtags:
+- claude-code
+- context-management
+- ai-workflow
+- developer-tools
 ---
-
 Have you ever been deep in a coding session with Claude, everything flowing perfectly, when suddenly you see that dreaded message: **"compacting..."**?
 
 Your heart sinks. You know what's coming next. The quality drops. The responses get vaguer. What was once a brilliant coding partner just got noticeably... dumber.
@@ -23,7 +27,7 @@ Let's run a quick experiment. Start a fresh Claude Code session and run these co
 
 Here's what you'll see:
 
-![Claude context window breakdown showing auto-compact buffer usage](../../public/blog/2025-11-03-taming-context-windows/claude-context.webp)
+![Claude context window breakdown showing auto-compact buffer usage](../../public/blog/2025-10-28-taming-context-windows/claude-context.webp)
 
 Notice anything alarming? **The auto-compact buffer is consuming 22.5% of your available context window** — that's 45,000 tokens out of 200,000 — before you've even started coding.
 
@@ -101,7 +105,7 @@ If you're designing standalone workflows, you don't want that 22.5% buffer eatin
 
 Now check your context again with `/context`:
 
-![Context window after disabling auto-compact, showing 22.5% more available space](../../public/blog/2025-11-03-taming-context-windows/diagram-context-comparison.webp)
+![Context window after disabling auto-compact, showing 22.5% more available space](../../public/blog/2025-10-28-taming-context-windows/diagram-context-comparison.webp)
 
 You just gained back **45,000 tokens** — over a fifth of your total context window.
 

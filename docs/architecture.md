@@ -703,6 +703,70 @@ Day: Thursday, November 20, 2025
 - Returns properly formatted date for frontmatter
 - Supports any combination of weekdays
 
+#### move_post_date.py
+```bash
+# Preview changes without making them
+uv run tools/move_post_date.py 2025-10-27 2025-10-23 --dry-run
+
+# Actually move the post
+uv run tools/move_post_date.py 2025-10-27 2025-10-23
+
+# Move with specific time (optional)
+uv run tools/move_post_date.py 2025-10-27 "2025-10-23T14:30:00Z"
+```
+
+**Purpose:** Move a blog post from one date to another
+**What it does:**
+- Renames MDX file with new date prefix
+- Updates `date` field in frontmatter
+- Renames image directory to match new date
+- Updates all image path references in MDX content
+
+**Options:**
+- `--dry-run` - Preview changes without making them (recommended first step)
+- `-q, --quiet` - Minimal output (only errors)
+
+**Use Cases:**
+- Adjusting content schedule from weekly to twice-weekly
+- Filling gaps in the content calendar
+- Rescheduling posts based on priorities
+- Fixing accidentally scheduled dates
+
+**Example Output:**
+```
+📄 Found post: 2025-10-27-packaging-expertise-context-engineering.mdx
+
+============================================================
+📋 MOVE PLAN
+============================================================
+
+1. Rename MDX file:
+   2025-10-27-packaging-expertise-context-engineering.mdx
+   → 2025-10-23-packaging-expertise-context-engineering.mdx
+
+2. Update frontmatter date:
+   2025-10-27T10:00:00Z
+   → 2025-10-23T10:00:00Z
+
+3. Update 2 image reference(s) in content
+
+4. Rename image directory:
+   2025-10-27-packaging-expertise-context-engineering/
+   → 2025-10-23-packaging-expertise-context-engineering/
+
+============================================================
+
+✅ Move completed successfully!
+   Post moved from 2025-10-27 to 2025-10-23
+```
+
+**Safety Features:**
+- Always validates dates are valid
+- Checks if target date already has a post
+- Verifies image directory exists before moving
+- Provides detailed preview with `--dry-run`
+- Reports all changes being made
+
 #### setup_check.py
 ```bash
 uv run tools/setup_check.py
