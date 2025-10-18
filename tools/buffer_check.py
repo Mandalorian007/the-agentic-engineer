@@ -140,13 +140,13 @@ def create_discord_message(stats: Dict[str, any], scheduled_posts: List[Dict]) -
     posts_count = stats["posts_scheduled"]
     posts_per_week = stats["posts_per_week"]
 
-    # Determine color and urgency
+    # Determine color and urgency with three levels
     if weeks < 2:
-        color = 0xFF0000  # Red - urgent
-        urgency = "🚨 URGENT"
+        color = 0xFF0000  # Red - urgent/low
+        urgency = "🚨 LOW"
     elif weeks < 4:
-        color = 0xFFA500  # Orange - warning
-        urgency = "⚠️ LOW"
+        color = 0xFFA500  # Orange - moderate
+        urgency = "⚠️ MODERATE"
     else:
         color = 0x00FF00  # Green - good
         urgency = "✅ GOOD"
