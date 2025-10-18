@@ -1,6 +1,5 @@
 """Configuration loading and validation for Next.js blog"""
 
-import os
 import yaml
 from dotenv import load_dotenv
 from pathlib import Path
@@ -105,3 +104,37 @@ def get_categories() -> list:
         'problem-solution',
         'opinions'
     ]
+
+
+def get_publishing_config(config: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Get publishing configuration with defaults
+
+    Args:
+        config: Configuration dict from load_config()
+
+    Returns:
+        Publishing configuration dict with:
+        - frequency: "weekly" or "twice-weekly"
+        - days: list of day names (e.g., ["monday", "thursday"])
+        - time: publish time string (e.g., "10:00:00")
+    """
+    publishing = config.get('publishing', {})
+    return {
+        'frequency': publishing.get('frequency', 'weekly'),
+        'days': publishing.get('days', ['monday']),
+        'time': publishing.get('time', '10:00:00'),
+    }
+
+
+def get_posts_per_week(config: Dict[str, Any]) -> int:
+    """
+    Calculate posts per week from configuration
+
+    Args:
+        config: Configuration dict from load_config()
+
+    Returns:
+        Number of posts per week based on configured publish days
+    """
+    return len(get_publishing_config(config)['days'])

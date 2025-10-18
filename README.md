@@ -188,6 +188,11 @@ image_generation:
   format: "webp"
   quality: 85
 
+publishing:
+  frequency: "twice-weekly"  # or "weekly"
+  days: ["monday", "thursday"]  # Days of week to publish
+  time: "10:00:00"  # Publish time (UTC)
+
 categories:
   - tutorials
   - case-studies
@@ -266,7 +271,16 @@ Images are automatically saved in WebP format for optimal web performance.
 
 ## Publishing Schedule
 
-Get the next available Monday for consistent publishing:
+The publishing schedule is configurable in `blog-config.yaml`:
+
+```yaml
+publishing:
+  frequency: "twice-weekly"  # or "weekly"
+  days: ["monday", "thursday"]  # Days of week to publish
+  time: "10:00:00"  # Publish time (UTC)
+```
+
+Get the next available publish date:
 
 ```bash
 uv run tools/next_publish_date.py
@@ -274,12 +288,14 @@ uv run tools/next_publish_date.py
 
 Output:
 ```
-Next available Monday for publishing:
+Next available publish date (Monday, Thursday):
 ----------------------------------------
-Directory name: 2025-10-20-your-slug-here
-Frontmatter date: 2025-10-20T10:00:00Z
-Day: Monday, October 20, 2025
+Directory name: 2025-11-20-your-slug-here
+Frontmatter date: 2025-11-20T10:00:00Z
+Day: Thursday, November 20, 2025
 ```
+
+**Changing frequency:** Just edit `blog-config.yaml` to change publish days. The entire content pipeline (date calculation, buffer monitoring) automatically adapts.
 
 ## Content Buffer Monitoring
 

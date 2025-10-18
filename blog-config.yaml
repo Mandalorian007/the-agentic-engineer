@@ -13,6 +13,12 @@ image_generation:
   format: "webp"
   quality: 85
 
+# Publishing schedule
+publishing:
+  frequency: "twice-weekly"  # or "weekly" for single-day publishing
+  days: ["monday", "thursday"]  # Day(s) of week to publish
+  time: "10:00:00"  # Publish time (UTC)
+
 # Categories (validation reference)
 categories:
   - tutorials

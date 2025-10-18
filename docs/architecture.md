@@ -238,9 +238,30 @@ Use **relative paths** from MDX file location:
 
 ---
 
-## Scheduled Posts & Date Filtering
+## Scheduled Posts & Publishing Schedule
 
-### How It Works
+### Configurable Publishing Schedule
+
+The publishing schedule is configured in `blog-config.yaml`:
+
+```yaml
+publishing:
+  frequency: "twice-weekly"  # or "weekly"
+  days: ["monday", "thursday"]  # Days of week to publish
+  time: "10:00:00"  # Publish time (UTC)
+```
+
+**To change publishing frequency:** Just edit the `days` array in `blog-config.yaml`. The entire content pipeline automatically adapts:
+- `next_publish_date.py` - Calculates next available publish day
+- `buffer_check.py` - Adjusts buffer calculations based on posts/week
+- `/create-post` command - Uses configured schedule
+
+**Examples:**
+- Weekly: `days: ["monday"]`
+- Twice weekly: `days: ["monday", "thursday"]`
+- Three times weekly: `days: ["monday", "wednesday", "friday"]`
+
+### How Scheduled Posts Work
 
 Posts with future dates are automatically hidden until their publication date:
 
@@ -347,7 +368,7 @@ uv run tools/buffer_check.py --force
 
 **Discord Notification Format:**
 - 🎨 **Color-coded urgency** (green ≥4 weeks, orange 2-4 weeks, red <2 weeks)
-- 📊 **Buffer status** (weeks remaining, number of scheduled posts)
+- 📊 **Buffer status** (weeks remaining, posts scheduled @ posts/week)
 - 📅 **Last scheduled post date**
 - ✍️ **When new content is needed**
 - 📝 **Complete list of scheduled posts with titles**
@@ -356,6 +377,7 @@ uv run tools/buffer_check.py --force
 - ✅ **Weekly check-in** - Always know your content status without manual tracking
 - ✅ **Auto-loads .env.local** - Works locally and in GitHub Actions with same command
 - ✅ **Title extraction** - Parses MDX frontmatter for readable post titles
+- ✅ **Adaptive calculations** - Automatically adjusts for configured publishing frequency
 - ✅ **Zero manual work** - Set and forget monitoring
 
 **Setup:**
@@ -515,6 +537,11 @@ image_generation:
   format: "webp"
   quality: 85
 
+publishing:
+  frequency: "twice-weekly"  # or "weekly" for single-day publishing
+  days: ["monday", "thursday"]  # Day(s) of week to publish
+  time: "10:00:00"  # Publish time (UTC)
+
 categories:
   - tutorials
   - case-studies
@@ -658,20 +685,23 @@ vale website/content/posts/YYYY-MM-DD-slug.mdx
 uv run tools/next_publish_date.py
 ```
 
-**Purpose:** Calculate next available Monday for consistent publishing
+**Purpose:** Calculate next available publish date based on configured schedule
+**Configuration:** Reads `publishing.days` from `blog-config.yaml`
 **Output:**
 ```
-Next available Monday for publishing:
+Next available publish date (Monday, Thursday):
 ----------------------------------------
-Directory name: 2025-10-20-your-slug-here
-Frontmatter date: 2025-10-20T10:00:00Z
-Day: Monday, October 20, 2025
+Directory name: 2025-11-20-your-slug-here
+Frontmatter date: 2025-11-20T10:00:00Z
+Day: Thursday, November 20, 2025
 ```
 
 **Logic:**
+- Loads publishing schedule from `blog-config.yaml`
 - Scans existing posts in `website/content/posts/`
-- Finds next Monday not already used
+- Finds next configured publish day not already used
 - Returns properly formatted date for frontmatter
+- Supports any combination of weekdays
 
 #### setup_check.py
 ```bash
@@ -697,18 +727,29 @@ uv run tools/buffer_check.py --force
 ```
 
 **Purpose:** Monitor content buffer and send Discord notification
+**Configuration:** Reads `publishing.days` from `blog-config.yaml` to calculate posts/week
 **Output:** Weekly status update with scheduled posts
 **Requires:** `LOW_CONTENT_WEBHOOK` in `.env.local` or GitHub secrets
 
 **Automated Usage:**
 - GitHub Action runs every Saturday at 8am EST
 - Sends color-coded Discord notification
-- Shows weeks of buffer, scheduled posts, and deadlines
+- Shows weeks of buffer (posts scheduled ÷ posts/week), scheduled posts, and deadlines
+- Automatically adapts to configured publishing frequency
 
 **Manual Testing:**
 ```bash
 # Send test notification (auto-loads .env.local)
 uv run tools/buffer_check.py --force
+```
+
+**Example Output:**
+```
+📊 Content Buffer Status
+==================================================
+Posts scheduled: 5
+Posts per week: 2
+Weeks of buffer: 2.5
 ```
 
 ---

@@ -20,6 +20,10 @@ import requests
 import yaml
 from dotenv import load_dotenv
 
+# Add parent directory to path to import lib modules
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from lib.config import load_config, get_posts_per_week
+
 # Auto-load .env.local if it exists (for local testing)
 project_root = Path(__file__).parent.parent
 env_file = project_root / ".env.local"
@@ -81,14 +85,24 @@ def get_scheduled_posts(content_dir: Path) -> List[Dict[str, any]]:
     return scheduled_posts
 
 
-def calculate_buffer_stats(scheduled_posts: List[Dict]) -> Dict[str, any]:
-    """Calculate buffer statistics."""
+def calculate_buffer_stats(scheduled_posts: List[Dict], posts_per_week: int) -> Dict[str, any]:
+    """
+    Calculate buffer statistics.
+
+    Args:
+        scheduled_posts: List of scheduled post dicts
+        posts_per_week: Number of posts published per week (from config)
+
+    Returns:
+        Dict with buffer statistics
+    """
     now = datetime.now(timezone.utc)
 
     if not scheduled_posts:
         return {
             "weeks_of_buffer": 0,
             "posts_scheduled": 0,
+            "posts_per_week": posts_per_week,
             "last_post_date": None,
             "content_runs_out": now,
             "need_content_by": now
@@ -97,9 +111,9 @@ def calculate_buffer_stats(scheduled_posts: List[Dict]) -> Dict[str, any]:
     last_post = scheduled_posts[-1]
     last_post_date = last_post["date"]
 
-    # Calculate weeks of buffer
-    days_until_last_post = (last_post_date - now).days
-    weeks_of_buffer = days_until_last_post / 7
+    # Calculate weeks of buffer based on actual posts per week
+    posts_scheduled = len(scheduled_posts)
+    weeks_of_buffer = posts_scheduled / posts_per_week
 
     # Calculate when content runs out (day after last post)
     content_runs_out = last_post_date
@@ -109,7 +123,8 @@ def calculate_buffer_stats(scheduled_posts: List[Dict]) -> Dict[str, any]:
 
     return {
         "weeks_of_buffer": weeks_of_buffer,
-        "posts_scheduled": len(scheduled_posts),
+        "posts_scheduled": posts_scheduled,
+        "posts_per_week": posts_per_week,
         "last_post_date": last_post_date,
         "content_runs_out": content_runs_out,
         "need_content_by": need_content_by
@@ -120,6 +135,7 @@ def create_discord_message(stats: Dict[str, any], scheduled_posts: List[Dict]) -
     """Create Discord webhook payload with embed."""
     weeks = stats["weeks_of_buffer"]
     posts_count = stats["posts_scheduled"]
+    posts_per_week = stats["posts_per_week"]
 
     # Determine color and urgency
     if weeks < 2:
@@ -149,7 +165,7 @@ def create_discord_message(stats: Dict[str, any], scheduled_posts: List[Dict]) -
     # Create embed
     embed = {
         "title": f"{urgency} - Content Buffer Check",
-        "description": f"You have **{weeks:.1f} weeks** of scheduled content ({posts_count} posts)",
+        "description": f"You have **{weeks:.1f} weeks** of scheduled content ({posts_count} posts @ {posts_per_week}/week)",
         "color": color,
         "fields": [
             {
@@ -208,6 +224,14 @@ def main():
     )
     args = parser.parse_args()
 
+    # Load configuration to get posts per week
+    try:
+        config = load_config()
+        posts_per_week = get_posts_per_week(config)
+    except Exception as e:
+        print(f"❌ Error loading configuration: {e}", file=sys.stderr)
+        sys.exit(1)
+
     # Get webhook URL (optional for dry-run)
     webhook_url = args.webhook_url or os.environ.get("LOW_CONTENT_WEBHOOK")
 
@@ -223,12 +247,13 @@ def main():
     scheduled_posts = get_scheduled_posts(content_dir)
 
     # Calculate stats
-    stats = calculate_buffer_stats(scheduled_posts)
+    stats = calculate_buffer_stats(scheduled_posts, posts_per_week)
 
     # Print summary
     print(f"\n📊 Content Buffer Status")
     print(f"{'='*50}")
     print(f"Posts scheduled: {stats['posts_scheduled']}")
+    print(f"Posts per week: {posts_per_week}")
     print(f"Weeks of buffer: {stats['weeks_of_buffer']:.1f}")
 
     if stats['last_post_date']:
