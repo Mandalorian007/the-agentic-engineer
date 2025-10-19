@@ -310,3 +310,5 @@ Status: 200 (success), 400 (validation), 500 (error)
 ---
 
 ## End of Template
+
+Publish the plan at `specs/my-plan.md`
