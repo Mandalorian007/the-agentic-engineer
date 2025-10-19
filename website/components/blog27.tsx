@@ -1,12 +1,6 @@
-"use client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Slash } from "lucide-react";
-import { Fragment, useCallback, useMemo, useState } from "react";
-import { ControllerRenderProps, useForm } from "react-hook-form";
-import { z } from "zod";
-import Image from "next/image";
+import { Slash } from "lucide-react";
+import { Fragment } from "react";
 
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,11 +8,8 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
-import { Label } from "@/components/ui/label";
+import { BlogsResult } from "@/components/blog27-load-more";
+import { BlogCard } from "@/components/blog-card";
 
 interface BreadcrumbItem {
   label: string;
@@ -33,21 +24,12 @@ interface Post {
   cta: string;
   thumbnail: string;
   readingTime?: string;
+  isPrimary?: boolean;
 }
 
 interface Category {
   label: string;
   value: string;
-}
-
-interface FilterFormProps {
-  categories: Array<Category>;
-  onCategoryChange: (selectedCategories: string[]) => void;
-}
-
-interface BlogsResultProps {
-  posts: Array<Post>;
-  categories: Array<Category>;
 }
 
 interface BreadcrumbBlogProps {
@@ -332,170 +314,6 @@ const POSTS: Array<Post> = [
   },
 ];
 
-const FilterFormSchema = z.object({
-  items: z.array(z.string()).refine((value) => value.length > 0, {
-    message: "At least one category should be selected.",
-  }),
-});
-
-const FilterForm = ({ categories, onCategoryChange }: FilterFormProps) => {
-  const form = useForm<z.infer<typeof FilterFormSchema>>({
-    resolver: zodResolver(FilterFormSchema),
-    defaultValues: {
-      items: [CATEGORIES[0].value],
-    },
-  });
-
-  const handleCheckboxChange = useCallback(
-    (
-      checked: boolean | string,
-      categoryValue: string,
-      field: ControllerRenderProps<z.infer<typeof FilterFormSchema>, "items">,
-    ) => {
-      let updatedValues = checked
-        ? [...field.value, categoryValue]
-        : field.value.filter((value: string) => value !== categoryValue);
-
-      // If no categories are checked, add "all"
-      if (updatedValues.length === 0) {
-        form.setValue("items", ["all"]);
-        onCategoryChange(["all"]);
-        return;
-      }
-
-      // Remove "all" if specific category is checked
-      if (updatedValues.includes("all")) {
-        updatedValues = updatedValues.filter((v: string) => v !== "all");
-      }
-
-      // Avoid unnecessary updates
-      if (JSON.stringify(field.value) !== JSON.stringify(updatedValues)) {
-        form.setValue("items", updatedValues);
-        onCategoryChange(updatedValues);
-      }
-    },
-    [form, onCategoryChange],
-  );
-
-  return (
-    <Form {...form}>
-      <form>
-        <FormField
-          control={form.control}
-          name="items"
-          render={({ field }) => (
-            <FormItem className="flex w-full flex-wrap items-center gap-2.5">
-              {categories.map((category) => {
-                const isChecked = field.value?.includes(category.value);
-                return (
-                  <FormItem
-                    key={category.value}
-                    className="flex flex-row items-start space-x-3 space-y-0"
-                  >
-                    <FormControl>
-                      <Label
-                        className={`flex cursor-pointer items-center gap-2.5 rounded-full px-4 py-2 transition-all ${
-                          isChecked
-                            ? 'bg-primary text-primary-foreground shadow-sm'
-                            : 'bg-muted hover:bg-muted/70'
-                        }`}
-                      >
-                        <span className="text-sm font-medium">{category.label}</span>
-                        <Checkbox
-                          checked={isChecked}
-                          onCheckedChange={(checked) =>
-                            handleCheckboxChange(checked, category.value, field)
-                          }
-                          className="sr-only"
-                        />
-                      </Label>
-                    </FormControl>
-                  </FormItem>
-                );
-              })}
-            </FormItem>
-          )}
-        />
-      </form>
-    </Form>
-  );
-};
-
-const BlogsResult = ({ posts, categories }: BlogsResultProps) => {
-  const [visibleCount, setVisibleCount] = useState(POSTS_PER_PAGE);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([
-    CATEGORIES[0].value,
-  ]);
-  const handleCategoryChange = useCallback((selected: string[]) => {
-    setSelectedCategories(selected);
-    setVisibleCount(POSTS_PER_PAGE);
-  }, []);
-
-  const handleLoadMore = useCallback(() => {
-    setVisibleCount((prev) => prev + POSTS_PER_PAGE);
-  }, []);
-  const filteredPosts = useMemo(() => {
-    // If "all" is selected, show all posts
-    if (selectedCategories.includes("all")) {
-      return posts;
-    }
-
-    // Otherwise filter by selected categories
-    return posts.filter((post) =>
-      selectedCategories.includes(post.category.toLowerCase())
-    );
-  }, [posts, selectedCategories]);
-
-  const postsToDisplay = filteredPosts;
-
-  const hasMore = visibleCount < postsToDisplay.length;
-
-  return (
-    <div>
-      <FilterForm
-        categories={categories}
-        onCategoryChange={handleCategoryChange}
-      />
-      <div className="flex w-full flex-col gap-4 py-8 lg:gap-8">
-        {postsToDisplay.length === 0 ? (
-          <div className="flex min-h-[300px] items-center justify-center rounded-lg border border-dashed">
-            <div className="text-center space-y-4 p-8">
-              <p className="text-muted-foreground text-lg font-medium">
-                No posts found in the selected categories.
-              </p>
-              <p className="text-muted-foreground text-sm">
-                Try selecting different categories or view all posts.
-              </p>
-              <Button
-                variant="outline"
-                className="mt-2"
-                onClick={() => handleCategoryChange(["all"])}
-              >
-                Show All Posts
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-3">
-              {postsToDisplay.slice(0, visibleCount).map((post) => (
-                <BlogCard key={post.title} {...post} />
-              ))}
-            </div>
-            <div className="flex justify-center">
-              {hasMore && (
-                <Button variant="secondary" onClick={handleLoadMore}>
-                  Load More
-                </Button>
-              )}
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  );
-};
-
 const BreadcrumbBlog = ({ breadcrumb }: BreadcrumbBlogProps) => {
   return (
     <Breadcrumb>
@@ -516,63 +334,6 @@ const BreadcrumbBlog = ({ breadcrumb }: BreadcrumbBlogProps) => {
         })}
       </BreadcrumbList>
     </Breadcrumb>
-  );
-};
-
-const BlogCard = ({ category, title, thumbnail, summary, link, cta, readingTime }: Post) => {
-  /**
-   * Format category ID to display name
-   * Examples:
-   *   "case-studies" -> "Case Studies"
-   *   "tutorials" -> "Tutorials"
-   *   "problem-solution" -> "Problem Solution"
-   */
-  const formatCategory = (cat: string): string => {
-    return cat
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
-  };
-
-  return (
-    <a href={link} className="block h-full w-full">
-      <Card className="size-full rounded-lg border py-0">
-        <CardContent className="p-0">
-          <div className="text-muted-foreground border-b p-2.5 text-sm font-medium leading-[1.2]">
-            {formatCategory(category)}
-          </div>
-          <AspectRatio ratio={1.520833333} className="overflow-hidden">
-            <Image
-              src={thumbnail}
-              alt={title}
-              fill
-              className="object-cover object-center"
-            />
-          </AspectRatio>
-          <div className="flex w-full flex-col gap-5 p-5">
-            <h2 className="text-lg font-medium leading-tight md:text-xl">
-              {title}
-            </h2>
-            <div className="w-full max-w-[20rem]">
-              <p className="text-muted-foreground text-sm font-medium leading-[1.4]">
-                {summary}
-              </p>
-            </div>
-            <div className="flex items-center justify-between">
-              <Button size="sm" variant="outline">
-                {cta}
-                <ArrowRight />
-              </Button>
-              {readingTime && (
-                <span className="text-xs text-muted-foreground">
-                  {readingTime}
-                </span>
-              )}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </a>
   );
 };
 
@@ -602,7 +363,7 @@ const Blog27 = ({ primaryPost = PRIMARY_POST, posts = POSTS }: Blog27Props) => {
 
           {primaryPost && (
             <div className="w-full max-w-[27.5rem]">
-              <BlogCard {...primaryPost} />
+              <BlogCard {...primaryPost} isPrimary={true} />
             </div>
           )}
         </div>
@@ -613,7 +374,7 @@ const Blog27 = ({ primaryPost = PRIMARY_POST, posts = POSTS }: Blog27Props) => {
             All Blogs
           </h2>
           <div>
-            <BlogsResult posts={posts} categories={CATEGORIES} />
+            <BlogsResult posts={posts} categories={CATEGORIES} postsPerPage={POSTS_PER_PAGE} />
           </div>
         </div>
       </div>

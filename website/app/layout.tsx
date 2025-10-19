@@ -43,6 +43,11 @@ export default function RootLayout({
             title="RSS Feed for The Agentic Engineer"
             href="/feed.xml"
           />
+          {/* Performance optimization: Establish early connection to CloudFront CDN for placeholder images.
+              Reduces FCP/LCP by performing DNS lookup, TCP handshake, and TLS negotiation in parallel
+              with HTML parsing, rather than waiting until image tags are discovered. */}
+          <link rel="preconnect" href="https://deifkwefumgah.cloudfront.net" />
+          <link rel="dns-prefetch" href="https://deifkwefumgah.cloudfront.net" />
         </head>
         <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen flex-col`}
