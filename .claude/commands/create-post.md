@@ -109,6 +109,7 @@ Follow these proven techniques for maximum engagement:
 - Include data and external sources
 - Use conversational, active voice
 - Avoid jargon unless writing for specialists
+- **IMPORTANT**: Always use proper markdown list syntax (`-` or `1.`) even when starting items with emojis (e.g., `- ✅ Item` not just `✅ Item`)
 
 ### Visuals & Media
 - **Every post MUST include at least one image** (hero/featured image minimum)
