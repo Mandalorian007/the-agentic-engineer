@@ -4,6 +4,12 @@ description: "Learn how to use Claude Code's pre-tool-use hooks to protect again
 date: "2025-10-13T06:00:00-04:00"
 category: "tutorials"
 hashtags: ["claude-code", "automation", "security", "python"]
+
+social:
+  twitter:
+    text: "🛡️ Running Claude Code with --dangerously-skip-permissions?\n\nGet YOLO mode speed WITHOUT the risk\n\nPre-tool-use hooks = automatic safety net\n\nNo more credential leaks or rm -rf disasters 👇"
+  linkedin:
+    text: "Claude Code's YOLO mode (--dangerously-skip-permissions) is a productivity game-changer. No more clicking approve 100+ times per session.\n\nBut it's also terrifying. One mistake and you could expose .env credentials, accidentally rm -rf /, or force-push to main.\n\nThe solution? Pre-tool-use hooks—Python scripts that intercept every operation before execution.\n\nMy hook blocks:\n• Access to .env files and credentials\n• Destructive rm commands (rm -rf /, rm -rf *)\n• Dangerous git operations (push --force, reset --hard)\n• Permission exploits (chmod 777, setuid)\n• Unauthorized package installation\n\nEvery tool call passes through this safety layer automatically. Exit code 0 allows the operation. Exit code 2 blocks it with an error message.\n\nResult? I get the speed of YOLO mode with zero risk. The hook catches dangerous operations before they execute, and I never have to think about it.\n\nThe setup takes 15 minutes. The peace of mind lasts forever.\n\nFull implementation guide:"
 ---
 
 ![Hero image showing a safe with code symbols](../../public/blog/2025-10-13-taming-claude-yolo-mode/hero-safe-yolo-mode.webp)

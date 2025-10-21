@@ -89,6 +89,13 @@ social:
 - Optional: omit entire platform if you don't want to post
 - Future-proof: Can add `hashtags`, `media`, `thread` properties without breaking existing posts
 
+**Newline Handling:**
+- Store newlines as `\n` in YAML (e.g., `"Line 1\n\nLine 2"`)
+- PyYAML automatically converts to actual newline characters in Python
+- Twitter: tweepy handles actual newlines natively
+- LinkedIn: `json.dumps()` auto-escapes as `\\n` in JSON
+- **No manual escaping needed** - libraries handle it automatically
+
 **Migration Path:**
 - V1 (now): Only `text` property required
 - V2 (future): Add `hashtags: ["tag1", "tag2"]` alongside `text`
@@ -225,8 +232,68 @@ Similar to Twitter script but for LinkedIn.
 **Functionality:**
 - Same pattern as `post_to_twitter.py`
 - Reads `social.linkedin.text` from frontmatter
-- Uses LinkedIn API SDK
+- Uses LinkedIn API via `requests` library
 - Future: Can read `hashtags`, `media` properties when enhanced
+
+**Newline Handling:**
+
+LinkedIn posts support newline characters for formatting, and the implementation is straightforward:
+
+```python
+import json
+import requests
+from lib.frontmatter import parse_frontmatter
+
+# Read post text from frontmatter (contains actual \n characters after YAML parsing)
+frontmatter, _ = parse_frontmatter(mdx_file)
+text = frontmatter['social']['linkedin']['text']
+url = f"https://{domain}/blog/{slug}"
+
+# Combine text and URL (Python string with actual newline characters)
+post_text = f"{text}\n\n{url}"
+
+# Build LinkedIn API payload
+payload = {
+    "author": f"urn:li:person:{person_id}",
+    "lifecycleState": "PUBLISHED",
+    "specificContent": {
+        "com.linkedin.ugc.ShareContent": {
+            "shareCommentary": {
+                "text": post_text  # Python string with actual newlines
+            },
+            "shareMediaCategory": "NONE"
+        }
+    },
+    "visibility": {
+        "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"
+    }
+}
+
+# json.dumps() automatically escapes \n as \\n in JSON string
+json_payload = json.dumps(payload)
+
+# Post to LinkedIn API
+headers = {
+    "Authorization": f"Bearer {access_token}",
+    "Content-Type": "application/json",
+    "X-Restli-Protocol-Version": "2.0.0"
+}
+response = requests.post(
+    "https://api.linkedin.com/v2/ugcPosts",
+    headers=headers,
+    data=json_payload
+)
+```
+
+**Key Points:**
+- Store newlines as `\n` in YAML frontmatter (e.g., `"Line 1\n\nLine 2"`)
+- PyYAML automatically converts `\n` to actual newline characters in Python strings
+- `json.dumps()` automatically escapes actual newlines as `\\n` in the JSON output
+- LinkedIn API receives properly formatted JSON and renders newlines as line breaks
+- **No manual escaping needed** - Python's standard library handles everything
+
+**Dependencies:**
+- `requests>=2.31.0` (already in pyproject.toml)
 
 **Note:** Implement when ready to add LinkedIn support.
 
