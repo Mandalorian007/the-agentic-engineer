@@ -6,13 +6,14 @@ Next.js blog with automated content generation and AI-powered image creation.
 
 - ✅ **Next.js 15**: Modern static site generation with App Router
 - ✅ **MDX Content**: Write in MDX with frontmatter, deploy with git push
-- ✅ **AI Image Generation**: Generate blog images with OpenAI DALL-E
-- ✅ **Social Media Previews**: Rich cards with hero images for X/Twitter, LinkedIn, Facebook
-- ✅ **Quality Checks**: SEO analysis + Vale prose linting
+- ✅ **AI Content Generation**: Complete blog posts with AI-generated images (OpenAI)
+- ✅ **Social Media Automation**: Auto-generate and post to Twitter/LinkedIn via GitHub Actions
+- ✅ **Quality Checks**: SEO analysis + Vale prose linting + Social validation
+- ✅ **Scheduled Publishing**: Configure publish days (weekly/twice-weekly), posts auto-appear on schedule
+- ✅ **Content Buffer Monitoring**: Weekly Discord notifications for content pipeline status
 - ✅ **Category System**: 7 hardcoded categories for consistent organization
 - ✅ **Theme Toggle**: Light/dark mode with next-themes
 - ✅ **Vercel Deploy**: Automatic deployment on git push
-- ✅ **Zero External APIs**: No Cloudinary, no Blogger - just Next.js + Vercel
 
 ## Quick Start
 
@@ -63,7 +64,7 @@ Use the `/create-post` command in Claude Code:
 
 This will:
 - Generate a complete MDX blog post with AI
-- Create hero images using DALL-E
+- Create hero images using OpenAI image generation (gpt-image-1)
 - Save to `website/content/posts/YYYY-MM-DD-slug.mdx`
 - Save images to `website/public/blog/YYYY-MM-DD-slug/*.webp`
 
@@ -101,23 +102,26 @@ Vercel automatically deploys on push! 🚀
 
 ```bash
 # Complete workflow in one command
-/create-quality-review Your blog post idea goes here
+/create-social-quality-review Your blog post idea goes here
 ```
 
 This runs:
-1. Gets next available Monday publish date
+1. Gets next available publish date (based on configured schedule)
 2. Creates MDX post with AI-generated content
-3. Generates images in WebP format
-4. Runs quality review (SEO + Vale)
-5. Reminds you to commit and push
+3. Generates hero images and diagrams in WebP format
+4. Generates platform-optimized social media posts (Twitter, LinkedIn)
+5. Runs quality review (SEO + Vale + Social validation)
+6. Reminds you to commit and push to deploy
+
+**Result:** Production-ready blog post with social media content, ready for git push.
 
 ### Available Commands
 
 **End-to-End:**
-- `/create-quality-review <idea>` - Complete workflow (create → review → remind to deploy)
+- `/create-social-quality-review <idea>` - Complete workflow (create → socials → review → remind to deploy)
 
 **Individual Steps:**
-- `/create-post <idea>` - Generate MDX blog post with AI
+- `/create-post <idea>` - Generate MDX blog post with AI-generated images
 - `/generate-socials <path>` - Generate social media posts for Twitter & LinkedIn
 - `/mdx-quality-review <path>` - Run SEO + Vale prose linting + Social validation
 
@@ -269,7 +273,7 @@ Vale configuration in `.vale.ini`:
 
 ## Image Generation
 
-Generate AI images using OpenAI DALL-E (outputs WebP directly):
+Generate AI images using OpenAI image generation (gpt-image-1 model, outputs WebP directly):
 
 ```bash
 uv run tools/generate_image.py "detailed prompt" website/public/blog/YYYY-MM-DD-slug/image.webp
@@ -477,16 +481,9 @@ the-agentic-engineer/
     └── lib/                      # TypeScript utilities
 ```
 
-## Migration from Blogger
+## Project History
 
-This project was migrated from Blogger + Cloudinary to Next.js + Vercel. See [`specs/content-pipeline-migration.md`](specs/content-pipeline-migration.md) for full migration details.
-
-**Benefits of migration:**
-- ✅ Simpler workflow (git push vs API calls)
-- ✅ Faster (no external API latency)
-- ✅ Cheaper (no Cloudinary costs)
-- ✅ More reliable (no OAuth tokens, no rate limits)
-- ✅ Better DX (local preview, hot-reload, TypeScript)
+Migrated from Blogger + Cloudinary to Next.js + Vercel (October 2025). See `docs/architecture.md` for full system details.
 
 ## Troubleshooting
 

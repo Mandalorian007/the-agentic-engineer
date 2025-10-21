@@ -1,13 +1,13 @@
 # The Agentic Engineer - Architecture Documentation
 
 **Last Updated:** October 2025
-**Status:** Production-ready Next.js blog with AI content generation
+**Status:** Production - Automated content pipeline with social media distribution
 
 ---
 
 ## Overview
 
-The Agentic Engineer is a modern blogging platform built with Next.js 15, featuring automated content generation through Claude Code and AI-powered image creation with OpenAI DALL-E.
+The Agentic Engineer is a fully automated blogging platform built with Next.js 15. The system handles the complete content lifecycle: AI-generated blog posts with OpenAI-generated images, platform-optimized social media posts, automated quality checks, scheduled publishing, and automated social media distribution via GitHub Actions.
 
 ### Tech Stack
 
@@ -37,7 +37,7 @@ the-agentic-engineer/
 │   │   ├── create-post.md        # Generate new blog post with AI
 │   │   ├── generate-socials.md   # Generate social media posts
 │   │   ├── mdx-quality-review.md # SEO + Vale + Social validation
-│   │   └── create-quality-review.md # End-to-end workflow
+│   │   └── create-social-quality-review.md # End-to-end workflow
 │   ├── hooks/                    # Python hooks for safety & validation
 │   └── settings.json             # Claude Code configuration
 │
@@ -56,7 +56,7 @@ the-agentic-engineer/
 │   └── social_validator.py       # Social media post validation
 │
 ├── tools/                        # Python CLI tools
-│   ├── generate_image.py         # DALL-E image generation
+│   ├── generate_image.py         # OpenAI image generation (gpt-image-1)
 │   ├── convert_to_webp.py        # Image format conversion
 │   ├── next_publish_date.py      # Calculate next Monday publish date
 │   ├── seo_check.py              # SEO analysis & validation
@@ -114,18 +114,25 @@ the-agentic-engineer/
 
 ### 1. Creating a Blog Post
 
-**Quick Start:**
+**Recommended Workflow:**
 ```bash
-# Complete workflow (create → review → remind to deploy)
-/create-quality-review Your blog post idea goes here
+# Complete workflow (create → socials → review → remind to deploy)
+/create-social-quality-review Your blog post idea goes here
 ```
 
-**Step by Step:**
+This command orchestrates the entire content pipeline:
+1. Gets next available publish date from configured schedule
+2. Creates MDX post with AI-generated content and images
+3. Generates platform-optimized social media posts
+4. Runs comprehensive quality review (SEO + Vale + Social)
+5. Provides deployment instructions
+
+**Step by Step (Manual):**
 ```bash
-# 1. Create post with AI
+# 1. Create post with AI-generated content and images
 /create-post Your blog post idea goes here
 
-# 2. Generate social media posts
+# 2. Generate social media posts (Twitter, LinkedIn)
 /generate-socials website/content/posts/YYYY-MM-DD-slug.mdx
 
 # 3. Run quality review
@@ -143,7 +150,7 @@ When you run `/create-post`:
 
 1. **Get next Monday date** - Uses `next_publish_date.py` for consistent scheduling
 2. **Generate content** - AI creates complete blog post with proper structure
-3. **Generate images** - DALL-E creates hero image and diagrams via `generate_image.py`
+3. **Generate images** - OpenAI gpt-image-1 creates hero image and diagrams via `generate_image.py`
 4. **Convert to WebP** - Optimizes images using `convert_to_webp.py`
 5. **Save files**:
    - MDX: `website/content/posts/YYYY-MM-DD-slug.mdx`
@@ -611,7 +618,7 @@ dependencies = [
     "Pillow>=11.0.0",           # Image processing
     "PyYAML>=6.0.2",            # YAML parsing
     "python-dotenv>=1.0.1",     # Environment variables
-    "openai>=1.0.0",            # DALL-E image generation
+    "openai>=1.0.0",            # Image generation (gpt-image-1)
     "requests>=2.31.0",         # HTTP requests
     "tweepy>=4.14.0",           # Twitter API integration
 ]
@@ -655,7 +662,7 @@ Next.js dependencies:
 uv run tools/generate_image.py "prompt" output.webp
 ```
 
-**Purpose:** Generate AI images using OpenAI DALL-E
+**Purpose:** Generate AI images using OpenAI gpt-image-1 model
 **Output:** WebP format, 1024x1024 pixels
 **Requires:** `OPENAI_API_KEY` in `.env.local`
 
@@ -936,41 +943,17 @@ Before first deploy:
 
 ---
 
-## Migration History
+## System Evolution
 
-This project was migrated from **Blogger + Cloudinary** to **Next.js + Vercel** in October 2025.
+**Current State (v2.0):** Next.js 15 + Vercel with automated social media distribution
+- **Workflow:** MDX → Git → Vercel → GitHub Actions → Social platforms
+- **Tools:** 6 Python CLI tools
+- **Dependencies:** 6 Python packages, standard Next.js stack
+- **Deployment:** `git push` (auto-deploys to Vercel)
+- **Social Media:** Automated via GitHub Actions (Twitter/LinkedIn)
+- **Images:** WebP format, committed to Git, served by Vercel CDN
 
-### Before (Old System)
-
-- **Workflow:** Markdown → Cloudinary API → Blogger API
-- **Tools:** 14 Python tools
-- **Dependencies:** 29 packages (Google OAuth, Cloudinary, Pygments, markdown-it-py)
-- **Deployment:** `/publish` command with OAuth
-- **Images:** External CDN (Cloudinary)
-
-### After (Current System)
-
-- **Workflow:** MDX → Git → Vercel
-- **Tools:** 6 Python tools (removed 8)
-- **Dependencies:** 5 packages (removed 24)
-- **Deployment:** `git push`
-- **Images:** Committed to Git, served by Vercel CDN
-
-### Benefits
-
-✅ **Simpler** - Fewer moving parts, less complexity
-✅ **Faster** - No API latency, instant preview
-✅ **Cheaper** - No Cloudinary monthly costs
-✅ **More Reliable** - No OAuth token expiration, no rate limits
-✅ **Better DX** - Hot-reload, TypeScript validation, local preview
-✅ **Version Control** - Images in Git, full history
-
-### Migration Documents
-
-For historical reference:
-- `MIGRATION_COMPLETE.md` - Summary of migration
-- `specs/content-pipeline-migration.md` - Detailed migration plan
-- `specs/nextjs-migration-resources.md` - Resources and checklist
+**Historical Note:** Migrated from Blogger + Cloudinary (October 2025). Migration docs available in `specs/` for reference.
 
 ---
 
@@ -1004,7 +987,7 @@ For historical reference:
 
 ### Image Generation
 
-- **OpenAI DALL-E:** https://platform.openai.com/docs/guides/images
+- **OpenAI Images API:** https://platform.openai.com/docs/guides/images
 - **Pillow:** Python image processing
 
 ### Prose Linting

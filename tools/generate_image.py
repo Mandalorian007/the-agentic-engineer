@@ -24,7 +24,7 @@ from PIL import Image
 
 def generate_image(prompt: str, output_path: str) -> None:
     """
-    Generate an image using DALL-E and save it as WebP format.
+    Generate an image using OpenAI gpt-image-1 model and save it as WebP format.
 
     Args:
         prompt: The text prompt to generate the image from
@@ -99,7 +99,7 @@ def generate_image(prompt: str, output_path: str) -> None:
 
         # Print revised prompt if available
         if hasattr(response.data[0], 'revised_prompt') and response.data[0].revised_prompt:
-            print(f"\n📝 Revised prompt used by DALL-E:")
+            print(f"\n📝 Revised prompt used by gpt-image-1:")
             print(f"   {response.data[0].revised_prompt}")
 
     except Exception as e:
