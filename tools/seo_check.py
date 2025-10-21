@@ -9,6 +9,7 @@ Analyzes MDX content for SEO best practices:
 - Heading structure (single H1, proper hierarchy)
 - Content length (minimum 300 words recommended)
 - Image alt text
+- Hero image presence (hero-*.webp required for OG/Twitter cards)
 - Links
 
 Usage:
@@ -177,7 +178,34 @@ def analyze_seo(post_path: Path):
     else:
         print_info("No images found")
 
-    # 7. Internal/external links
+    # 7. Hero image check (for OG/Twitter cards)
+    # Extract slug from filename (format: YYYY-MM-DD-slug.mdx)
+    filename = post_path.stem  # Gets filename without extension
+    slug_match = re.match(r'\d{4}-\d{2}-\d{2}-(.+)', filename)
+
+    if slug_match:
+        # Check if hero image directory exists
+        # Assuming post is in website/content/posts/, images are in website/public/blog/
+        # Navigate: website/content/posts/ -> content/ -> website/ -> website/public/blog/{slug}
+        website_root = post_path.parent.parent.parent  # Go up from content/posts to website/
+        public_dir = website_root / "public" / "blog" / filename
+
+        if public_dir.exists():
+            # Look for hero-*.webp files
+            hero_images = list(public_dir.glob("hero-*.webp"))
+
+            if hero_images:
+                print_success(f"Hero image found: {hero_images[0].name} (for social media previews)")
+            else:
+                print_error("No hero image found (hero-*.webp)")
+                issues.append(f"REQUIRED: Add hero-*.webp image to public/blog/{filename}/ for Open Graph/Twitter Card previews")
+        else:
+            print_error(f"Image directory not found: public/blog/{filename}")
+            issues.append(f"Create image directory: public/blog/{filename}")
+    else:
+        print_warning("Cannot validate hero image - filename doesn't match YYYY-MM-DD-slug.mdx format")
+
+    # 8. Internal/external links
     links = re.findall(r'\[([^\]]+)\]\(([^\)]+)\)', body)
     links = [l for l in links if not l[1].startswith('!')]  # Exclude images
 

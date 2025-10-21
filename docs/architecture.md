@@ -254,6 +254,11 @@ Use **relative paths** from MDX file location:
 - No build-time remark plugin needed
 - Simple and maintainable
 
+**Hero Images for Social Media:**
+- Hero images (named `hero-*.webp`) are automatically detected and used for Open Graph and Twitter Card previews
+- No manual configuration needed - the system scans `public/blog/{slug}/` for any file starting with `hero-`
+- Social media platforms (Twitter, LinkedIn, Facebook) show rich preview cards with these images when posts are shared
+
 ---
 
 ## Scheduled Posts & Publishing Schedule
@@ -470,6 +475,9 @@ export function generateStaticParams() {
 ### SEO Features
 
 - ✅ **Dynamic Metadata** - Per-page title, description, Open Graph
+- ✅ **Open Graph Images** - Hero images automatically included for rich social previews
+- ✅ **Twitter Card Metadata** - summary_large_image cards with hero images
+- ✅ **Automatic Hero Detection** - Scans public/blog/{slug}/ for hero-*.webp files
 - ✅ **JSON-LD Structured Data** - BlogPosting schema for rich results
 - ✅ **XML Sitemap** - Auto-generated from posts and category pages
 - ✅ **robots.txt** - Allow all, link to sitemap

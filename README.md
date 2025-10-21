@@ -7,6 +7,7 @@ Next.js blog with automated content generation and AI-powered image creation.
 - ✅ **Next.js 15**: Modern static site generation with App Router
 - ✅ **MDX Content**: Write in MDX with frontmatter, deploy with git push
 - ✅ **AI Image Generation**: Generate blog images with OpenAI DALL-E
+- ✅ **Social Media Previews**: Rich cards with hero images for X/Twitter, LinkedIn, Facebook
 - ✅ **Quality Checks**: SEO analysis + Vale prose linting
 - ✅ **Category System**: 7 hardcoded categories for consistent organization
 - ✅ **Theme Toggle**: Light/dark mode with next-themes

@@ -19,6 +19,7 @@ import { ReadingProgress } from "@/components/reading-progress";
 import { HeadingWithAnchor } from "@/components/heading-with-anchor";
 import { extractHeadings, generateHeadingId } from "@/lib/toc";
 import { formatReadingTime } from "@/lib/reading-time";
+import { getHeroImagePath } from "@/lib/og-image";
 
 // ISR: Revalidate every 1 hour (3600 seconds)
 export const revalidate = 3600;
@@ -46,6 +47,10 @@ export async function generateMetadata(props: BlogPostPageProps) {
     };
   }
 
+  // Get hero image for Open Graph and Twitter Card
+  const heroImageUrl = getHeroImagePath(params.slug);
+  const postUrl = `https://the-agentic-engineer.com/blog/${params.slug}`;
+
   return {
     title: post.title,
     description: post.description,
@@ -54,7 +59,26 @@ export async function generateMetadata(props: BlogPostPageProps) {
       description: post.description,
       type: "article",
       publishedTime: post.date,
+      url: postUrl,
+      ...(heroImageUrl && {
+        images: [
+          {
+            url: heroImageUrl,
+            width: 1024,
+            height: 1024,
+            alt: post.title,
+          },
+        ],
+      }),
     },
+    ...(heroImageUrl && {
+      twitter: {
+        card: "summary_large_image",
+        title: post.title,
+        description: post.description,
+        images: [heroImageUrl],
+      },
+    }),
   };
 }
 
