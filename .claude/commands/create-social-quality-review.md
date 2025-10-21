@@ -1,10 +1,10 @@
-# Create and Quality Review
+# Create with Social and Quality Review
 
-Complete end-to-end workflow from idea to quality-reviewed post.
+Complete end-to-end workflow from idea to quality-reviewed post with social media content.
 
 ## Instructions
 
-When the user runs `/create-quality-review <idea>`:
+When the user runs `/create-social-quality-review <idea>`:
 
 1. **Get next publish date:**
    ```bash
@@ -17,13 +17,21 @@ When the user runs `/create-quality-review <idea>`:
    - Use the date from step 1 in the frontmatter
    - Remember the post file path (e.g., `website/content/posts/2025-10-20-automated-blog-publishing.mdx`)
 
-3. **Run quality review:**
+3. **Generate social media posts:**
+   ```bash
+   /generate-socials website/content/posts/2025-10-20-automated-blog-publishing.mdx
+   ```
+   - This will add social media posts to the frontmatter
+   - Social content will be validated in the next step
+
+4. **Run quality review:**
    ```bash
    /mdx-quality-review website/content/posts/2025-10-20-automated-blog-publishing.mdx
    ```
+   - Runs SEO check, Vale prose linting, and social validation
    - Ensure to resolve any reasonable issues that were discovered
 
-4. **Final summary:**
+5. **Final summary:**
    - Show the post file path
    - Remind user that post is ready to commit and push to deploy:
      ```bash
@@ -36,10 +44,10 @@ When the user runs `/create-quality-review <idea>`:
 ## Example
 
 ```bash
-/create-quality-review I want to write about migrating from Blogger to Next.js
+/create-social-quality-review I want to write about migrating from Blogger to Next.js
 ```
 
-This creates the post, runs quality review, and provides instructions for deployment.
+This creates the post, generates social media content, runs quality review, and provides instructions for deployment.
 
 ## Note
 
@@ -47,5 +55,6 @@ Deployment is handled by:
 1. Git commit (saves the post to version control)
 2. Git push (triggers Vercel deployment)
 3. Vercel auto-deploys and makes the post live
+4. GitHub Actions automatically post to social media at scheduled time (Mon/Thu 10:00 UTC)
 
 No build or publish commands needed!
