@@ -298,7 +298,7 @@ Posts with future dates are automatically hidden until their publication date:
 ```yaml
 ---
 title: "Future Post"
-date: "2025-12-25T10:00:00Z"  # Won't appear until this date
+date: "2025-12-25T11:00:00Z"  # Won't appear until 6am EST on this date
 category: "tutorials"
 ---
 ```
@@ -332,18 +332,21 @@ Posts appear within ~1 hour of their scheduled time without manual intervention.
 
 ### How It Works
 
-Social media posts are automatically published via GitHub Actions on the same schedule as blog posts (Mon/Thu at 10:00 UTC).
+Social media posts are automatically published via GitHub Actions running daily at 6:30am EST. Posts go live at 6am EST via ISR, giving 30 minutes for Next.js to rebuild before tweeting.
 
 **Architecture:**
 1. **Content Generation** - `/generate-socials` command creates platform-optimized posts
 2. **Storage** - Social content stored in frontmatter under `social:` key
 3. **Validation** - Social validator checks character limits during quality review
-4. **Automation** - GitHub Actions workflows post to each platform independently
+4. **Standardized Schedule** - All posts publish at 6am EST (11am UTC)
+5. **Automated Tweeting** - GitHub Actions runs at 6:30am EST (11:30am UTC) to tweet posts from today
 
 **Implementation** (`tools/post_to_twitter.py` + `.github/workflows/post-to-twitter.yml`):
 
 ```python
 # Find posts scheduled for today
+# All posts publish at 6am EST (11am UTC)
+# Script runs at 6:30am EST to tweet them
 posts_today = get_posts_for_today(config)
 
 # Read social.twitter.text from frontmatter
@@ -356,12 +359,19 @@ client.create_tweet(text=tweet_text)
 
 **Frontmatter Schema:**
 ```yaml
+---
+date: "2025-10-27T11:00:00Z"  # All posts at 6am EST (11am UTC)
 social:
   twitter:
     text: "🚀 Engaging tweet about the post (max 250 chars)"
   linkedin:
     text: "Professional LinkedIn post (max 2970 chars)"
+---
 ```
+
+**Daily Schedule:**
+- **6:00am EST (11:00 UTC)**: Post goes live, ISR begins rebuilding
+- **6:30am EST (11:30 UTC)**: GitHub Actions tweets the post
 
 **Tweet Format:**
 ```
@@ -374,15 +384,17 @@ https://the-agentic-engineer.com/blog/{slug}
 - ✅ **Platform-specific content** - Different messaging for Twitter vs LinkedIn
 - ✅ **Pre-validated posts** - Character limits checked during quality review
 - ✅ **Isolated workflows** - Twitter and LinkedIn post independently (no cascading failures)
-- ✅ **Scheduled automation** - GitHub Actions run at exact publish times
+- ✅ **Standardized schedule** - All posts at 6am EST, tweets at 6:30am EST
+- ✅ **Publish any day** - Not limited to Mon/Thu - schedule a post for any date
+- ✅ **ISR-safe timing** - 30 minute window ensures post is live before tweeting
 - ✅ **Version controlled** - Social posts committed alongside blog content
 - ✅ **Easy testing** - Manual trigger via GitHub UI or local script
 
 **Dependencies:**
 - `tweepy>=4.14.0` - Python Twitter API client
 - GitHub Actions workflows:
-  - `.github/workflows/post-to-twitter.yml` - Runs Mon/Thu at 10:00 UTC
-  - `.github/workflows/post-to-linkedin.yml` - Future: Runs Mon/Thu at 10:05 UTC
+  - `.github/workflows/post-to-twitter.yml` - Runs daily at 6:30am EST (11:30am UTC)
+  - `.github/workflows/post-to-linkedin.yml` - Future: Runs daily at 6:35am EST (11:35am UTC)
 - Environment variables (set as GitHub secrets):
   - `TWITTER_API_KEY`
   - `TWITTER_API_KEY_SECRET`
@@ -585,8 +597,8 @@ image_generation:
 
 publishing:
   frequency: "twice-weekly"  # or "weekly" for single-day publishing
-  days: ["monday", "thursday"]  # Day(s) of week to publish
-  time: "10:00:00"  # Publish time (UTC)
+  days: ["monday", "thursday"]  # Day(s) of week for regular schedule (can publish any day)
+  time: "11:00:00"  # Publish time (UTC) - 6am EST - posts go live for ISR
 
 categories:
   - tutorials
@@ -740,8 +752,10 @@ uv run tools/next_publish_date.py
 Next available publish date (Monday, Thursday):
 ----------------------------------------
 Directory name: 2025-11-20-your-slug-here
-Frontmatter date: 2025-11-20T10:00:00Z
+Frontmatter date: 2025-11-20T11:00:00Z
 Day: Thursday, November 20, 2025
+
+Note: All posts scheduled at 11:00:00 UTC (6am EST)
 ```
 
 **Logic:**

@@ -1,9 +1,10 @@
 name: Post to Twitter
 
 on:
-  # Run every Monday and Thursday at 10:00 UTC
+  # Run daily at 6:30am EST (11:30 UTC)
+  # Posts go live at 6am EST via ISR, tweets sent 30 min later
   schedule:
-    - cron: '0 10 * * 1,4'
+    - cron: '30 11 * * *'
 
   # Allow manual trigger for testing
   workflow_dispatch:

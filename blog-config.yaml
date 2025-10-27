@@ -16,8 +16,8 @@ image_generation:
 # Publishing schedule
 publishing:
   frequency: "twice-weekly"  # or "weekly" for single-day publishing
-  days: ["monday", "thursday"]  # Day(s) of week to publish
-  time: "10:00:00"  # Publish time (UTC)
+  days: ["monday", "thursday"]  # Day(s) of week for regular schedule (can publish any day)
+  time: "11:00:00"  # Publish time (UTC) - 6am EST - posts go live for ISR
 
 # Categories (validation reference)
 categories:

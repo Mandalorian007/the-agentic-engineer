@@ -299,8 +299,8 @@ The publishing schedule is configurable in `blog-config.yaml`:
 ```yaml
 publishing:
   frequency: "twice-weekly"  # or "weekly"
-  days: ["monday", "thursday"]  # Days of week to publish
-  time: "10:00:00"  # Publish time (UTC)
+  days: ["monday", "thursday"]  # Days of week for regular schedule (can publish any day)
+  time: "11:00:00"  # Publish time (UTC) - 6am EST - posts go live for ISR
 ```
 
 Get the next available publish date:
@@ -314,8 +314,10 @@ Output:
 Next available publish date (Monday, Thursday):
 ----------------------------------------
 Directory name: 2025-11-20-your-slug-here
-Frontmatter date: 2025-11-20T10:00:00Z
+Frontmatter date: 2025-11-20T11:00:00Z
 Day: Thursday, November 20, 2025
+
+Note: Posts are scheduled at 11:00:00 UTC (6am EST) for daily ISR.
 ```
 
 **Changing frequency:** Just edit `blog-config.yaml` to change publish days. The entire content pipeline (date calculation, buffer monitoring) automatically adapts.
@@ -351,9 +353,11 @@ Automated social media posting via GitHub Actions. Posts are automatically publi
 
 1. **Generate social posts** with `/generate-socials` command
 2. **Social content stored in frontmatter** under `social:` key
-3. **GitHub Actions runs on schedule** (Mon/Thu at 10:00 UTC)
-4. **Script checks for posts published today** and posts to Twitter
+3. **Posts go live daily at 6am EST** (11am UTC) via ISR
+4. **GitHub Actions runs at 6:30am EST** (11:30am UTC) to tweet them
 5. **Each platform has its own workflow** for isolated failures
+
+This standardized daily schedule means you can publish on ANY day of the week - just schedule a post for that date!
 
 ### Setup
 
@@ -366,7 +370,8 @@ Automated social media posting via GitHub Actions. Posts are automatically publi
      - `TWITTER_ACCESS_TOKEN_SECRET`
 
 2. **GitHub Actions workflows:**
-   - `.github/workflows/post-to-twitter.yml` - Runs Mon/Thu at 10:00 UTC
+   - `.github/workflows/post-to-twitter.yml` - Runs daily at 6:30am EST (11:30am UTC)
+   - Posts go live at 6am EST (11am UTC), tweets sent 30 minutes later
    - Manually trigger via GitHub UI for testing
 
 ### Platform Requirements

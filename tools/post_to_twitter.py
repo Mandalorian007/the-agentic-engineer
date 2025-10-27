@@ -7,6 +7,10 @@ This script:
 3. Appends blog URL
 4. Posts to Twitter via API v2
 
+Posts are scheduled to go live at 6am EST (11am UTC) via ISR.
+GitHub Actions runs at 6:30am EST (11:30am UTC) to tweet them.
+This gives ISR 30 minutes to rebuild and make posts live.
+
 Usage:
     python tools/post_to_twitter.py                      # Post tweets for today
     python tools/post_to_twitter.py --dry-run            # Preview today's tweets
@@ -73,8 +77,11 @@ def get_twitter_client(dry_run: bool = False):
     )
 
 
-def get_posts_for_date(config: dict, target_date: date_type | None = None) -> list[tuple[Path, dict]]:
-    """Get all blog posts scheduled for a specific date.
+def get_posts_for_today(config: dict, target_date: date_type | None = None) -> list[tuple[Path, dict]]:
+    """Get all blog posts scheduled for today (UTC).
+
+    Posts are scheduled to go live at 6am EST (11am UTC).
+    This script runs at 6:30am EST to tweet them after ISR has rebuilt.
 
     Args:
         config: Blog configuration
@@ -87,7 +94,7 @@ def get_posts_for_date(config: dict, target_date: date_type | None = None) -> li
     if target_date is None:
         target_date = datetime.now(timezone.utc).date()
 
-    posts_for_date = []
+    posts_for_today = []
 
     for mdx_file in content_dir.glob("*.mdx"):
         try:
@@ -102,15 +109,15 @@ def get_posts_for_date(config: dict, target_date: date_type | None = None) -> li
 
             post_date = datetime.fromisoformat(date_str.replace("Z", "+00:00")).date()
 
-            # Check if post matches target date
+            # Check if post is scheduled for today
             if post_date == target_date:
-                posts_for_date.append((mdx_file, frontmatter))
+                posts_for_today.append((mdx_file, frontmatter))
 
         except Exception as e:
             print(f"⚠️  Warning: Failed to parse {mdx_file.name}: {e}")
             continue
 
-    return posts_for_date
+    return posts_for_today
 
 
 def build_tweet(frontmatter: dict, slug: str, domain: str) -> str | None:
@@ -207,16 +214,16 @@ def main():
 
     domain = config.get("domain", "the-agentic-engineer.com")
 
-    # Get posts scheduled for target date
-    posts_for_date = get_posts_for_date(config, target_date)
+    # Get posts scheduled for today
+    posts_today = get_posts_for_today(config, target_date)
 
-    if not posts_for_date:
+    if not posts_today:
         date_str = target_date.strftime("%Y-%m-%d") if target_date else "today"
         print(f"ℹ️  No posts scheduled for {date_str}")
         sys.exit(0)
 
     date_str = target_date.strftime("%Y-%m-%d") if target_date else "today"
-    print(f"📅 Found {len(posts_for_date)} post(s) scheduled for {date_str}")
+    print(f"📅 Found {len(posts_today)} post(s) scheduled for {date_str}")
 
     # Get Twitter client (skip if dry run)
     client = get_twitter_client(dry_run=args.dry_run)
@@ -225,7 +232,7 @@ def main():
     posted_count = 0
     error_count = 0
 
-    for post_file, post_frontmatter in posts_for_date:
+    for post_file, post_frontmatter in posts_today:
         # Extract slug from filename (remove .mdx extension)
         slug = post_file.stem
 
