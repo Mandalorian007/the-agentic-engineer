@@ -50,6 +50,8 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return Response.json({
     status: 'ok',
-    message: 'Revalidation endpoint is active. Use POST with Authorization header to trigger revalidation.'
+    message: 'Revalidation endpoint is active. Use POST with Authorization header to trigger revalidation.',
+    envVarConfigured: !!process.env.REVALIDATE_SECRET,
+    envVarLength: process.env.REVALIDATE_SECRET?.length || 0
   });
 }
