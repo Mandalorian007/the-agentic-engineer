@@ -93,7 +93,7 @@ website/lib/
 - [ ] Export function `getHeroImagePath(slug: string): string | null`
 - [ ] Use `fs.readdirSync()` to scan `/public/blog/{slug}/` directory
 - [ ] Find first file matching pattern `hero-*.webp`
-- [ ] Return absolute URL path: `https://the-agentic-engineer.com/blog/{slug}/hero-{name}.webp`
+- [ ] Return absolute URL path: `https://agentic-engineer.com/blog/{slug}/hero-{name}.webp`
 - [ ] Return `null` if directory doesn't exist or no hero image found
 - [ ] Edge case: Handle missing directories gracefully (return null, don't throw)
 - [ ] Edge case: Handle multiple hero images (return first match alphabetically)
@@ -160,7 +160,7 @@ website/lib/
 **Special Considerations**:
 - All image URLs must be absolute (include full domain) for social platform compatibility
 - Hero image detection runs at build time (SSG), not runtime—safe for `fs` usage
-- Domain hardcoded as `https://the-agentic-engineer.com` (matches existing JSON-LD pattern line 82)
+- Domain hardcoded as `https://agentic-engineer.com` (matches existing JSON-LD pattern line 82)
 
 ---
 

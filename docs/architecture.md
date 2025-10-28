@@ -377,7 +377,7 @@ social:
 ```
 {social.twitter.text}
 
-https://the-agentic-engineer.com/blog/{slug}
+https://agentic-engineer.com/blog/{slug}
 ```
 
 **Key Features:**
@@ -584,7 +584,7 @@ Professional layouts from [shadcnblocks.com](https://www.shadcnblocks.com/) (Pro
 
 ```yaml
 blog_name: "The Agentic Engineer"
-domain: "the-agentic-engineer.com"
+domain: "agentic-engineer.com"
 
 website_dir: "website"
 content_dir: "website/content/posts"
@@ -931,7 +931,7 @@ cd website && pnpm run build
    - Set output directory: `.next`
 
 2. **Configure domain:**
-   - Add custom domain: `the-agentic-engineer.com`
+   - Add custom domain: `agentic-engineer.com`
    - Vercel handles SSL automatically
 
 3. **Environment variables:**

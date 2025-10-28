@@ -45,7 +45,7 @@ SHADCNBLOCKS_API_KEY=sk_live_xxx
 3. **Configure authentication methods** (email/password, Google OAuth, etc.)
 4. **Set callback URLs**:
    - Local development: `http://localhost:3000`
-   - Production: `https://the-agentic-engineer.com`
+   - Production: `https://agentic-engineer.com`
 5. **Copy API keys** from dashboard:
    - Publishable Key → `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
    - Secret Key → `CLERK_SECRET_KEY`

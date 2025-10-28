@@ -4,7 +4,7 @@ import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import remarkHtml from 'remark-html';
 
-const siteUrl = 'https://the-agentic-engineer.com';
+const siteUrl = 'https://agentic-engineer.com';
 
 // Limit RSS feed to most recent posts (standard practice: 10-20 posts)
 const RSS_FEED_LIMIT = 20;

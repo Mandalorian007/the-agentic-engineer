@@ -212,7 +212,7 @@ def main():
         print(f"❌ Error loading blog config: {e}")
         sys.exit(1)
 
-    domain = config.get("domain", "the-agentic-engineer.com")
+    domain = config.get("domain", "agentic-engineer.com")
 
     # Get posts scheduled for today
     posts_today = get_posts_for_today(config, target_date)

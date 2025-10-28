@@ -33,7 +33,7 @@ export function getHeroImagePath(slug: string): string | null {
     }
 
     // Return absolute URL (required for social media metadata)
-    return `https://the-agentic-engineer.com/blog/${slug}/${heroImage}`;
+    return `https://agentic-engineer.com/blog/${slug}/${heroImage}`;
   } catch (error) {
     // Gracefully handle any errors (permissions, fs issues, etc.)
     console.error(`Error finding hero image for slug "${slug}":`, error);

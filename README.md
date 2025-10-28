@@ -200,7 +200,7 @@ The relative path goes from `website/content/posts/` to `website/public/blog/`. 
 
 ```yaml
 blog_name: "The Agentic Engineer"
-domain: "the-agentic-engineer.com"
+domain: "agentic-engineer.com"
 
 website_dir: "website"
 content_dir: "website/content/posts"

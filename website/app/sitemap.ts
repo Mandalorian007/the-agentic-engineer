@@ -3,7 +3,7 @@ import { getPublishedPosts } from '@/lib/posts';
 import { getAllCategoryIds } from '@/lib/categories';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://the-agentic-engineer.com';
+  const baseUrl = 'https://agentic-engineer.com';
 
   // Get all published posts
   const posts = getPublishedPosts();

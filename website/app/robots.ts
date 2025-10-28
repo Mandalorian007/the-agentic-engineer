@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://the-agentic-engineer.com/sitemap.xml',
+    sitemap: 'https://agentic-engineer.com/sitemap.xml',
   };
 }

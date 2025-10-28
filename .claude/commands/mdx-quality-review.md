@@ -39,7 +39,7 @@ When the user runs `/quality-check <path>`:
    - Validates:
      - Twitter total length (280 chars max including actual URL)
      - LinkedIn total length (3000 chars max including actual URL)
-     - Calculates actual URL based on slug: https://the-agentic-engineer.com/blog/{slug}
+     - Calculates actual URL based on slug: https://agentic-engineer.com/blog/{slug}
      - URL overhead is len(URL) + 2 for \n\n (typically 74-90 chars)
      - Required `text` field for each platform
      - Proper schema structure

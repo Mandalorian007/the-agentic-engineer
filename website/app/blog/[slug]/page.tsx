@@ -49,7 +49,7 @@ export async function generateMetadata(props: BlogPostPageProps) {
 
   // Get hero image for Open Graph and Twitter Card
   const heroImageUrl = getHeroImagePath(params.slug);
-  const postUrl = `https://the-agentic-engineer.com/blog/${params.slug}`;
+  const postUrl = `https://agentic-engineer.com/blog/${params.slug}`;
 
   return {
     title: post.title,
@@ -103,7 +103,7 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
     "description": post.description,
     "image": post.content.match(/!\[.*?\]\(\.\.\/\.\.\/public\/(.*?)\)/g)?.map(img => {
       const match = img.match(/!\[.*?\]\(\.\.\/\.\.\/public\/(.*?)\)/);
-      return match ? `https://the-agentic-engineer.com/${match[1]}` : null;
+      return match ? `https://agentic-engineer.com/${match[1]}` : null;
     }).filter(Boolean) || [],
     "datePublished": post.date,
     "dateModified": post.date,
@@ -116,15 +116,15 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
       "name": "The Agentic Engineer",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://the-agentic-engineer.com/logo.png"
+        "url": "https://agentic-engineer.com/logo.png"
       }
     },
-    "url": `https://the-agentic-engineer.com/blog/${params.slug}`,
+    "url": `https://agentic-engineer.com/blog/${params.slug}`,
     "keywords": post.hashtags?.join(", ") || "",
     "articleSection": category?.name || post.category,
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://the-agentic-engineer.com/blog/${params.slug}`
+      "@id": `https://agentic-engineer.com/blog/${params.slug}`
     }
   };
 
@@ -278,7 +278,7 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
         <aside className="lg:sticky lg:top-24 h-fit space-y-6">
           {/* Share This Article */}
           <ShareButtons
-            url={`https://the-agentic-engineer.com/blog/${params.slug}`}
+            url={`https://agentic-engineer.com/blog/${params.slug}`}
             title={post.title}
           />
 
