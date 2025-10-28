@@ -8,6 +8,9 @@ import { getRecentPosts } from "@/lib/posts";
 import { CATEGORY_LABELS } from "@/lib/categories";
 import { formatReadingTime } from "@/lib/reading-time";
 
+// Revalidate every hour to show new posts as they're published
+export const revalidate = 3600;
+
 export default function Home() {
   const recentPosts = getRecentPosts(3);
 
