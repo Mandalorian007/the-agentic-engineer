@@ -16,7 +16,7 @@ jobs:
       - name: Trigger on-demand revalidation
         run: |
           echo "Triggering ISR cache revalidation..."
-          response=$(curl -s -w "\n%{http_code}" -X POST \
+          response=$(curl -L -s -w "\n%{http_code}" -X POST \
             -H "Authorization: Bearer ${{ secrets.REVALIDATE_SECRET }}" \
             https://agentic-engineer.com/api/revalidate)
 
