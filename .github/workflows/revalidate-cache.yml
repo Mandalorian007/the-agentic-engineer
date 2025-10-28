@@ -13,24 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Debug secret availability
-        run: |
-          if [ -z "${{ secrets.REVALIDATE_SECRET }}" ]; then
-            echo "ERROR: REVALIDATE_SECRET is not set!"
-            exit 1
-          fi
-          echo "Secret length: ${#REVALIDATE_SECRET}"
-          echo "Secret prefix: ${REVALIDATE_SECRET:0:5}"
-        env:
-          REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
-
       - name: Trigger on-demand revalidation
         env:
           REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
         run: |
           echo "Triggering ISR cache revalidation..."
-          echo "Token length in step: ${#REVALIDATE_SECRET}"
-
           response=$(curl --location-trusted -s -w "\n%{http_code}" -X POST \
             -H "Authorization: Bearer $REVALIDATE_SECRET" \
             https://agentic-engineer.com/api/revalidate)

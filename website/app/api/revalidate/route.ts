@@ -19,21 +19,9 @@ export async function POST(request: NextRequest) {
     const token = authHeader?.replace('Bearer ', '');
     const expectedToken = process.env.REVALIDATE_SECRET;
 
-    // Debug info (remove after testing)
-    const debug = {
-      receivedLength: token?.length || 0,
-      expectedLength: expectedToken?.length || 0,
-      receivedPrefix: token?.substring(0, 5) || 'none',
-      expectedPrefix: expectedToken?.substring(0, 5) || 'none',
-      hasWhitespace: token ? /\s/.test(token) : false,
-    };
-
     if (!token || token !== expectedToken) {
       return Response.json(
-        {
-          message: 'Invalid or missing token',
-          debug
-        },
+        { message: 'Invalid or missing token' },
         { status: 401 }
       );
     }
@@ -63,8 +51,6 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return Response.json({
     status: 'ok',
-    message: 'Revalidation endpoint is active. Use POST with Authorization header to trigger revalidation.',
-    envVarConfigured: !!process.env.REVALIDATE_SECRET,
-    envVarLength: process.env.REVALIDATE_SECRET?.length || 0
+    message: 'Revalidation endpoint is active. Use POST with Authorization header to trigger revalidation.'
   });
 }
