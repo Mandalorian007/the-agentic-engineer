@@ -29,8 +29,10 @@ jobs:
           REVALIDATE_SECRET: ${{ secrets.REVALIDATE_SECRET }}
         run: |
           echo "Triggering ISR cache revalidation..."
+          echo "Token length in step: ${#REVALIDATE_SECRET}"
+
           response=$(curl -L -s -w "\n%{http_code}" -X POST \
-            -H "Authorization: Bearer ${REVALIDATE_SECRET}" \
+            -H "Authorization: Bearer $REVALIDATE_SECRET" \
             https://agentic-engineer.com/api/revalidate)
 
           http_code=$(echo "$response" | tail -n1)
