@@ -17,10 +17,23 @@ export async function POST(request: NextRequest) {
     // Security: Verify secret token
     const authHeader = request.headers.get('authorization');
     const token = authHeader?.replace('Bearer ', '');
+    const expectedToken = process.env.REVALIDATE_SECRET;
 
-    if (!token || token !== process.env.REVALIDATE_SECRET) {
+    // Debug info (remove after testing)
+    const debug = {
+      receivedLength: token?.length || 0,
+      expectedLength: expectedToken?.length || 0,
+      receivedPrefix: token?.substring(0, 5) || 'none',
+      expectedPrefix: expectedToken?.substring(0, 5) || 'none',
+      hasWhitespace: token ? /\s/.test(token) : false,
+    };
+
+    if (!token || token !== expectedToken) {
       return Response.json(
-        { message: 'Invalid or missing token' },
+        {
+          message: 'Invalid or missing token',
+          debug
+        },
         { status: 401 }
       );
     }
