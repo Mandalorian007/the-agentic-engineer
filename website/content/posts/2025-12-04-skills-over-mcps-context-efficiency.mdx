@@ -1,0 +1,443 @@
+---
+title: "Skills Over MCPs: Context-Efficient Agent Capabilities"
+description: "Claude Code Skills provide MCP-like capabilities with zero context overhead. Scale to thousands of tools without bloating your agent's context window."
+date: "2025-12-04T11:00:00Z"
+category: "tutorials"
+hashtags: ["claude-code", "mcp", "skills", "context-optimization"]
+social:
+  twitter:
+    text: "💡 MCPs eating up your agent's context window?\n\nClaude Code Skills give you the same capabilities with ZERO context overhead until you actually need them.\n\nScale to 4,000 tools. Use zero context. 🚀"
+  linkedin:
+    text: "Context is the most precious resource in agent workflows—and we're wasting it.\n\nMost teams using Model Context Protocol (MCP) servers don't realize they're preloading tool descriptions into every agent session, consuming tokens whether they need those tools or not. The more MCPs you add, the less context you have for actual problem-solving.\n\nClaude Code Skills offers a better pattern: zero-context tool discovery with progressive disclosure.\n\nInstead of loading everything upfront, Skills uses a three-step flow:\n1. Skill discovery (reads metadata file only when relevant)\n2. Interface learning (runs --help to understand the tool)\n3. Execution (runs the tool and gets results)\n\nContext used: Minimal. Context saved: All implementation details.\n\nI built a complete weather skill with current conditions and forecasting. It provides full MCP-like capabilities but consumes zero context until the moment I ask about weather.\n\nThe pattern scales beautifully:\n- MCPs: More tools = more default context consumed\n- Skills: Add 1,000 tools = zero additional default context\n\nIn the article, I walk through:\n- Building a complete weather skill from scratch\n- PEP 723 self-contained scripts with inline dependencies\n- Click-based CLI interfaces with automatic --help\n- When to use Skills vs MCPs (and when to use both)\n- Real working code you can clone and run\n\nThe key insight: package capabilities as standalone CLI scripts that declare their own dependencies, provide their own documentation, and handle their own configuration. The agent loads only what it needs, when it needs it.\n\nIf you're working with AI agents and feeling context pressure, this pattern could change your workflow. Start with one skill, see the efficiency gains, then scale from there."
+---
+
+The more we work with AI agents, the more we realize that **context is a precious resource**. And one of the biggest challenges with Model Context Protocol (MCP) servers is this: they preload tool descriptions into your agent's context window, consuming tokens before you even need them.
+
+Large MCP servers can eat up massive amounts of context—and here's the problem: **the more complex your task, the more context you need to solve it**. When MCPs consume fixed context overhead regardless of whether you're using them, that's wasteful.
+
+Let me show you a better pattern: **Claude Code Skills**.
+
+## The MCP Context Problem
+
+Imagine you spin up an agent to write some code. Maybe you have:
+- An MCP for internet research
+- An MCP for weather data
+- An MCP for database queries
+- An MCP for YouTube analysis
+
+These are wonderful capabilities. But they all use context by default just by being loaded. You want these capabilities available, but you don't necessarily want them consuming your context window when you're not using them.
+
+## The Skills Alternative
+
+Claude Code Skills offers a different approach: **zero context until needed**.
+
+![Progressive disclosure workflow showing how Skills load only what's needed, when it's needed](../../public/blog/2025-12-04-skills-over-mcps-context-efficiency/hero-skills-progressive-disclosure.webp)
+
+Let's build a simple weather skill that provides current conditions and forecasting capabilities. I'll show you exactly how simple this can be using a [real implementation example](https://github.com/Mandalorian007/claude-skill-context-test).
+
+### How Skills Work: The Discovery Flow
+
+Here's what happens when you ask about weather:
+
+```
+User: "What's the weather in NYC?"
+    ↓
+Claude discovers weather skill (reads SKILL.md)
+    ↓
+Claude runs: uv run .claude/skills/weather/scripts/current.py --help
+    ↓
+Claude learns the tool's interface
+    ↓
+Claude runs: uv run .claude/skills/weather/scripts/current.py "New York City"
+    ↓
+Real weather data returned
+```
+
+**Context used**: Minimal metadata and interface description
+**Context saved**: All implementation details (API calls, formatting, error handling)
+
+## Building a Weather Skill: Step by Step
+
+### 1. Directory Structure
+
+Skills follow a clean, predictable pattern:
+
+```
+.claude/skills/weather/
+├── SKILL.md                  # Discovery metadata
+└── scripts/
+    ├── current.py            # Current weather tool
+    └── forecast.py           # Forecast tool
+```
+
+### 2. The SKILL.md File
+
+This is the only file Claude reads by default—and only when the skill is relevant:
+
+```markdown
+---
+name: weather
+description: Access weather data including current conditions and forecasts. Use when the user asks about weather, temperature, forecasts, or conditions for a location.
+---
+
+# Weather
+
+Standalone scripts for weather data.
+
+## Instructions
+
+- **Never read script source code** — always run `<script.py> --help` first to learn usage
+- Run with `uv run .claude/skills/weather/scripts/<script.py> --help`
+
+## Available Scripts
+
+- `current.py` — current weather conditions
+- `forecast.py` — multi-day weather forecast
+
+## Configuration
+
+Requires `.env` — see `.env.example` for template.
+```
+
+**Key Design Points**:
+- YAML frontmatter for skill activation matching
+- Clear instruction: use `--help`, never read source code
+- Minimal, focused content
+- Lists available tools with one-line descriptions
+
+### 3. Self-Contained Scripts with PEP 723
+
+Here's the beautiful part—each script is completely self-contained using Python's PEP 723 standard:
+
+```python
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+# "httpx",
+# "python-dotenv",
+# "click",
+# ]
+# ///
+"""Fetch current weather data for a location."""
+
+import os
+import sys
+
+import click
+import httpx
+from dotenv import load_dotenv
+
+@click.command()
+@click.argument("location")
+def current(location: str) -> None:
+    """Get current weather for LOCATION (city name, zip code, or coordinates)."""
+    load_dotenv()
+
+    api_url = os.getenv("WEATHER_API_URL")
+    api_key = os.getenv("WEATHER_API_KEY")
+
+    if not api_url or not api_key:
+        click.echo("Error: WEATHER_API_URL and WEATHER_API_KEY must be set", err=True)
+        sys.exit(1)
+
+    response = httpx.get(
+        f"https://{api_url}/current.json",
+        params={"q": location},
+        headers={
+            "x-rapidapi-host": api_url,
+            "x-rapidapi-key": api_key,
+        },
+    )
+
+    if response.status_code != 200:
+        click.echo(f"Error: API returned {response.status_code}", err=True)
+        sys.exit(1)
+
+    data = response.json()
+
+    # Display formatted weather data
+    loc = data["location"]
+    cur = data["current"]
+
+    click.echo(f"\n📍 {loc['name']}, {loc.get('region', '')}, {loc['country']}")
+    click.echo(f"   Local time: {loc['localtime']}")
+    click.echo(f"\n🌡️ {cur['temp_f']}°F ({cur['temp_c']}°C)")
+    click.echo(f"   Feels like {cur['feelslike_f']}°F ({cur['feelslike_c']}°C)")
+    click.echo(f"   {cur['condition']['text']}")
+    click.echo(f"\n💧 Humidity: {cur['humidity']}%")
+    click.echo(f"💨 Wind: {cur['wind_mph']} mph {cur['wind_dir']}")
+    click.echo(f"👁️ Visibility: {cur['vis_miles']} miles")
+    click.echo()
+
+if __name__ == "__main__":
+    current()
+```
+
+**What Makes This Powerful**:
+
+1. **Inline Dependencies** - No requirements.txt needed, dependencies declared in script metadata
+2. **Click Framework** - Automatic `--help` generation with proper argument validation
+3. **Self-Contained Config** - Loads its own environment variables
+4. **Clear Error Handling** - Proper exit codes and error messages
+5. **Rich Output** - Formatted, emoji-enhanced output ready for display
+
+### 4. Seeing It in Action
+
+Here's real output from running the skill:
+
+```bash
+> what's the weather in NYC?
+
+> The "weather" skill is running
+
+⏺ Bash(uv run .claude/skills/weather/scripts/current.py --help)
+  ⎿ Usage: current.py [OPTIONS] LOCATION
+     Get current weather for LOCATION (city name, zip code, or coordinates)
+
+⏺ Bash(uv run .claude/skills/weather/scripts/current.py "New York City")
+  ⎿ 📍 New York, New York, United States of America
+       Local time: 2025-11-29 11:07
+
+     🌡️ 37°F (2.8°C), feels like 29°F (-1.8°C)
+        Sunny, clear skies
+
+     💧 Humidity: 40%
+     💨 Wind: 12.8 mph from the NW with gusts up to 15.5 mph
+     👁️ Visibility: 9 miles
+
+⏺ Current weather in New York City:
+  - Temperature: 37°F (2.8°C), feels like 29°F (-1.8°C)
+  - Conditions: Sunny, clear skies
+  - Humidity: 40%
+  - Wind: 12.8 mph from the NW with gusts up to 15.5 mph
+  - Visibility: 9 miles
+
+  It's a cold but clear and sunny day in NYC!
+```
+
+Notice the workflow:
+1. Skill discovered and activated
+2. Help command run to learn the interface
+3. Tool executed with proper parameters
+4. Results formatted and presented
+
+**All without preloading implementation code into context.**
+
+## The Power of Progressive Disclosure
+
+This pattern uses **progressive disclosure** to minimize context consumption:
+
+1. **Default State**: Zero context (skill not loaded)
+2. **Skill Discovery**: SKILL.md metadata when relevant
+3. **Tool Learning**: `--help` output to understand the interface
+4. **Execution**: Only the output data
+
+![Comparison diagram showing MCP loading all tools upfront versus Skills loading only what's needed](../../public/blog/2025-12-04-skills-over-mcps-context-efficiency/diagram-mcp-vs-skills-context.webp)
+
+Compare this to MCP:
+- **MCP Default**: All tool descriptions loaded upfront
+- **MCP Usage**: Tools described whether you need them or not
+- **MCP Growth**: More tools = more context consumed
+
+With skills:
+- **Skills Default**: Nothing loaded
+- **Skills Usage**: Load only what you need, when you need it
+- **Skills Growth**: Add 1,000 tools = zero additional default context
+
+## Scaling Skills: The Real Benefit
+
+Here's where this pattern shines. You can build skills for:
+
+- **Research**: Reddit search, YouTube data, news APIs
+- **Development**: Database queries, API testing, deployment tools
+- **Media**: Movie data, TV shows, sports scores
+- **Finance**: Stock prices, crypto data, market analysis
+- **Communication**: Email, Slack, Discord integrations
+
+![Visualization showing thousands of dormant tools with only one activated, representing zero context overhead](../../public/blog/2025-12-04-skills-over-mcps-context-efficiency/diagram-skills-scaling.webp)
+
+Each skill adds **zero default context overhead**. The LLM decides based on your query which skill to load, learns only what it needs from `--help`, and executes.
+
+You could effectively have **4,000 tools available** while using **zero context** until you need one.
+
+## Implementation Patterns
+
+### One Script, One Purpose
+
+Keep scripts focused and independent:
+
+```python
+# Good: Focused on one task
+current.py      # Current weather only
+forecast.py     # Forecast only
+alerts.py       # Weather alerts only
+
+# Avoid: Multi-purpose with subcommands (adds complexity)
+weather.py current
+weather.py forecast
+weather.py alerts
+```
+
+### Use Standard Tooling
+
+The example uses:
+- **uv** for Python dependency management (could use bun, npm, etc.)
+- **Click** for CLI interfaces (could use argparse, typer, etc.)
+- **PEP 723** for inline dependencies (optional but recommended)
+
+Choose what fits your workflow. The pattern works with any language that supports:
+1. CLI argument parsing
+2. `--help` output
+3. Executable scripts
+
+### Configuration Strategy
+
+Use environment variables for secrets and config:
+
+```python
+# .env.example
+WEATHER_API_URL='weatherapi-com.p.rapidapi.com'
+WEATHER_API_KEY='your_api_key_here'
+
+# Load in script
+from dotenv import load_dotenv
+load_dotenv()
+
+api_key = os.getenv("WEATHER_API_KEY")
+```
+
+This keeps credentials out of code and makes scripts portable across environments.
+
+## When to Use Skills vs MCPs
+
+**Use Skills When**:
+- You have many optional capabilities (10+ tools)
+- Tools are used infrequently or conditionally
+- Context efficiency is critical for your workflow
+- You want to grow your toolkit without context bloat
+
+**Use MCPs When**:
+- You need tools constantly available (always in context is fine)
+- Tool discovery/activation time is unacceptable
+- You need tight integration with external services
+- You're building shared tools for multiple users/agents
+
+**Use Both**:
+- Core, always-needed capabilities as MCPs
+- Extended, situational capabilities as Skills
+- Best of both worlds: efficiency + availability
+
+## Key Takeaways
+
+The core pattern is simple:
+1. **Package tools as standalone scripts** - Each script is self-contained with inline dependencies
+2. **Provide `--help` documentation** - Let the agent discover how to use your tools on demand
+3. **Zero default context** - Skills only load when relevant to the user's query
+
+That's it. No complex setup, no context overhead, infinite scalability.
+
+## Real-World Example: Complete Implementation
+
+Check out the [full working example on GitHub](https://github.com/Mandalorian007/claude-skill-context-test) to see:
+
+- Complete SKILL.md configuration
+- Both current.py and forecast.py implementations
+- Environment setup with .env.example
+- Full PEP 723 script metadata
+- Click-based CLI interfaces
+- Rich formatted output
+
+The complete implementation provides two fully functional weather tools with zero default context overhead.
+
+## The Core Philosophy
+
+Skills embrace a simple principle: **context is precious, load only what you need**.
+
+By packaging capabilities as standalone executable scripts that:
+1. Declare their own dependencies (PEP 723)
+2. Provide their own help documentation (`--help`)
+3. Handle their own configuration (environment variables)
+4. Return clean, formatted output
+
+You create a scalable toolkit that grows without bloating your agent's context window.
+
+## Getting Started
+
+Ready to build your first skill? Here's the minimal starter:
+
+```bash
+# 1. Create the structure
+mkdir -p .claude/skills/myskill/scripts
+
+# 2. Create SKILL.md
+cat > .claude/skills/myskill/SKILL.md << 'EOF'
+---
+name: myskill
+description: Description of when to use this skill
+---
+
+# My Skill
+
+## Instructions
+
+- Run scripts with `uv run .claude/skills/myskill/scripts/<script.py> --help`
+
+## Available Scripts
+
+- `tool.py` — What this tool does
+EOF
+
+# 3. Create your first script
+cat > .claude/skills/myskill/scripts/tool.py << 'EOF'
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = ["click"]
+# ///
+
+import click
+
+@click.command()
+@click.argument("param")
+def tool(param: str) -> None:
+    """Tool description for --help output."""
+    click.echo(f"Processing: {param}")
+    # Your implementation here
+
+if __name__ == "__main__":
+    tool()
+EOF
+
+# 4. Make executable
+chmod +x .claude/skills/myskill/scripts/tool.py
+
+# 5. Test it
+uv run .claude/skills/myskill/scripts/tool.py --help
+```
+
+That's it. You now have a working skill that consumes zero context until needed.
+
+## Conclusion
+
+Context is a finite, valuable resource in agent workflows. MCPs are powerful but come with context overhead that grows with every tool you add.
+
+Claude Code Skills offer an alternative: **zero-context tool discovery** with **lazy loading** of only what you need, when you need it.
+
+By packaging capabilities as self-contained CLI scripts with:
+- PEP 723 inline dependencies
+- Click-based interfaces with automatic `--help`
+- Environment-based configuration
+- Clear, formatted output
+
+You can build a toolkit of hundreds or thousands of capabilities that consume no default context, loading only the minimal interface details when relevant.
+
+The result? More context available for solving complex problems, less wasted on tools you might never use.
+
+Consider auditing your MCPs. Which ones could be refactored as Skills? Which rarely-used capabilities could free up context for the work that really matters?
+
+Start small, build one skill, see the pattern. Then watch your toolkit grow without your context shrinking.
+
+The future of agent tooling isn't just about what capabilities you have—it's about **how efficiently you provide access to them**.
+
+Skills are that efficient path forward.
