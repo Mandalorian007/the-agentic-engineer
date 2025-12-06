@@ -470,6 +470,29 @@ Direct tool usage without Claude Code commands:
 - **Images**: next/image + Vercel CDN
 - **Code**: react-syntax-highlighter (oneLight/oneDark themes)
 
+### Code Syntax Highlighting
+
+Code blocks use `react-syntax-highlighter` with PrismLight for optimized bundle size. Only the languages actually used in blog posts are registered.
+
+**Currently registered languages:**
+- `bash` / `shell`
+- `python`
+- `markdown`
+- `typescript`
+- `javascript`
+- `json`
+- `yaml`
+- `tsx`
+
+**Adding a new language:** If you write a post using a language not listed above (e.g., `go`, `rust`, `sql`), the code will render as plain text without highlighting. To add support:
+
+1. Edit `website/components/code-block.tsx`
+2. Add the import: `import go from "react-syntax-highlighter/dist/esm/languages/prism/go";`
+3. Register it: `SyntaxHighlighter.registerLanguage("go", go);`
+4. Update this list in the README
+
+Available languages: [Prism supported languages](https://github.com/react-syntax-highlighter/react-syntax-highlighter/blob/master/AVAILABLE_LANGUAGES_PRISM.MD)
+
 ### Project Structure
 
 ```

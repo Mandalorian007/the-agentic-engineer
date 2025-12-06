@@ -95,6 +95,9 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
   // Extract headings for Table of Contents
   const headings = extractHeadings(post.content);
 
+  // Track image index for priority loading (first image gets priority for LCP)
+  let imageIndex = 0;
+
   // Generate JSON-LD structured data for SEO
   const jsonLd = {
     "@context": "https://schema.org",
@@ -240,6 +243,10 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
                     imageSrc = `/blog/${params.slug}/${srcString.slice(2)}`;
                   }
 
+                  // First image (hero) gets priority for LCP optimization
+                  const isFirstImage = imageIndex === 0;
+                  imageIndex++;
+
                   return (
                     <span className="block my-8">
                       <Image
@@ -248,8 +255,8 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
                         width={1200}
                         height={675}
                         className="rounded-lg"
-                        priority={false}
-                        unoptimized
+                        priority={isFirstImage}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
                       />
                     </span>
                   );

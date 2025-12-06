@@ -39,7 +39,7 @@ export default function Home() {
       <section className="mt-24">
         <h2 className="text-3xl font-bold mb-8">Recent Posts</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {recentPosts.map((post) => (
+          {recentPosts.map((post, index) => (
             <Link key={post.slug} href={`/blog/${post.slug}`} className="block h-full w-full">
               <Card className="size-full rounded-lg border py-0 hover:border-foreground/50 transition-colors">
                 <CardContent className="p-0">
@@ -53,6 +53,8 @@ export default function Home() {
                         alt={post.title}
                         fill
                         className="object-cover object-center"
+                        priority={index === 0}
+                        sizes="(max-width: 768px) 100vw, 33vw"
                       />
                     ) : (
                       <div className="flex items-center justify-center size-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-950 dark:to-purple-950">
