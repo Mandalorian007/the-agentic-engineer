@@ -22,13 +22,62 @@ from dotenv import load_dotenv
 
 # Add parent directory to path to import lib modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from lib.config import load_config, get_posts_per_week
+from lib.config import load_config, get_posts_per_week, get_publishing_config
 
 # Auto-load .env.local if it exists (for local testing)
 project_root = Path(__file__).parent.parent
 env_file = project_root / ".env.local"
 if env_file.exists():
     load_dotenv(env_file)
+
+# Map day names to weekday numbers (Python's datetime convention)
+DAY_MAP = {
+    'monday': 0,
+    'tuesday': 1,
+    'wednesday': 2,
+    'thursday': 3,
+    'friday': 4,
+    'saturday': 5,
+    'sunday': 6
+}
+
+
+def get_next_publish_date(after_date: datetime, publish_days: List[str], publish_time: str) -> datetime:
+    """
+    Get the next publish date after a given date based on configured days.
+
+    Args:
+        after_date: Find next publish date after this date
+        publish_days: List of day names (e.g., ["monday", "thursday"])
+        publish_time: Time to publish in HH:MM:SS format
+
+    Returns:
+        Next available publish date as datetime
+    """
+    from datetime import timedelta
+
+    # Parse publish time
+    time_parts = publish_time.split(':')
+    hour = int(time_parts[0])
+    minute = int(time_parts[1]) if len(time_parts) > 1 else 0
+    second = int(time_parts[2]) if len(time_parts) > 2 else 0
+
+    # Convert day names to weekday numbers
+    target_weekdays = [DAY_MAP[day.lower()] for day in publish_days]
+    target_weekdays.sort()
+
+    # Start from the day after after_date
+    current_date = after_date + timedelta(days=1)
+    current_date = current_date.replace(hour=hour, minute=minute, second=second, microsecond=0)
+
+    # Find the next occurrence of any target weekday
+    for _ in range(7):  # At most we need to check 7 days ahead
+        if current_date.weekday() in target_weekdays:
+            return current_date
+        current_date += timedelta(days=1)
+
+    # This should never happen if target_weekdays is valid
+    raise ValueError(f"Could not find next publish date. Check publish_days: {publish_days}")
 
 
 def extract_title_from_mdx(mdx_file: Path) -> Optional[str]:
@@ -85,27 +134,32 @@ def get_scheduled_posts(content_dir: Path) -> List[Dict[str, any]]:
     return scheduled_posts
 
 
-def calculate_buffer_stats(scheduled_posts: List[Dict], posts_per_week: int) -> Dict[str, any]:
+def calculate_buffer_stats(scheduled_posts: List[Dict], posts_per_week: int, config: Dict) -> Dict[str, any]:
     """
     Calculate buffer statistics.
 
     Args:
         scheduled_posts: List of scheduled post dicts
         posts_per_week: Number of posts published per week (from config)
+        config: Full configuration dict for publishing schedule
 
     Returns:
         Dict with buffer statistics
     """
     now = datetime.now(timezone.utc)
+    pub_config = get_publishing_config(config)
 
     if not scheduled_posts:
+        # No posts scheduled - need content for the next publish date
+        next_publish = get_next_publish_date(now, pub_config['days'], pub_config['time'])
+        next_publish = next_publish.replace(tzinfo=timezone.utc)
         return {
             "weeks_of_buffer": 0,
             "posts_scheduled": 0,
             "posts_per_week": posts_per_week,
             "last_post_date": None,
             "content_runs_out": now,
-            "need_content_by": now
+            "need_content_by": next_publish
         }
 
     last_post = scheduled_posts[-1]
@@ -121,8 +175,9 @@ def calculate_buffer_stats(scheduled_posts: List[Dict], posts_per_week: int) -> 
     # Calculate when content runs out (the last post date)
     content_runs_out = last_post_date
 
-    # Need new content by the last post date (to maintain buffer)
-    need_content_by = content_runs_out
+    # Need new content by the NEXT publish date after the last scheduled post
+    need_content_by = get_next_publish_date(last_post_date, pub_config['days'], pub_config['time'])
+    need_content_by = need_content_by.replace(tzinfo=timezone.utc)
 
     return {
         "weeks_of_buffer": weeks_of_buffer,
@@ -250,7 +305,7 @@ def main():
     scheduled_posts = get_scheduled_posts(content_dir)
 
     # Calculate stats
-    stats = calculate_buffer_stats(scheduled_posts, posts_per_week)
+    stats = calculate_buffer_stats(scheduled_posts, posts_per_week, config)
 
     # Print summary
     print(f"\n📊 Content Buffer Status")
