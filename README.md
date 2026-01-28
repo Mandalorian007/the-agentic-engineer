@@ -212,9 +212,9 @@ image_generation:
   quality: 85
 
 publishing:
-  frequency: "twice-weekly"  # or "weekly"
-  days: ["monday", "thursday"]  # Days of week to publish
-  time: "10:00:00"  # Publish time (UTC)
+  frequency: "weekly"
+  days: ["monday"]
+  time: "11:00:00"  # Publish time (UTC) - 6am EST
 
 categories:
   - tutorials
@@ -298,8 +298,8 @@ The publishing schedule is configurable in `blog-config.yaml`:
 
 ```yaml
 publishing:
-  frequency: "twice-weekly"  # or "weekly"
-  days: ["monday", "thursday"]  # Days of week for regular schedule (can publish any day)
+  frequency: "weekly"
+  days: ["monday"]
   time: "11:00:00"  # Publish time (UTC) - 6am EST - posts go live for ISR
 ```
 
@@ -311,11 +311,11 @@ uv run tools/next_publish_date.py
 
 Output:
 ```
-Next available publish date (Monday, Thursday):
+Next available publish date (Monday):
 ----------------------------------------
-Directory name: 2025-11-20-your-slug-here
-Frontmatter date: 2025-11-20T11:00:00Z
-Day: Thursday, November 20, 2025
+Directory name: 2025-11-25-your-slug-here
+Frontmatter date: 2025-11-25T11:00:00Z
+Day: Monday, November 25, 2025
 
 Note: Posts are scheduled at 11:00:00 UTC (6am EST) for daily ISR.
 ```
