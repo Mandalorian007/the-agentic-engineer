@@ -276,9 +276,9 @@ The publishing schedule is configured in `blog-config.yaml`:
 
 ```yaml
 publishing:
-  frequency: "twice-weekly"  # or "weekly"
-  days: ["monday", "thursday"]  # Days of week to publish
-  time: "10:00:00"  # Publish time (UTC)
+  frequency: "weekly"
+  days: ["monday"]
+  time: "11:00:00"  # Publish time (UTC) - 6am EST
 ```
 
 **To change publishing frequency:** Just edit the `days` array in `blog-config.yaml`. The entire content pipeline automatically adapts:
@@ -596,8 +596,8 @@ image_generation:
   quality: 85
 
 publishing:
-  frequency: "twice-weekly"  # or "weekly" for single-day publishing
-  days: ["monday", "thursday"]  # Day(s) of week for regular schedule (can publish any day)
+  frequency: "weekly"
+  days: ["monday"]
   time: "11:00:00"  # Publish time (UTC) - 6am EST - posts go live for ISR
 
 categories:
