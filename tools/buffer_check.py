@@ -22,62 +22,14 @@ from dotenv import load_dotenv
 
 # Add parent directory to path to import lib modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from lib.config import load_config, get_posts_per_week, get_publishing_config
+from lib.config import load_config, get_publishing_config, get_publishing_rate
+from lib.scheduling import get_next_publish_date, format_schedule_label
 
 # Auto-load .env.local if it exists (for local testing)
 project_root = Path(__file__).parent.parent
 env_file = project_root / ".env.local"
 if env_file.exists():
     load_dotenv(env_file)
-
-# Map day names to weekday numbers (Python's datetime convention)
-DAY_MAP = {
-    'monday': 0,
-    'tuesday': 1,
-    'wednesday': 2,
-    'thursday': 3,
-    'friday': 4,
-    'saturday': 5,
-    'sunday': 6
-}
-
-
-def get_next_publish_date(after_date: datetime, publish_days: List[str], publish_time: str) -> datetime:
-    """
-    Get the next publish date after a given date based on configured days.
-
-    Args:
-        after_date: Find next publish date after this date
-        publish_days: List of day names (e.g., ["monday", "thursday"])
-        publish_time: Time to publish in HH:MM:SS format
-
-    Returns:
-        Next available publish date as datetime
-    """
-    from datetime import timedelta
-
-    # Parse publish time
-    time_parts = publish_time.split(':')
-    hour = int(time_parts[0])
-    minute = int(time_parts[1]) if len(time_parts) > 1 else 0
-    second = int(time_parts[2]) if len(time_parts) > 2 else 0
-
-    # Convert day names to weekday numbers
-    target_weekdays = [DAY_MAP[day.lower()] for day in publish_days]
-    target_weekdays.sort()
-
-    # Start from the day after after_date
-    current_date = after_date + timedelta(days=1)
-    current_date = current_date.replace(hour=hour, minute=minute, second=second, microsecond=0)
-
-    # Find the next occurrence of any target weekday
-    for _ in range(7):  # At most we need to check 7 days ahead
-        if current_date.weekday() in target_weekdays:
-            return current_date
-        current_date += timedelta(days=1)
-
-    # This should never happen if target_weekdays is valid
-    raise ValueError(f"Could not find next publish date. Check publish_days: {publish_days}")
 
 
 def extract_title_from_mdx(mdx_file: Path) -> Optional[str]:
@@ -134,29 +86,32 @@ def get_scheduled_posts(content_dir: Path) -> List[Dict[str, any]]:
     return scheduled_posts
 
 
-def calculate_buffer_stats(scheduled_posts: List[Dict], posts_per_week: int, config: Dict) -> Dict[str, any]:
+def calculate_buffer_stats(scheduled_posts: List[Dict], config: Dict) -> Dict[str, any]:
     """
     Calculate buffer statistics.
 
     Args:
         scheduled_posts: List of scheduled post dicts
-        posts_per_week: Number of posts published per week (from config)
         config: Full configuration dict for publishing schedule
 
     Returns:
-        Dict with buffer statistics
+        Dict with buffer statistics including buffer_amount, buffer_unit,
+        and publishing rate info
     """
     now = datetime.now(timezone.utc)
     pub_config = get_publishing_config(config)
+    rate = get_publishing_rate(config)
+    frequency = pub_config.get('frequency', 'weekly')
 
     if not scheduled_posts:
         # No posts scheduled - need content for the next publish date
-        next_publish = get_next_publish_date(now, pub_config['days'], pub_config['time'])
+        next_publish = get_next_publish_date(now.replace(tzinfo=None), pub_config)
         next_publish = next_publish.replace(tzinfo=timezone.utc)
         return {
-            "weeks_of_buffer": 0,
+            "buffer_amount": 0,
+            "buffer_unit": "months" if frequency == "monthly" else "weeks",
             "posts_scheduled": 0,
-            "posts_per_week": posts_per_week,
+            "frequency_label": rate['frequency_label'],
             "last_post_date": None,
             "content_runs_out": now,
             "need_content_by": next_publish
@@ -165,24 +120,31 @@ def calculate_buffer_stats(scheduled_posts: List[Dict], posts_per_week: int, con
     last_post = scheduled_posts[-1]
     last_post_date = last_post["date"]
 
-    # Calculate weeks of buffer based on actual time span
-    # This is more accurate than just dividing posts by posts_per_week
     posts_scheduled = len(scheduled_posts)
     time_until_last_post = last_post_date - now
     days_of_buffer = time_until_last_post.days
-    weeks_of_buffer = days_of_buffer / 7.0
+
+    if frequency == 'monthly':
+        buffer_amount = days_of_buffer / 30.44  # average days per month
+        buffer_unit = "months"
+    else:
+        buffer_amount = days_of_buffer / 7.0
+        buffer_unit = "weeks"
 
     # Calculate when content runs out (the last post date)
     content_runs_out = last_post_date
 
     # Need new content by the NEXT publish date after the last scheduled post
-    need_content_by = get_next_publish_date(last_post_date, pub_config['days'], pub_config['time'])
+    need_content_by = get_next_publish_date(
+        last_post_date.replace(tzinfo=None), pub_config
+    )
     need_content_by = need_content_by.replace(tzinfo=timezone.utc)
 
     return {
-        "weeks_of_buffer": weeks_of_buffer,
+        "buffer_amount": buffer_amount,
+        "buffer_unit": buffer_unit,
         "posts_scheduled": posts_scheduled,
-        "posts_per_week": posts_per_week,
+        "frequency_label": rate['frequency_label'],
         "last_post_date": last_post_date,
         "content_runs_out": content_runs_out,
         "need_content_by": need_content_by
@@ -191,20 +153,34 @@ def calculate_buffer_stats(scheduled_posts: List[Dict], posts_per_week: int, con
 
 def create_discord_message(stats: Dict[str, any], scheduled_posts: List[Dict]) -> Dict:
     """Create Discord webhook payload with embed."""
-    weeks = stats["weeks_of_buffer"]
+    buffer_amount = stats["buffer_amount"]
+    buffer_unit = stats["buffer_unit"]
     posts_count = stats["posts_scheduled"]
-    posts_per_week = stats["posts_per_week"]
+    freq_label = stats["frequency_label"]
 
-    # Determine color and urgency with three levels
-    if weeks < 2:
-        color = 0xFF0000  # Red - urgent/low
-        urgency = "🚨 LOW"
-    elif weeks < 4:
-        color = 0xFFA500  # Orange - moderate
-        urgency = "⚠️ MODERATE"
+    # Determine color and urgency based on buffer unit
+    if buffer_unit == "months":
+        # Monthly thresholds: red < 1, orange < 2, green >= 2
+        if buffer_amount < 1:
+            color = 0xFF0000  # Red - urgent/low
+            urgency = "🚨 LOW"
+        elif buffer_amount < 2:
+            color = 0xFFA500  # Orange - moderate
+            urgency = "⚠️ MODERATE"
+        else:
+            color = 0x00FF00  # Green - good
+            urgency = "✅ GOOD"
     else:
-        color = 0x00FF00  # Green - good
-        urgency = "✅ GOOD"
+        # Weekly thresholds: red < 2, orange < 4, green >= 4
+        if buffer_amount < 2:
+            color = 0xFF0000  # Red - urgent/low
+            urgency = "🚨 LOW"
+        elif buffer_amount < 4:
+            color = 0xFFA500  # Orange - moderate
+            urgency = "⚠️ MODERATE"
+        else:
+            color = 0x00FF00  # Green - good
+            urgency = "✅ GOOD"
 
     # Format dates
     if stats["last_post_date"]:
@@ -223,7 +199,7 @@ def create_discord_message(stats: Dict[str, any], scheduled_posts: List[Dict]) -
     # Create embed
     embed = {
         "title": f"{urgency} - Content Buffer Check",
-        "description": f"You have **{weeks:.1f} weeks** of scheduled content ({posts_count} posts @ {posts_per_week}/week)",
+        "description": f"You have **{buffer_amount:.1f} {buffer_unit}** of scheduled content ({posts_count} posts @ {freq_label})",
         "color": color,
         "fields": [
             {
@@ -282,10 +258,9 @@ def main():
     )
     args = parser.parse_args()
 
-    # Load configuration to get posts per week
+    # Load configuration
     try:
         config = load_config()
-        posts_per_week = get_posts_per_week(config)
     except Exception as e:
         print(f"❌ Error loading configuration: {e}", file=sys.stderr)
         sys.exit(1)
@@ -305,14 +280,18 @@ def main():
     scheduled_posts = get_scheduled_posts(content_dir)
 
     # Calculate stats
-    stats = calculate_buffer_stats(scheduled_posts, posts_per_week, config)
+    stats = calculate_buffer_stats(scheduled_posts, config)
+
+    pub_config = get_publishing_config(config)
+    schedule_label = format_schedule_label(pub_config)
 
     # Print summary
     print(f"\n📊 Content Buffer Status")
     print(f"{'='*50}")
     print(f"Posts scheduled: {stats['posts_scheduled']}")
-    print(f"Posts per week: {posts_per_week}")
-    print(f"Weeks of buffer: {stats['weeks_of_buffer']:.1f}")
+    print(f"Publishing rate: {stats['frequency_label']}")
+    print(f"Schedule: {schedule_label}")
+    print(f"Buffer: {stats['buffer_amount']:.1f} {stats['buffer_unit']}")
 
     if stats['last_post_date']:
         print(f"Last post date: {stats['last_post_date'].strftime('%Y-%m-%d')}")

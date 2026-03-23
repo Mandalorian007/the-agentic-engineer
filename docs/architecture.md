@@ -51,6 +51,7 @@ the-agentic-engineer/
 │
 ├── lib/                          # Python modules for content generation
 │   ├── config.py                 # Blog configuration loader
+│   ├── scheduling.py             # Shared date calculation (weekly/monthly)
 │   ├── frontmatter.py            # YAML frontmatter parser
 │   ├── validator.py              # MDX validation & category checking
 │   └── social_validator.py       # Social media post validation
@@ -58,10 +59,10 @@ the-agentic-engineer/
 ├── tools/                        # Python CLI tools
 │   ├── generate_image.py         # OpenAI image generation (gpt-image-1)
 │   ├── convert_to_webp.py        # Image format conversion
-│   ├── next_publish_date.py      # Calculate next Monday publish date
+│   ├── next_publish_date.py      # Calculate next publish date (weekly/monthly)
 │   ├── seo_check.py              # SEO analysis & validation
 │   ├── post_to_twitter.py        # Twitter posting from frontmatter
-│   ├── buffer_check.py           # Weekly content buffer monitoring
+│   ├── buffer_check.py           # Content buffer monitoring
 │   └── setup_check.py            # Environment validation
 │
 ├── website/                      # Next.js application (deployed to Vercel)
@@ -275,21 +276,30 @@ Use **relative paths** from MDX file location:
 The publishing schedule is configured in `blog-config.yaml`:
 
 ```yaml
+# Monthly (2nd Monday of each month)
+publishing:
+  frequency: "monthly"
+  day: "monday"
+  week_of_month: 2
+  time: "11:00:00"  # Publish time (UTC) - 6am EST
+
+# Weekly (every Monday)
 publishing:
   frequency: "weekly"
   days: ["monday"]
-  time: "11:00:00"  # Publish time (UTC) - 6am EST
+  time: "11:00:00"
 ```
 
-**To change publishing frequency:** Just edit the `days` array in `blog-config.yaml`. The entire content pipeline automatically adapts:
-- `next_publish_date.py` - Calculates next available publish day
-- `buffer_check.py` - Adjusts buffer calculations based on posts/week
+**To change publishing frequency:** Edit `blog-config.yaml`. The entire content pipeline automatically adapts:
+- `scheduling.py` - Shared date calculation for weekly/monthly
+- `next_publish_date.py` - Calculates next available publish date
+- `buffer_check.py` - Adjusts buffer calculations (months or weeks)
 - `/create-post` command - Uses configured schedule
 
 **Examples:**
-- Weekly: `days: ["monday"]`
-- Twice weekly: `days: ["monday", "thursday"]`
-- Three times weekly: `days: ["monday", "wednesday", "friday"]`
+- Monthly (2nd Monday): `frequency: "monthly"`, `day: "monday"`, `week_of_month: 2`
+- Weekly: `frequency: "weekly"`, `days: ["monday"]`
+- Twice weekly: `frequency: "weekly"`, `days: ["monday", "thursday"]`
 
 ### How Scheduled Posts Work
 
@@ -412,24 +422,24 @@ https://agentic-engineer.com/blog/{slug}
 
 ### How It Works
 
-A GitHub Action runs every **Saturday at 8am EST** to monitor the content pipeline and send a weekly status update via Discord webhook.
+A GitHub Action runs every **Saturday at 8am EST** to monitor the content pipeline and send a status update via Discord webhook.
 
 **Implementation** (`.github/workflows/buffer-check.yml` + `tools/buffer_check.py`):
 
 ```bash
-# Runs weekly via GitHub Actions
+# Runs periodically via GitHub Actions
 uv run tools/buffer_check.py --force
 ```
 
 **Discord Notification Format:**
-- 🎨 **Color-coded urgency** (green ≥4 weeks, orange 2-4 weeks, red <2 weeks)
-- 📊 **Buffer status** (weeks remaining, posts scheduled @ posts/week)
+- 🎨 **Color-coded urgency** (monthly: green ≥2 months, orange 1-2 months, red <1 month; weekly: green ≥4 weeks, orange 2-4 weeks, red <2 weeks)
+- 📊 **Buffer status** (months or weeks remaining, posts scheduled @ rate)
 - 📅 **Last scheduled post date**
 - ✍️ **When new content is needed**
 - 📝 **Complete list of scheduled posts with titles**
 
 **Key Features:**
-- ✅ **Weekly check-in** - Always know your content status without manual tracking
+- ✅ **Periodic check-in** - Always know your content status without manual tracking
 - ✅ **Auto-loads .env.local** - Works locally and in GitHub Actions with same command
 - ✅ **Title extraction** - Parses MDX frontmatter for readable post titles
 - ✅ **Adaptive calculations** - Automatically adjusts for configured publishing frequency
@@ -596,9 +606,10 @@ image_generation:
   quality: 85
 
 publishing:
-  frequency: "weekly"
-  days: ["monday"]
-  time: "11:00:00"  # Publish time (UTC) - 6am EST - posts go live for ISR
+  frequency: "monthly"
+  day: "monday"              # Publish on Mondays
+  week_of_month: 2           # 2nd occurrence each month
+  time: "11:00:00"           # Publish time (UTC) - 6am EST - posts go live for ISR
 
 categories:
   - tutorials
@@ -746,24 +757,22 @@ uv run tools/next_publish_date.py
 ```
 
 **Purpose:** Calculate next available publish date based on configured schedule
-**Configuration:** Reads `publishing.days` from `blog-config.yaml`
+**Configuration:** Reads `publishing` section from `blog-config.yaml`
 **Output:**
 ```
-Next available publish date (Monday, Thursday):
+Next available publish date (2nd Monday of each month):
 ----------------------------------------
-Directory name: 2025-11-20-your-slug-here
-Frontmatter date: 2025-11-20T11:00:00Z
-Day: Thursday, November 20, 2025
-
-Note: All posts scheduled at 11:00:00 UTC (6am EST)
+Directory name: 2026-04-13-your-slug-here
+Frontmatter date: 2026-04-13T11:00:00Z
+Day: Monday, April 13, 2026
 ```
 
 **Logic:**
 - Loads publishing schedule from `blog-config.yaml`
 - Scans existing posts in `website/content/posts/`
-- Finds next configured publish day not already used
+- Finds next configured publish date not already used
+- Supports weekly (any weekday combination) and monthly (nth weekday) schedules
 - Returns properly formatted date for frontmatter
-- Supports any combination of weekdays
 
 #### move_post_date.py
 ```bash
@@ -789,7 +798,7 @@ uv run tools/move_post_date.py 2025-10-27 "2025-10-23T14:30:00Z"
 - `-q, --quiet` - Minimal output (only errors)
 
 **Use Cases:**
-- Adjusting content schedule from weekly to twice-weekly
+- Adjusting content schedule (e.g., weekly to monthly)
 - Filling gaps in the content calendar
 - Rescheduling posts based on priorities
 - Fixing accidentally scheduled dates
@@ -853,15 +862,15 @@ uv run tools/buffer_check.py --force
 ```
 
 **Purpose:** Monitor content buffer and send Discord notification
-**Configuration:** Reads `publishing.days` from `blog-config.yaml` to calculate posts/week
-**Output:** Weekly status update with scheduled posts
+**Configuration:** Reads `publishing` section from `blog-config.yaml` to calculate buffer metrics
+**Output:** Status update with scheduled posts (months-based for monthly, weeks-based for weekly)
 **Requires:** `LOW_CONTENT_WEBHOOK` in `.env.local` or GitHub secrets
 
 **Automated Usage:**
 - GitHub Action runs every Saturday at 8am EST
 - Sends color-coded Discord notification
-- Shows weeks of buffer (posts scheduled ÷ posts/week), scheduled posts, and deadlines
-- Automatically adapts to configured publishing frequency
+- Shows buffer remaining (months or weeks), scheduled posts, and deadlines
+- Automatically adapts to configured publishing frequency (weekly or monthly)
 
 **Manual Testing:**
 ```bash
@@ -873,9 +882,10 @@ uv run tools/buffer_check.py --force
 ```
 📊 Content Buffer Status
 ==================================================
-Posts scheduled: 5
-Posts per week: 2
-Weeks of buffer: 2.5
+Posts scheduled: 3
+Publishing rate: 1/month
+Schedule: 2nd Monday of each month
+Buffer: 2.5 months
 ```
 
 ---

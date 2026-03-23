@@ -29,7 +29,7 @@ jobs:
         run: |
           uv sync
 
-      - name: Send weekly content buffer status
+      - name: Send content buffer status
         env:
           LOW_CONTENT_WEBHOOK: ${{ secrets.LOW_CONTENT_WEBHOOK }}
         run: |

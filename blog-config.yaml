@@ -15,9 +15,10 @@ image_generation:
 
 # Publishing schedule
 publishing:
-  frequency: "weekly"
-  days: ["monday"]
-  time: "11:00:00"  # Publish time (UTC) - 6am EST - posts go live for ISR
+  frequency: "monthly"
+  day: "monday"              # Publish on Mondays
+  week_of_month: 2           # 2nd occurrence each month
+  time: "11:00:00"           # Publish time (UTC) - 6am EST - posts go live for ISR
 
 # Categories (validation reference)
 categories:

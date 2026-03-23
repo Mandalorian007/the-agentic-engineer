@@ -9,8 +9,8 @@ Next.js blog with automated content generation and AI-powered image creation.
 - ✅ **AI Content Generation**: Complete blog posts with AI-generated images (OpenAI)
 - ✅ **Social Media Automation**: Auto-generate and post to Twitter/LinkedIn via GitHub Actions
 - ✅ **Quality Checks**: SEO analysis + Vale prose linting + Social validation
-- ✅ **Scheduled Publishing**: Configure publish days (weekly/twice-weekly), posts auto-appear on schedule
-- ✅ **Content Buffer Monitoring**: Weekly Discord notifications for content pipeline status
+- ✅ **Scheduled Publishing**: Configure publish cadence (weekly/monthly), posts auto-appear on schedule
+- ✅ **Content Buffer Monitoring**: Discord notifications for content pipeline status
 - ✅ **Category System**: 7 hardcoded categories for consistent organization
 - ✅ **Theme Toggle**: Light/dark mode with next-themes
 - ✅ **Vercel Deploy**: Automatic deployment on git push
@@ -212,9 +212,10 @@ image_generation:
   quality: 85
 
 publishing:
-  frequency: "weekly"
-  days: ["monday"]
-  time: "11:00:00"  # Publish time (UTC) - 6am EST
+  frequency: "monthly"
+  day: "monday"              # Publish on Mondays
+  week_of_month: 2           # 2nd occurrence each month
+  time: "11:00:00"           # Publish time (UTC) - 6am EST
 
 categories:
   - tutorials
@@ -297,10 +298,18 @@ Images are automatically saved in WebP format for optimal web performance.
 The publishing schedule is configurable in `blog-config.yaml`:
 
 ```yaml
+# Monthly (2nd Monday of each month)
+publishing:
+  frequency: "monthly"
+  day: "monday"
+  week_of_month: 2
+  time: "11:00:00"  # Publish time (UTC) - 6am EST
+
+# Weekly (every Monday)
 publishing:
   frequency: "weekly"
   days: ["monday"]
-  time: "11:00:00"  # Publish time (UTC) - 6am EST - posts go live for ISR
+  time: "11:00:00"
 ```
 
 Get the next available publish date:
@@ -311,16 +320,14 @@ uv run tools/next_publish_date.py
 
 Output:
 ```
-Next available publish date (Monday):
+Next available publish date (2nd Monday of each month):
 ----------------------------------------
-Directory name: 2025-11-25-your-slug-here
-Frontmatter date: 2025-11-25T11:00:00Z
-Day: Monday, November 25, 2025
-
-Note: Posts are scheduled at 11:00:00 UTC (6am EST) for daily ISR.
+Directory name: 2026-04-13-your-slug-here
+Frontmatter date: 2026-04-13T11:00:00Z
+Day: Monday, April 13, 2026
 ```
 
-**Changing frequency:** Just edit `blog-config.yaml` to change publish days. The entire content pipeline (date calculation, buffer monitoring) automatically adapts.
+**Changing frequency:** Just edit `blog-config.yaml` to change the publishing cadence. The entire content pipeline (date calculation, buffer monitoring) automatically adapts.
 
 ### Moving Posts to New Dates
 
@@ -341,7 +348,7 @@ uv run tools/move_post_date.py 2025-10-27 2025-10-23
 - ✅ Updates all image references in content
 
 **Use cases:**
-- Adjusting to a new publishing schedule (e.g., weekly → twice-weekly)
+- Adjusting to a new publishing schedule (e.g., weekly → monthly)
 - Filling gaps in the content calendar
 - Moving posts earlier/later based on priorities
 
@@ -395,7 +402,7 @@ uv run tools/post_to_twitter.py
 
 ## Content Buffer Monitoring
 
-Get a weekly Discord notification every Saturday showing your content pipeline status.
+Get a Discord notification every Saturday showing your content pipeline status.
 
 ### Setup
 
@@ -409,8 +416,8 @@ Get a weekly Discord notification every Saturday showing your content pipeline s
    - Add secret: `LOW_CONTENT_WEBHOOK`
 
 3. **GitHub Action runs every Saturday at 8am EST**
-   - Sends weekly status update to Discord
-   - Shows: weeks of buffer, scheduled posts, last post date
+   - Sends status update to Discord
+   - Shows: buffer remaining (months or weeks), scheduled posts, last post date
 
 ### Manual Testing
 
@@ -419,8 +426,8 @@ Get a weekly Discord notification every Saturday showing your content pipeline s
 uv run tools/buffer_check.py --force
 ```
 
-Each weekly notification shows:
-- 🚨 Status level (color-coded: red < 2 weeks, orange < 4 weeks, green ≥ 4 weeks)
+Each notification shows:
+- 🚨 Status level (color-coded: monthly = red < 1 month / orange < 2 months / green ≥ 2 months; weekly = red < 2 weeks / orange < 4 weeks / green ≥ 4 weeks)
 - 📅 Date of last scheduled post
 - ✍️ When you need new content by
 - 📝 Complete list of scheduled posts

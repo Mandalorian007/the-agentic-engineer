@@ -55,6 +55,6 @@ Deployment is handled by:
 1. Git commit (saves the post to version control)
 2. Git push (triggers Vercel deployment)
 3. Vercel auto-deploys and makes the post live
-4. GitHub Actions automatically post to social media at scheduled time (Mon/Thu 10:00 UTC)
+4. GitHub Actions automatically post to social media daily at 11:30 UTC (only when content is scheduled)
 
 No build or publish commands needed!

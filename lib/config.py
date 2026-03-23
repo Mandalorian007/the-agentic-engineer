@@ -115,21 +115,59 @@ def get_publishing_config(config: Dict[str, Any]) -> Dict[str, Any]:
 
     Returns:
         Publishing configuration dict with:
-        - frequency: "weekly" or "twice-weekly"
-        - days: list of day names (e.g., ["monday", "thursday"])
-        - time: publish time string (e.g., "10:00:00")
+        - frequency: "weekly" or "monthly"
+        - time: publish time string (e.g., "11:00:00")
+        For weekly: days (list of day names)
+        For monthly: day (single day name), week_of_month (int)
     """
     publishing = config.get('publishing', {})
-    return {
-        'frequency': publishing.get('frequency', 'weekly'),
-        'days': publishing.get('days', ['monday']),
-        'time': publishing.get('time', '10:00:00'),
+    frequency = publishing.get('frequency', 'weekly')
+
+    result = {
+        'frequency': frequency,
+        'time': publishing.get('time', '11:00:00'),
     }
+
+    if frequency == 'monthly':
+        result['day'] = publishing.get('day', 'monday')
+        result['week_of_month'] = publishing.get('week_of_month', 2)
+    else:
+        result['days'] = publishing.get('days', ['monday'])
+
+    return result
+
+
+def get_publishing_rate(config: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Get publishing rate info from configuration.
+
+    Returns:
+        Dict with:
+        - posts_per_month: float (e.g., 1.0 for monthly, ~4.3 for weekly)
+        - frequency_label: str (e.g., "1/month", "1/week")
+    """
+    pub_config = get_publishing_config(config)
+    frequency = pub_config.get('frequency', 'weekly')
+
+    if frequency == 'monthly':
+        return {
+            'posts_per_month': 1.0,
+            'frequency_label': '1/month',
+        }
+    else:
+        days_count = len(pub_config.get('days', ['monday']))
+        return {
+            'posts_per_month': days_count * 4.33,
+            'frequency_label': f'{days_count}/week',
+        }
 
 
 def get_posts_per_week(config: Dict[str, Any]) -> int:
     """
-    Calculate posts per week from configuration
+    Calculate posts per week from configuration.
+
+    For monthly frequency, returns 1 (used as a fallback for
+    legacy code that expects a weekly number).
 
     Args:
         config: Configuration dict from load_config()
@@ -137,4 +175,7 @@ def get_posts_per_week(config: Dict[str, Any]) -> int:
     Returns:
         Number of posts per week based on configured publish days
     """
-    return len(get_publishing_config(config)['days'])
+    pub_config = get_publishing_config(config)
+    if pub_config.get('frequency') == 'monthly':
+        return 1
+    return len(pub_config.get('days', ['monday']))
