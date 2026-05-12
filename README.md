@@ -316,19 +316,20 @@ mkdir -p ~/.claude/skills
 git clone https://github.com/blader/humanizer.git ~/.claude/skills/humanizer
 ```
 
-**Usage — always pass a voice sample** to avoid homogenizing the blog's voice:
+**Usage — always pass a voice sample** to avoid homogenizing the blog's voice. The canonical voice sample for this blog is `website/content/posts/2026-01-19-ai-toolkit-escape-ecosystem-lock-in.mdx`:
 ```
 /humanizer
-Humanize the post at website/content/posts/2026-02-09-my-post.mdx.
-Use my writing style from website/content/posts/2026-01-26-ai-agents-beat-developer-burnout.mdx as a reference.
+Humanize the post at website/content/posts/<your-post>.mdx.
+Use my writing style from website/content/posts/2026-01-19-ai-toolkit-escape-ecosystem-lock-in.mdx as a reference.
 ```
 
-**Pipeline order:** run humanizer **before** `/generate-socials` and `/mdx-quality-review`. Humanizer rewrites prose; the SEO/Vale/social checks should validate the final shape.
+**Pipeline order:** the `/create-social-quality-review` orchestrator runs humanizer **between `/create-post` and `/generate-socials`** so socials reflect the humanized body. If you run steps manually, follow the same order.
 
-**Caveats:**
-- Without a voice sample, humanizer falls back to its own opinionated default voice, which will flatten the consistency of your back catalog.
-- Pattern #26 (no hyphens on compound modifiers) is wrong for technical writing — review the diff before accepting changes to terms like `real-time`, `end-to-end`, `vendor-agnostic`.
-- Em dashes are not actually an AI tell (per maintainer in issue #113), but the skill still flags them. If your voice uses them deliberately, push back.
+**Style rules for this blog (override humanizer defaults):**
+- **Minimize em dashes** — em dashes are old voice for this site; apply pattern #14 aggressively.
+- **Do not un-hyphenate technical compound modifiers** — skip pattern #26 for terms like `real-time`, `end-to-end`, `vendor-agnostic`, `plug-and-play`, `hands-on-keyboard`.
+- **Preserve product names** — Claude Code, Codex, Cursor, MCP, marketplace plugins, etc.
+- **Do not rewrite the `/services` closing CTA** — wording is load-bearing for conversion.
 
 ## AI Toolkit (aitk)
 
