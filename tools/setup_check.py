@@ -213,7 +213,7 @@ class SetupChecker:
         if api_key:
             masked = api_key[:8] + '...' if len(api_key) > 8 else '***'
             print_success(f"OPENAI_API_KEY set ({masked})")
-            print_info("   Used by: tools/generate_image.py")
+            print_info("   Used by: tools/generate_embedding.py (image generation now uses aitk — see aitk config)")
         else:
             print_warning("OPENAI_API_KEY not set")
             self.warnings.append("OpenAI API key not configured")

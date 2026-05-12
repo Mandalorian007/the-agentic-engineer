@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Open_Sans } from "next/font/google";
 import "./globals.css";
 import { Navbar8 } from "@/components/navbar8";
 import { Footer16 } from "@/components/footer16";
@@ -9,19 +9,16 @@ import { shadcn } from "@clerk/themes";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const openSans = Open_Sans({
+  variable: "--font-open-sans",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "The Agentic Engineer",
-  description: "Exploring AI agents, automation, and engineering with practical insights and real-world examples.",
+  description:
+    "I build agentic developer platforms that make engineering teams measurably faster. Vendor-agnostic platform engineering for private industry and federal agencies.",
 };
 
 export default function RootLayout({
@@ -45,7 +42,7 @@ export default function RootLayout({
           />
         </head>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen flex-col`}
+          className={`${openSans.variable} antialiased flex min-h-screen flex-col`}
         >
           <ThemeProvider
             attribute="class"

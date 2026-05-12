@@ -6,7 +6,7 @@ Next.js blog with automated content generation and AI-powered image creation.
 
 - ✅ **Next.js 15**: Modern static site generation with App Router
 - ✅ **MDX Content**: Write in MDX with frontmatter, deploy with git push
-- ✅ **AI Content Generation**: Complete blog posts with AI-generated images (OpenAI)
+- ✅ **AI Content Generation**: Complete blog posts with AI-generated images via the `aitk` CLI
 - ✅ **Social Media Automation**: Auto-generate and post to Twitter/LinkedIn via GitHub Actions
 - ✅ **Quality Checks**: SEO analysis + Vale prose linting + Social validation
 - ✅ **Scheduled Publishing**: Configure publish cadence (weekly/monthly), posts auto-appear on schedule
@@ -22,7 +22,7 @@ Next.js blog with automated content generation and AI-powered image creation.
 **Requirements:**
 - Node.js 18+ and pnpm
 - Python 3.10+ (for content generation tools)
-- OpenAI API key (for image generation)
+- [`aitk`](#ai-toolkit-aitk) CLI installed and configured (`aitk config`) — used for image generation
 - Vale (optional, for prose linting): `brew install vale`
 
 **Configuration:**
@@ -38,8 +38,11 @@ Next.js blog with automated content generation and AI-powered image creation.
 
 2. **Configure environment:**
    ```bash
-   # Create .env.local (root directory)
-   echo "OPENAI_API_KEY=your-key-here" > .env.local
+   # Image generation credentials (one-time, interactive)
+   aitk config
+
+   # Optional: only needed for tools/generate_embedding.py
+   # echo "OPENAI_API_KEY=your-key-here" > .env.local
    ```
 
 3. **Verify setup:**
@@ -64,7 +67,7 @@ Use the `/create-post` command in Claude Code:
 
 This will:
 - Generate a complete MDX blog post with AI
-- Create hero images using OpenAI image generation (gpt-image-1)
+- Create hero images using `aitk image generate` (OpenAI GPT Image backend)
 - Save to `website/content/posts/YYYY-MM-DD-slug.mdx`
 - Save images to `website/public/blog/YYYY-MM-DD-slug/*.webp`
 
@@ -230,7 +233,8 @@ categories:
 ### .env.local
 
 ```bash
-# Required for AI image generation
+# Optional: only needed for tools/generate_embedding.py
+# (image generation now uses aitk config, not .env.local)
 OPENAI_API_KEY=your-key-here
 
 # Optional: Discord webhook for low content buffer notifications
@@ -274,24 +278,60 @@ Vale configuration in `.vale.ini`:
 
 ## Image Generation
 
-Generate AI images using OpenAI image generation (gpt-image-1 model, outputs WebP directly):
+Image generation is handled by the [`aitk`](#ai-toolkit-aitk) CLI (OpenAI GPT Image backend, writes WebP directly):
 
 ```bash
-uv run tools/generate_image.py "detailed prompt" website/public/blog/YYYY-MM-DD-slug/image.webp
+aitk image generate '<detailed prompt>' \
+  -o website/public/blog/YYYY-MM-DD-slug/image.webp \
+  -s 1536x1024 -q high -f webp
 ```
 
 **Example:**
 ```bash
-uv run tools/generate_image.py "modern minimalist illustration of AI automation, blue and purple gradient, clean tech aesthetic, isometric view" website/public/blog/2025-10-12-my-post/hero.webp
+aitk image generate \
+  'modern minimalist illustration of AI automation, blue and purple gradient, clean tech aesthetic, isometric view' \
+  -o website/public/blog/2025-10-12-my-post/hero.webp \
+  -s 1536x1024 -q high -f webp
 ```
 
-Images are automatically saved in WebP format for optimal web performance.
+**Flag notes:**
+- Use **single quotes** around the prompt (per `aitk image generate --help`)
+- `-s` accepts `1024x1024`, `1536x1024` (landscape, recommended for heroes), or `1024x1536`
+- `-q` accepts `low`, `medium`, `high`
+- `-f` accepts `png`, `jpeg`, `webp`
 
 **Prompt Tips:**
 - Specify style (minimalist, modern, flat design)
 - Include colors (blue gradient, warm tones)
 - Add perspective (isometric, top-down)
 - Describe mood (professional, energetic)
+
+## AI Toolkit (aitk)
+
+This project uses [`aitk`](https://github.com/clipisode/aitk) (AI Toolkit CLI) as the unified surface for AI-backed utilities.
+
+**One-time setup:**
+```bash
+aitk config           # interactive credential setup (OpenAI, ElevenLabs, etc.)
+aitk --help           # list all subcommands
+```
+
+**Common needs in this project:**
+
+| Need | Command |
+|---|---|
+| Generate a hero/diagram image for a blog post | `aitk image generate '<prompt>' -o <path>.webp -s 1536x1024 -q high -f webp` |
+| Edit an existing image with a text prompt | `aitk image edit <input> '<prompt>'` |
+| Web search (ad-hoc research) | `aitk search '<query>'` |
+| Scrape a page for content research | `aitk scrape page <url>` |
+| Generate narration/voiceover audio | `aitk audio ...` |
+| Generate short video clips | `aitk video ...` |
+
+**Where this matters in the pipeline:**
+- `/create-post` (via Claude Code) calls `aitk image generate` for hero and inline images
+- Interactive research can use `aitk search` / `aitk scrape` from the shell, or the existing MCP servers from inside Claude Code
+
+Run `aitk <subcommand> --help` for full flag details on any command.
 
 ## Publishing Schedule
 
@@ -455,8 +495,8 @@ Validates TypeScript, MDX, and generates static pages.
 Direct tool usage without Claude Code commands:
 
 **Content Generation:**
-- `uv run tools/generate_image.py <prompt> <path>` - Generate AI images (outputs WebP)
-- `uv run tools/convert_to_webp.py <input> <output>` - Convert existing images to WebP (rarely needed)
+- `aitk image generate '<prompt>' -o <path> -f webp` - Generate AI images (see [AI Toolkit (aitk)](#ai-toolkit-aitk))
+- `uv run tools/convert_to_webp.py <input> <output>` - Convert existing PNG/JPG to WebP (rarely needed; aitk writes WebP directly)
 
 **Validation:**
 - `uv run tools/seo_check.py <mdx-file>` - SEO analysis

@@ -57,7 +57,6 @@ the-agentic-engineer/
 │   └── social_validator.py       # Social media post validation
 │
 ├── tools/                        # Python CLI tools
-│   ├── generate_image.py         # OpenAI image generation (gpt-image-1)
 │   ├── convert_to_webp.py        # Image format conversion
 │   ├── next_publish_date.py      # Calculate next publish date (weekly/monthly)
 │   ├── seo_check.py              # SEO analysis & validation
@@ -151,8 +150,8 @@ When you run `/create-post`:
 
 1. **Get next Monday date** - Uses `next_publish_date.py` for consistent scheduling
 2. **Generate content** - AI creates complete blog post with proper structure
-3. **Generate images** - OpenAI gpt-image-1 creates hero image and diagrams via `generate_image.py`
-4. **Convert to WebP** - Optimizes images using `convert_to_webp.py`
+3. **Generate images** - `aitk image generate` (OpenAI GPT Image backend) creates hero image and diagrams, writing WebP directly
+4. **Convert to WebP** - `aitk` outputs WebP directly via `-f webp`; `convert_to_webp.py` remains for converting pre-existing PNG/JPG assets
 5. **Save files**:
    - MDX: `website/content/posts/YYYY-MM-DD-slug.mdx`
    - Images: `website/public/blog/YYYY-MM-DD-slug/*.webp`
@@ -680,20 +679,21 @@ Next.js dependencies:
 
 ### Content Generation
 
-#### generate_image.py
+#### aitk image generate
 ```bash
-uv run tools/generate_image.py "prompt" output.webp
+aitk image generate '<prompt>' -o output.webp -s 1536x1024 -q high -f webp
 ```
 
-**Purpose:** Generate AI images using OpenAI gpt-image-1 model
-**Output:** WebP format, 1024x1024 pixels
-**Requires:** `OPENAI_API_KEY` in `.env.local`
+**Purpose:** Generate AI images using OpenAI GPT Image
+**Output:** WebP format, default 1024x1024 — `-s 1536x1024` recommended for landscape heroes
+**Requires:** Credentials configured once via `aitk config`
 
 **Example:**
 ```bash
-uv run tools/generate_image.py \
-  "modern minimalist illustration of AI automation, blue gradient, isometric view" \
-  website/public/blog/2025-10-12-my-post/hero.webp
+aitk image generate \
+  'modern minimalist illustration of AI automation, blue gradient, isometric view' \
+  -o website/public/blog/2025-10-12-my-post/hero.webp \
+  -s 1536x1024 -q high -f webp
 ```
 
 **Prompt Tips:**
@@ -701,15 +701,16 @@ uv run tools/generate_image.py \
 - Include colors (blue gradient, warm tones)
 - Add perspective (isometric, top-down)
 - Describe mood (professional, energetic)
+- Use **single quotes** around the prompt (per `aitk image generate --help`)
 
 #### convert_to_webp.py
 ```bash
 uv run tools/convert_to_webp.py input.png output.webp
 ```
 
-**Purpose:** Convert existing images to WebP format
+**Purpose:** Convert existing PNG/JPG assets to WebP format
 **Quality:** 85% (configurable in script)
-**Note:** Rarely needed - `generate_image.py` outputs WebP directly
+**Note:** Rarely needed — `aitk image generate -f webp` writes WebP directly
 
 ### Validation
 

@@ -1,0 +1,144 @@
+---
+title: "Claude Code vs Codex vs Cursor (and Why It Doesn't Matter)"
+description: "The honest Claude Code, Codex, and Cursor comparison — and why your AI platform strategy matters far more than which coding agent you pick this quarter."
+date: "2026-02-09T11:00:00Z"
+category: "opinions"
+hashtags: ["claude-code", "codex", "cursor", "mcp", "marketplace-plugins", "ai-platform", "platform-engineering", "developer-tools"]
+social:
+  twitter:
+    text: "Claude Code vs Codex vs Cursor: the honest take.\n\nPick whichever fits your IDE. The real leverage is one layer down — MCP servers and plugins your platform team builds.\n\nNew post:"
+  linkedin:
+    text: "Every quarter I sit in a meeting where someone has been asked to pick \"the\" AI coding tool.\n\nSpreadsheet ready. Demos lined up. Standardization deadline on the calendar.\n\nBy end of quarter the spreadsheet is stale, two of the rejected tools have shipped major releases, and the decision is being relitigated.\n\nThe question is wrong. Not the answer — the question.\n\nIn my latest post I do the honest tool-by-tool take on Claude Code, Codex, and Cursor, then show the question engineering leaders should be asking instead:\n\n→ All three are racing toward generic coding excellence. They will converge.\n→ None of them know your domain glossary, your warehouse layout, your auth flow, your release calendar.\n→ The leverage is one layer down — MCP servers (your capability layer) and marketplace plugins (your workflow layer) that your platform team builds once.\n→ A plugin installed in Claude Code does the same job in Codex, in Cursor, or in whatever ships next. Your platform investment compounds across vendors instead of getting reset every model release.\n\nTool choice has a half-life of about a model release. Your platform layer has a half-life of years.\n\nIf \"AI tooling rollout\" is on your roadmap this year, the exec question stopped being \"which tool do we standardize on?\" and became \"what's our AI platform strategy, who owns it, and which five plugins ship this quarter?\"\n\nFull breakdown:"
+---
+
+![Three AI coding agents racing forward above a glowing platform infrastructure layer](../../public/blog/2026-02-09-claude-code-vs-codex-vs-cursor-choose/hero-three-agents-one-platform.webp)
+
+Every few weeks I sit in a meeting where an engineering leader has been tasked with picking "the" AI coding tool. They have a comparison spreadsheet. They have vendor demos lined up. They have a target standardization date.
+
+By the end of the quarter the spreadsheet is out of date, two of the tools they ruled out have shipped major releases, and the decision they made is being relitigated. The political capital spent on the debate doesn't come back.
+
+I've watched this loop play out enough times to be direct about it: the question is wrong. Not the answer — the question.
+
+This is the comparison post nobody wants to write. I'll give you the honest tool-by-tool take, then I'll show you the question you should be asking instead — the one where the budget you're allocating actually compounds.
+
+## The Three Tools, Briefly and Opinionated
+
+I'll do the comparison part first, because that's why you searched for this post.
+
+**Claude Code** is Anthropic's terminal-native coding agent. It's where the MCP and marketplace-plugin ecosystem is most mature. Deep agentic workflows, strong at multi-step refactors, opinionated about safety. My current daily driver. If you live in a terminal and care about extensibility, this is the strongest single pick today.
+
+**Codex** — and the broader OpenAI coding-agent surface — leans on tight integration with the OpenAI ecosystem and strong code reasoning. Comfortable in an IDE. If your shop is already deep in OpenAI for everything else, the friction to add Codex is lowest.
+
+**Cursor** is IDE-first and has the polished demo-to-production gap that most engineering managers respond to. Fast onboarding. Strong inline UX. Bias toward "looks great in a screenshare" — which can be a feature or a tax depending on whether you're selling AI internally or shipping with it.
+
+Honorable mentions: GitHub Copilot Enterprise rides incumbency hard and is the right answer if your CIO already pays for it and your security review is the gating constraint. Windsurf is moving fast. Aider remains the indie-developer favorite for terminal workflows with surgical control.
+
+The honest recommendation: pick based on three things — your team's IDE habits, your security posture (where your code goes and what the vendor retains), and the budget envelope. Everything else evens out.
+
+Whichever one you pick this quarter will be roughly equivalent to the others within a year. The arms race is converging.
+
+That's the comparison part. The rest of this post is why that pick matters less than the spreadsheet implies.
+
+## What All Three Tools Have In Common — And Why It's a Problem
+
+Strip away the branding and the demos. The thing Claude Code, Codex, and Cursor have in common is what they're racing toward: **generic coding excellence**.
+
+Better next-token prediction over generic code. Better tool use against generic APIs. Better reasoning over generic problems. That race is real and the curve is steep. But it's a race for the commodity layer.
+
+Here's what none of them have, and what no vendor R&D dollar can buy:
+
+- Your domain glossary. The eight words your org uses for "customer," only three of which mean the same thing.
+- Your warehouse layout. The deprecated tables nobody removed. The new tables nobody documented.
+- Your auth flow. The legacy OAuth bridge sitting between two systems you're slowly migrating off.
+- Your release calendar. The freeze window before the mobile cut. The unwritten Friday-deploy rule.
+- Your three services that all claim to be the source of truth for the same noun.
+
+A generic agent inside a specific organization is a fast-typing junior engineer on day one. Typing speed has not been the bottleneck for engineering since 2019. It never was.
+
+The conversation engineering leaders should be having is one layer down: **how do we make our organization legible to any agent we hand the keys to?**
+
+That's where leverage actually compounds. Let me show you what that looks like.
+
+## MCP Servers: Your Capability Layer
+
+The first piece is **MCP** — Model Context Protocol. It's the de facto standard for exposing tools and data to any AI agent. The one-line version: an MCP server is a small adapter that lets an agent call into your tools or data the same way a human would.
+
+The ecosystem splits cleanly into two parts.
+
+**Third-party MCPs** wrap commodity tools your org already uses: GitHub, Slack, Linear, Stripe, Snowflake, Datadog, Sentry. Install these. Don't write them yourself. You'll be productive in an afternoon. This is the fast lane.
+
+**Internal MCPs** are where your competitive advantage lives. Your metadata catalog. Your feature store. Your deployment system. Your incident dashboard. Your customer 360. Your internal search over engineering documentation. Nobody is going to write these for you. They're the same shape as the third-party MCPs — a thin server that exposes a few well-defined capabilities — but the inputs and outputs are yours.
+
+The principle behind which internal MCPs to build first: **anything that took a senior engineer six months to learn about your org should be a callable capability.** Where data lives. How to ship safely. Who owns what. What "production" means here. That tacit knowledge is the thing the vendor cannot ship in their next model release.
+
+This is investment work, not procurement work. It pays back forever — because every coding agent you adopt afterward inherits it.
+
+## Marketplace Plugins: Your Workflow Layer
+
+MCPs are the capability layer. Capabilities alone don't get the job done.
+
+Here's the gap. An agent with twenty MCP-exposed tools is technically capable of doing most of what an engineer does. But it doesn't know *the sequence* — which tool to call when, what to do with the output, when to ask for help, when to stop. That sequencing is where your org's actual process lives.
+
+This is what **marketplace plugins** solve. Anthropic-sponsored, ecosystem-wide, and rapidly being adopted across the agentic coding tools. A plugin packages skills (prompts that define how to do a thing), sub-agents (specialized roles spun up for parts of the work), hooks (guardrails and validations), and the MCPs they depend on — into a single installable unit.
+
+A plugin isn't a tool. It's an *encapsulated business process*.
+
+Here's the strategic kicker, and it's the whole reason this matters: **a plugin installed in Claude Code does the same thing in Codex, in Cursor, in whatever ships next.** You stop betting on which vendor wins. Your platform investment compounds across tools.
+
+When Cursor pulls ahead next quarter and Claude Code passes them six months later, your infrastructure doesn't care. Your plugin catalog runs the same. Your MCP servers stay put. The agent surface becomes the swappable component, the way the IDE became the swappable component sometime around 2010.
+
+That's what vendor-agnostic actually means in practice. Not "we'll re-evaluate annually." It means your investment is portable by design.
+
+## A Concrete Example: Dataset Discovery as a Plugin
+
+Abstract is easy. Let me make it real with a workflow you've almost certainly hit.
+
+An engineer needs to find the customer LTV dataset. Easy on paper. Painful in practice.
+
+The data catalog returns 40 candidates. Several are deprecated but still listed. Two are owned by a team that disbanded last quarter. One is the right table but requires an access request that takes a week. Three look identical until you read the freshness metadata and realize one of them stopped updating in October.
+
+"Find a dataset" isn't a tool call. It's a workflow:
+
+1. **Semantic search**: map the user's plain-English ask to your org's domain terminology. "Customer LTV" might be `cust_ltv_v3`, `customer_lifetime_value`, or `dim_customer_revenue` depending on which team owns it.
+2. **Candidate filter**: drop deprecated, drop unowned, drop stale based on a freshness threshold. Cut the 40 to 6.
+3. **Access check**: of the remaining candidates, which can this user actually query under their current role?
+4. **Owner lookup**: who do they ping if they have a question? Is that owner still here?
+5. **Optional**: pre-fill an access request for the right table with the right justification.
+
+That's a sub-agent flow with five tool calls hitting your catalog, your data-quality system, your IAM, your org directory, and your access-request system.
+
+Package that as a plugin. Now every engineer in your org, in whichever coding agent they prefer, runs the same workflow with the same quality bar — including the new hire who would have spent two weeks learning that the warehouse has three customer tables and one of them is a trap.
+
+This is what "AI infrastructure" actually means when you strip the marketing off. It is not a license. It is not a model. It is *your* business processes, packaged as code, callable by any agent you point at them.
+
+## The Strategic Reframe
+
+Here's the picture pulled together.
+
+The vendors are racing for the commodity layer. They will keep getting better at generic coding, and the curve is steep. **You should not invest a dollar of platform budget trying to outrun them on that curve.** You will lose. They have billions and they ship every quarter.
+
+Your competitive advantage is the layer they can't write — your org's context and your org's processes. That layer is the MCP servers and plugins your platform team builds. It's the dataset-discovery example, repeated thirty more times for every common workflow that takes too long today.
+
+Two consequences fall out of this.
+
+**First**, tool choice becomes a procurement question, not a strategy question. Which agent you pick this quarter matters about as much as which IDE your team uses. You can switch vendors next year. You cannot switch out your MCP layer or your plugin catalog without setting yourself back nine months.
+
+**Second**, the right exec question is no longer "which AI coding tool do we standardize on." It's: "what's our AI platform strategy, who owns it, what gets MCP'd first, and which five plugins ship this quarter?" Those are the questions where the answers compound.
+
+Tool choice has a half-life of about a model release. Your platform layer has a half-life of years.
+
+Agents are getting better at generic coding fast. The wall they will hit — and they will hit it — is the wall of org-specific delivery. That wall is yours to remove, with infrastructure investment your platform team does once and every future agent inherits.
+
+## What To Do Monday Morning
+
+If you're an engineering leader and the comparison spreadsheet is still on your screen, close it.
+
+Replace it with three lists:
+
+1. **Top 10 commodity tools your engineers touch daily.** Install the third-party MCPs for these this month. Quick wins.
+2. **Top 5 internal systems where tacit knowledge bottlenecks delivery.** Plan internal MCP servers for these. Quarterly project.
+3. **Top 5 recurring multi-step workflows your engineers run.** Plan plugins for these. They'll outlive whatever coding agent you happen to be using when they ship.
+
+That's the platform strategy. The tool you pick to run on top of it is a swappable detail.
+
+If you're building this platform layer, [this is the work I do](/services). I help engineering teams turn AI coding tools into production-grade developer platforms — vendor-agnostic, outcome-focused, hands-on-keyboard. Discovery engagements start at two weeks; full platform builds run eight to twelve. If "AI tooling rollout" is on your roadmap this year and you're not sure whether you're buying a tool or building a platform, that conversation is the one worth having.
