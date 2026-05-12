@@ -306,6 +306,30 @@ aitk image generate \
 - Add perspective (isometric, top-down)
 - Describe mood (professional, energetic)
 
+## Humanizing Posts (Voice Pass)
+
+After a post is drafted (by `/create-post` or by hand), an optional voice pass through the [`blader/humanizer`](https://github.com/blader/humanizer) Claude Code skill removes common AI tells (significance inflation, copula avoidance, AI-vocabulary, false ranges, rule-of-three filler, etc.) and re-injects the author's voice.
+
+**Install (one-time, per machine):**
+```bash
+mkdir -p ~/.claude/skills
+git clone https://github.com/blader/humanizer.git ~/.claude/skills/humanizer
+```
+
+**Usage — always pass a voice sample** to avoid homogenizing the blog's voice:
+```
+/humanizer
+Humanize the post at website/content/posts/2026-02-09-my-post.mdx.
+Use my writing style from website/content/posts/2026-01-26-ai-agents-beat-developer-burnout.mdx as a reference.
+```
+
+**Pipeline order:** run humanizer **before** `/generate-socials` and `/mdx-quality-review`. Humanizer rewrites prose; the SEO/Vale/social checks should validate the final shape.
+
+**Caveats:**
+- Without a voice sample, humanizer falls back to its own opinionated default voice, which will flatten the consistency of your back catalog.
+- Pattern #26 (no hyphens on compound modifiers) is wrong for technical writing — review the diff before accepting changes to terms like `real-time`, `end-to-end`, `vendor-agnostic`.
+- Em dashes are not actually an AI tell (per maintainer in issue #113), but the skill still flags them. If your voice uses them deliberately, push back.
+
 ## AI Toolkit (aitk)
 
 This project uses [`aitk`](https://github.com/clipisode/aitk) (AI Toolkit CLI) as the unified surface for AI-backed utilities.
