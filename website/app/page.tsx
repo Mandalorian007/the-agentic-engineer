@@ -47,7 +47,7 @@ export default function Home() {
           <div>
             <h2 className="text-3xl font-bold">From the blog</h2>
             <p className="text-muted-foreground mt-2">
-              Field notes on agentic engineering — patterns, tooling, and lessons from real engagements.
+              Field notes on agentic engineering: patterns, tooling, and lessons from real engagements.
             </p>
           </div>
           <Button variant="ghost" asChild>

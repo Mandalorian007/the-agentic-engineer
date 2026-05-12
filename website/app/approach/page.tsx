@@ -25,12 +25,12 @@ const PRINCIPLES = [
   {
     icon: Target,
     title: "Outcomes over outputs",
-    body: "The deliverable isn't a deck or a Notion page — it's measurable adoption and a velocity number that moves. We agree on the metric in week one and instrument for it.",
+    body: "The deliverable isn't a deck or a Notion page. It's measurable adoption and a velocity number that moves. We agree on the metric in week one and instrument for it.",
   },
   {
     icon: Layers,
     title: "Vendor-agnostic by design",
-    body: "Claude Code, Codex, Cursor, Copilot, Windsurf — these are tactical. The platform layer is strategic. I build to the meta-layer so the system survives the next tool launch.",
+    body: "Claude Code, Codex, Cursor, Copilot, Windsurf are tactical. The platform layer is strategic. I build to the meta-layer so the system survives the next tool launch.",
   },
   {
     icon: GaugeCircle,
@@ -40,7 +40,7 @@ const PRINCIPLES = [
   {
     icon: Search,
     title: "Your codebase is the context",
-    body: "Generic agents are weak. The moat is org-specific context — internal MCP servers, packaged skills, and subagent patterns shaped to how your teams actually ship.",
+    body: "Generic agents are weak. The moat is org-specific context: internal MCP servers, packaged skills, and subagent patterns shaped to how your teams actually ship.",
   },
 ];
 
@@ -50,7 +50,7 @@ const PHASES = [
     title: "Discover",
     duration: "2–3 weeks",
     summary:
-      "I start by understanding what you actually have — telemetry, interviews, and a frank assessment of where the platform isn't yet built.",
+      "I start by understanding what you actually have: telemetry, interviews, and a frank assessment of where the platform isn't yet built.",
     activities: [
       {
         title: "Tool usage telemetry",
@@ -62,7 +62,7 @@ const PHASES = [
       },
       {
         title: "Security & compliance review",
-        body: "Audit logging, secrets handling, data residency, model approval policies — what's in place, what needs to be.",
+        body: "Audit logging, secrets handling, data residency, model approval policies. What's in place, what needs to be.",
       },
       {
         title: "Platform readiness assessment",
@@ -81,7 +81,7 @@ const PHASES = [
     activities: [
       {
         title: "Standardized configurations",
-        body: "Settings, hooks, permission policies, and safety guardrails packaged as version-controlled defaults — applied across tools, not per-developer.",
+        body: "Settings, hooks, permission policies, and safety guardrails packaged as version-controlled defaults. Applied across tools, not per-developer.",
       },
       {
         title: "Skill libraries",
@@ -93,7 +93,7 @@ const PHASES = [
       },
       {
         title: "Subagent and orchestration patterns",
-        body: "Composition patterns tuned to your topology — monorepo, microservices, frontend/backend splits, monolith carve-outs.",
+        body: "Composition patterns tuned to your topology: monorepo, microservices, frontend/backend splits, monolith carve-outs.",
       },
     ],
     output:
@@ -112,7 +112,7 @@ const PHASES = [
       },
       {
         title: "Ship/no-ship quality gates",
-        body: "Automated signals that tell the platform team when an upgrade is safe to roll forward — and when to hold.",
+        body: "Automated signals that tell the platform team when an upgrade is safe to roll forward, and when to hold.",
       },
       {
         title: "Adoption telemetry",
@@ -120,7 +120,7 @@ const PHASES = [
       },
       {
         title: "Cost & quality dashboards",
-        body: "Token spend, eval pass rates, time-to-merge, PR throughput — the numbers leadership actually wants to see.",
+        body: "Token spend, eval pass rates, time-to-merge, PR throughput. The numbers leadership actually wants to see.",
       },
     ],
     output:
@@ -131,7 +131,7 @@ const PHASES = [
     title: "Enable",
     duration: "Weeks 8–12",
     summary:
-      "A platform nobody uses is sunk cost. Adoption is part of the deliverable — never a hopeful side effect.",
+      "A platform nobody uses is sunk cost. Adoption is part of the deliverable, never a hopeful side effect.",
     activities: [
       {
         title: "Team onboarding",
@@ -151,7 +151,7 @@ const PHASES = [
       },
     ],
     output:
-      "Your team owns the platform. I'm available on retainer if you want it — but the engagement stands on its own.",
+      "Your team owns the platform. I'm available on retainer if you want it, but the engagement stands on its own.",
   },
 ];
 
@@ -186,7 +186,7 @@ export default function ApproachPage() {
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
           Four phases, 10–14 weeks, fixed fee. Built like an engineer would
-          build it — instrumented, evaluated, and owned by your team on
+          build it: instrumented, evaluated, and owned by your team on
           day one.
         </p>
       </section>
@@ -225,7 +225,7 @@ export default function ApproachPage() {
         <h2 className="text-3xl font-bold mb-4">The four phases</h2>
         <p className="text-lg text-muted-foreground mb-12">
           Each phase has a clear scope, deliverables, and exit criteria. Phases
-          overlap where the work calls for it — engineering, not theater.
+          overlap where the work calls for it. Engineering, not theater.
         </p>
         <div className="space-y-10">
           {PHASES.map((phase) => (

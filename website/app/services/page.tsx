@@ -29,7 +29,7 @@ const PHASES = [
     label: "Phase 1",
     title: "Discovery & strategy",
     duration: "2–3 weeks",
-    body: "I audit how your teams actually use AI coding tools today — Claude Code, Codex, Cursor, Copilot, Windsurf, whatever you've licensed — and map adoption gaps, friction points, and security blockers. We agree on the metrics that prove the platform is working: cycle time, PR throughput, eval quality, developer satisfaction.",
+    body: "I audit how your teams actually use AI coding tools today (Claude Code, Codex, Cursor, Copilot, Windsurf, whatever you've licensed) and map adoption gaps, friction points, and security blockers. We agree on the metrics that prove the platform is working: cycle time, PR throughput, eval quality, developer satisfaction.",
     deliverables: [
       "Tool usage audit across teams",
       "Adoption + friction analysis",
@@ -56,7 +56,7 @@ const PHASES = [
     label: "Phase 3",
     title: "Enablement",
     duration: "Overlaps phase 2",
-    body: "A platform nobody uses is a sunk cost. I leave behind onboarding docs, in-house workshops, and runbooks so your team owns the system on day one. Adoption is part of the deliverable — not a hopeful side effect.",
+    body: "A platform nobody uses is a sunk cost. I leave behind onboarding docs, in-house workshops, and runbooks so your team owns the system on day one. Adoption is part of the deliverable, not a hopeful side effect.",
     deliverables: [
       "Team onboarding documentation",
       "Live workshops (recorded for replay)",
@@ -150,7 +150,7 @@ export default function ServicesPage() {
             measurement, security is anxious, and velocity hasn&apos;t moved.
           </p>
           <p>
-            The tools work. What&apos;s missing is the platform around them —
+            The tools work. What&apos;s missing is the platform around them:
             shared configurations, org-specific context, evaluations, guardrails,
             and the enablement that turns a license bill into a force
             multiplier.
@@ -227,7 +227,7 @@ export default function ServicesPage() {
           ))}
         </div>
         <p className="text-center text-muted-foreground mt-8 max-w-2xl mx-auto">
-          Best fit: engineering orgs of <strong className="text-foreground">50–500 developers</strong> — big enough to need the platform, small enough to act on it.
+          Best fit: engineering orgs of <strong className="text-foreground">50–500 developers</strong>. Big enough to need the platform, small enough to act on it.
         </p>
       </section>
 
@@ -257,7 +257,7 @@ export default function ServicesPage() {
           ))}
         </div>
         <p className="text-muted-foreground mt-6">
-          I&apos;m the fast, deep, neutral option — a staff-level engineer who
+          I&apos;m the fast, deep, neutral option: a staff-level engineer who
           has shipped this pattern, working directly with your team for the
           weeks it takes to land it.
         </p>
@@ -346,7 +346,7 @@ export default function ServicesPage() {
       <section className="mt-24 max-w-3xl mx-auto text-center space-y-6">
         <h2 className="text-3xl md:text-4xl font-bold">Ready to talk?</h2>
         <p className="text-lg text-muted-foreground">
-          A first conversation is 30 minutes — I want to understand what
+          A first conversation is 30 minutes. I want to understand what
           tools you&apos;ve rolled out, where adoption stalled, and what
           shipping faster would unlock. If we&apos;re a fit, the next step is
           a discovery sprint.
