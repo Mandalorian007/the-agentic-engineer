@@ -13,39 +13,39 @@ social:
 
 # AI Content Pipelines: From Text Prompts to Images and Video
 
-Content pipelines have historically been one of the most expensive parts of software projects. Need character art? Hire an artist. Need animations? That's a specialist. Need both at scale? That's a team and a budget.
+Content pipelines are expensive. Need character art? Hire an artist. Need animations? That's a specialist. Need both at scale? That's a team and a budget.
 
-But with AI image and video generation, we can reframe what's possible. What used to require artists and weeks of iteration can now be prototyped in minutes. And when you compose these capabilities into workflows, you unlock something powerful: automated content pipelines that turn text descriptions into polished visual assets.
+AI image and video generation changes the math. Work that used to take weeks of iteration can now be prototyped in minutes. And once you start composing these capabilities into workflows, you get something genuinely useful: automated pipelines that turn text descriptions into polished visual assets.
 
 ![AI content pipeline transforming text prompts through image generation to video output](../../public/blog/2026-01-05-ai-content-pipelines-image-video-generation/hero-content-pipeline-automation.webp)
 
-## The Problem: Media Needs Scale Quickly
+## The problem: media needs scale quickly
 
-I was working on a Discord game project recently. Simple enough concept, but the content requirements added up fast:
+I was working on a Discord game project recently. Simple concept, but the content requirements added up fast:
 
 - **Profile images** for each character
 - **Discord emojis** (128x128, under 256KB)
 - **Ultimate ability animations** (short animated clips)
 
-This is where small projects traditionally hit a wall. You either spend time learning art tools, pay for assets, or settle for placeholder graphics. But there's another path now.
+This is where small projects usually hit a wall. You either burn time learning art tools, pay for assets, or settle for placeholder graphics. There's another path now.
 
-## The Solution: Composable AI Skills
+## The solution: composable AI skills
 
-The key insight is that AI capabilities like image generation and video creation become dramatically more useful when composed into workflows. Instead of manually running prompts one at a time, you build small, focused tools that chain together.
+Image generation and video creation get a lot more useful once you compose them. Instead of running prompts one at a time, you build small focused tools that chain together.
 
 Here's what I built using Claude Code skills:
 
-1. **Image Generation** - Describe a character, get a high-quality image
-2. **Emoji Conversion** - Resize and optimize for Discord specs
-3. **Video Animation** - Take a static image and animate it with Sora
+1. **Image generation.** Describe a character, get a high-quality image.
+2. **Emoji conversion.** Resize and optimize for Discord specs.
+3. **Video animation.** Take a static image and animate it with Sora.
 
 ![Three connected skills forming a content pipeline](../../public/blog/2026-01-05-ai-content-pipelines-image-video-generation/diagram-skills-composition.webp)
 
-Each skill is a simple wrapper around an API call with some processing logic. But composed together, they form a complete content pipeline.
+Each skill is a thin wrapper around an API call with some processing logic. Composed together, they form a complete content pipeline.
 
-## Skill Architecture: Progressive Disclosure
+## Skill architecture: progressive disclosure
 
-The secret to effective AI skills is keeping context minimal while making capabilities discoverable. Here's the pattern:
+Good AI skills keep context minimal while making capabilities discoverable. The pattern:
 
 ```
 skills/
@@ -56,7 +56,7 @@ skills/
         └── src/main.py       # All logic + help text lives here
 ```
 
-The `SKILL.md` file stays tiny (under 50 lines) because it's loaded into Claude's context on every invocation. The detailed documentation lives in the CLI's `--help` output, which only loads when explicitly requested.
+`SKILL.md` stays tiny (under 50 lines) because it's loaded into Claude's context on every invocation. The detailed documentation lives in the CLI's `--help` output, which only loads when explicitly requested.
 
 ```text
 ## Instructions
@@ -66,11 +66,11 @@ uv run img --help                # Discover all commands
 uv run img generate --help       # Detailed usage
 ```
 
-This progressive disclosure pattern keeps your context clean while making the full capability set accessible.
+Progressive disclosure keeps your context clean while still exposing the full capability set.
 
-## The OpenAI Image API
+## The OpenAI image API
 
-Image generation uses the `gpt-image-1` model. Here's the core pattern:
+Image generation uses the `gpt-image-1` model. Core pattern:
 
 ```python
 from openai import OpenAI
@@ -99,9 +99,9 @@ Key parameters:
 - **background**: `opaque`, `transparent`, or `auto`
 - **output_format**: `png`, `jpeg`, or `webp`
 
-## Converting to Discord Emojis
+## Converting to Discord emojis
 
-Discord emojis have specific requirements: 128x128 pixels maximum, under 256KB for static images. Here's how to process an image:
+Discord emojis have strict requirements: 128x128 pixels max, under 256KB for static images. Here's how to process an image:
 
 ```python
 from PIL import Image
@@ -123,11 +123,11 @@ def emojify(input_path: Path, size: int = 128, max_kb: int = 256):
         return buffer.getvalue()
 ```
 
-The LANCZOS resampling preserves detail when scaling down. For most character images, this produces clean, readable emojis.
+LANCZOS resampling preserves detail when scaling down. For most character images, you get clean readable emojis.
 
 ## Animating with Sora
 
-The video generation API (Sora) takes static images and brings them to life. The key difference from image generation: it's asynchronous. You submit a request, then poll for completion.
+The video generation API (Sora) takes static images and brings them to life. One key difference from image generation: it's asynchronous. You submit a request, then poll for completion.
 
 ```python
 # Start generation (returns immediately)
@@ -142,7 +142,7 @@ video = client.videos.create(
 video_id = video.id  # Generation is async
 ```
 
-Sora generation takes 1-5 minutes. Here's a polling pattern with progress feedback:
+Sora generation takes 1-5 minutes. A polling pattern with progress feedback:
 
 ```python
 def poll_video(client: OpenAI, video_id: str) -> object:
@@ -164,44 +164,44 @@ def poll_video(client: OpenAI, video_id: str) -> object:
         time.sleep(5)
 ```
 
-Once complete, download the result:
+Once it's done, download the result:
 
 ```python
 content = client.videos.download_content(video_id, variant="video")
 content.write_to_file("output.mp4")
 ```
 
-## Real Example: Fundrick the Thunder Knight
+## Real example: Fundrick the Thunder Knight
 
-Let me show you what this pipeline produces. I wanted a Mandalorian-esque armored character with lightning and hammer themes. Here's what came out:
+Here's what the pipeline produces. I wanted a Mandalorian-esque armored character with lightning and hammer themes. What came out:
 
-### The Profile Image
+### The profile image
 
-Starting from a text description, the image generation produced this:
+Starting from a text description, image generation produced this:
 
 ![Fundrick character full profile image - armored warrior with lightning hammer and shield](../../public/blog/2026-01-05-ai-content-pipelines-image-video-generation/example-character-image.webp)
 
-This required minimal prompt engineering. Just describe what you want, iterate once or twice, and you have usable character art.
+Minimal prompt engineering. Describe what you want, iterate once or twice, and you have usable character art.
 
-### The Discord Emoji
+### The Discord emoji
 
-Running through the emoji conversion skill:
+Running it through the emoji conversion skill:
 
 ![Fundrick emoji - 128x128 Discord-ready version](../../public/blog/2026-01-05-ai-content-pipelines-image-video-generation/example-character-emoji.webp)
 
 Same character, properly sized and optimized for Discord's requirements.
 
-### The Ultimate Animation
+### The ultimate animation
 
-And finally, the animated ultimate ability - lightning summoning with a ground strike:
+And the animated ultimate ability, lightning summoning with a ground strike:
 
 ![Fundrick ultimate animation - lightning strike attack](../../public/blog/2026-01-05-ai-content-pipelines-image-video-generation/example-ultimate-animation.webp)
 
-From concept to three distinct media assets in a single session. No external artists, no asset stores, no waiting.
+Concept to three distinct media assets in a single session. No external artists, no asset stores, no waiting.
 
-## The Click CLI Pattern
+## The Click CLI pattern
 
-For building these skills, Click provides an excellent CLI framework. Rich docstrings become help text automatically:
+For building these skills, Click is a solid CLI framework. Rich docstrings become help text automatically:
 
 ```python
 @click.group()
@@ -225,11 +225,11 @@ def generate(prompt: str, output: str | None, quality: str):
     """
 ```
 
-The `\b` marker prevents Click from rewrapping text, preserving example formatting.
+The `\b` marker tells Click not to rewrap the text, so example formatting survives.
 
-## API Key Discovery
+## API key discovery
 
-A small but important detail: making your skills work from any directory. This pattern walks up the directory tree to find a `.env` file:
+Small but important detail: your skills should work from any directory. This pattern walks up the directory tree to find a `.env` file:
 
 ```python
 def get_api_key() -> str | None:
@@ -254,22 +254,22 @@ def get_api_key() -> str | None:
     return None
 ```
 
-This means you can invoke the skill from any subdirectory and it will find your API key.
+Now you can invoke the skill from any subdirectory and it will still find your API key.
 
-## What This Enables
+## What this enables
 
-The individual capabilities aren't new. Image generation has been around for a couple years. Video generation is newer but accessible. What's different is composition.
+The individual capabilities aren't new. Image generation has been around for a couple of years. Video generation is newer but accessible. What's different is composition.
 
-When you build these as Claude Code skills:
+Once you build these as Claude Code skills:
 
-1. **They're always available** - Skills persist in your workspace
-2. **They compose dynamically** - Describe a workflow and Claude chains them
-3. **They iterate cheaply** - Generate variations until you like one
-4. **They scale** - Same pipeline works for one character or fifty
+1. **They're always available.** Skills persist in your workspace.
+2. **They compose dynamically.** Describe a workflow and Claude chains them.
+3. **They iterate cheaply.** Generate variations until you like one.
+4. **They scale.** Same pipeline works for one character or fifty.
 
-For prototyping, for small projects, for indie games, for Discord bots - the barrier to visual content just dropped dramatically.
+For prototyping, for small projects, for indie games, for Discord bots, the barrier to visual content just dropped.
 
-## Getting Started
+## Getting started
 
 All you need is an OpenAI API key with access to image and video generation. The skill pattern is simple:
 
@@ -278,6 +278,6 @@ All you need is an OpenAI API key with access to image and video generation. The
 3. **Wrap the API calls** with appropriate error handling
 4. **Add processing** for format conversion
 
-The code samples in this post are complete enough to start from. The key is composition - build small tools that do one thing, then let Claude orchestrate them into workflows.
+The code samples in this post are complete enough to start from. The trick is composition. Build small tools that do one thing, then let Claude orchestrate them into workflows.
 
 What used to require teams now requires prompts. That's the power of AI content pipelines.

@@ -16,27 +16,27 @@ Our AI workflows have been text-focused for too long.
 
 We write prompts, parse responses, generate code. But images? They're usually just static assets we pass around. Upload an image, get a description, move on.
 
-That's changing. Understanding *what's in an image and where* is becoming essential for the next generation of AI applications. Not just "this is a photo of a room" but "there are three doors, a window on the north wall, and a light source in the corner at coordinates (234, 156)."
+That's changing. Understanding *what's in an image and where* matters for the next generation of AI applications. Not just "this is a photo of a room" but "there are three doors, a window on the north wall, and a light source in the corner at coordinates (234, 156)."
 
 This is object detection. And Gemini makes it surprisingly accessible.
 
 ![Hero image showing AI analyzing an image to detect and locate objects](../../public/blog/2026-01-08-gemini-image-detection-ai-workflows/hero-gemini-detection-workflow.webp)
 
-## The Problem We're Solving
+## The problem we're solving
 
-Imagine you're building an AI-powered application with image generation. Users can create images, but then they want to give feedback: "Make the car on the left bigger" or "Change the color of that lamp."
+Say you're building an AI-powered application with image generation. Users can create images, but then they want to give feedback: "Make the car on the left bigger" or "Change the color of that lamp."
 
-You have a problem. The AI generated the image, but it doesn't actually know what's in it or where things are located. The image is just pixels.
+You have a problem. The AI generated the image, but it doesn't actually know what's in it or where things sit. The image is just pixels.
 
 Or consider accessibility. A user with visual impairment is playing a digital tabletop game. They want to move their character to the door using voice commands. You know where the character token is. But where's the door? The background is just an image file.
 
-These aren't hypothetical problems. They're the kind of challenges that emerge when we try to build applications that truly understand visual content.
+These aren't hypothetical problems. They're the kind of challenges that show up when you try to build applications that actually understand visual content.
 
-## Gemini's Hidden Superpower
+## Gemini's hidden superpower
 
-Gemini has image understanding capabilities that most developers overlook entirely. Everyone knows it can describe images. Far fewer know it can locate objects with precise coordinates.
+Gemini has image understanding capabilities that most developers overlook. Everyone knows it can describe images. Far fewer know it can locate objects with precise coordinates.
 
-Here's the basic idea: you give Gemini an image and ask it to find specific objects. It returns bounding boxes—coordinates that tell you exactly where each object is located.
+The basic idea: you give Gemini an image and ask it to find specific objects. It returns bounding boxes, coordinates that tell you exactly where each object sits.
 
 ```python
 from google import genai
@@ -71,7 +71,7 @@ The output might look like:
 
 Now you know not just *that* there are doors, but *where* they are.
 
-## Understanding the Coordinate System
+## Understanding the coordinate system
 
 One quirk to know: Gemini normalizes coordinates to a 0-1000 scale. This keeps things consistent regardless of the original image dimensions.
 
@@ -95,13 +95,13 @@ pixel_coords = normalize_to_pixels([120, 450, 280, 520], 1920, 1080)
 
 ![Diagram showing how Gemini's normalized coordinates map to actual image pixels](../../public/blog/2026-01-08-gemini-image-detection-ai-workflows/diagram-coordinate-normalization.webp)
 
-## Practical Application: Accessible Gaming
+## Practical application: accessible gaming
 
-Let's build something real. A voice-controlled navigation system for a tabletop game map.
+Time to build something real. A voice-controlled navigation system for a tabletop game map.
 
 The user says: "Move my character to the nearest door."
 
-We need to:
+You need to:
 1. Detect all doors in the map image
 2. Calculate which door is closest to the character's position
 3. Return the destination coordinates
@@ -162,9 +162,9 @@ nearest = find_nearest_door(doors, character_position)
 print(f"Moving to: {nearest['label']} at {get_center(nearest['box_2d'])}")
 ```
 
-This is accessibility that seemed impossible a few years ago. Now it's a few dozen lines of code.
+A few years ago this kind of accessibility felt out of reach. Now it's a few dozen lines of code.
 
-## Beyond Simple Detection
+## Beyond simple detection
 
 Gemini 2.5 goes further than basic object detection. It understands relationships and context.
 
@@ -173,7 +173,7 @@ You can ask questions like:
 - "Which shelf has the red books?"
 - "Identify areas that look damaged"
 
-This conversational approach means you can describe what you're looking for in natural language, even if it's complex or abstract.
+This conversational approach means you can describe what you want in natural language, even when it's complex or abstract.
 
 ```python
 prompt = """In this warehouse image, find:
@@ -184,11 +184,11 @@ prompt = """In this warehouse image, find:
 Return structured JSON for each finding with bounding boxes."""
 ```
 
-The model applies world knowledge to understand what "damaged" or "unsafe" might look like in context.
+The model applies world knowledge to figure out what "damaged" or "unsafe" might look like in context.
 
-## Building Detection into Your Pipelines
+## Building detection into your pipelines
 
-You don't need to restructure your entire application to use image detection. Here are three integration patterns:
+You don't need to restructure your entire application to use image detection. Three integration patterns work well:
 
 **Pattern 1: Pre-processing enrichment**
 
@@ -207,7 +207,7 @@ def enrich_image(image_path: str) -> dict:
 
 **Pattern 2: On-demand detection skill**
 
-Build a reusable skill that any part of your application can call. The AI agent doesn't need the image in its context window—just the extracted data.
+Build a reusable skill that any part of your application can call. The AI agent doesn't need the image in its context window. Just the extracted data.
 
 ```python
 # Skill: find_in_image
@@ -237,23 +237,23 @@ def get_scene_context(image_path: str) -> str:
     # ... return context for downstream processing
 ```
 
-## Why Gemini for Detection?
+## Why Gemini for detection?
 
-I'm not suggesting you lock yourself into any single AI provider. Use OpenAI for image generation if it's best for your needs. Use Claude for coding. Use whatever works.
+Don't lock yourself into any single AI provider. Use OpenAI for image generation if it's best for your needs. Use Claude for coding. Use whatever works.
 
-But for image detection specifically, Gemini has advantages:
+But for image detection specifically, Gemini has some clear advantages:
 
-1. **Zero setup** - No model training, no custom datasets, no ML infrastructure
-2. **Natural language queries** - Describe what you're looking for, don't configure class labels
-3. **Contextual understanding** - It gets relationships, not just objects
-4. **Accessible pricing** - Gemini 2.5 Flash at $0.30 per million input tokens makes experimentation cheap
-5. **Structured outputs** - Native JSON schema support for predictable responses
+1. **Zero setup.** No model training, no custom datasets, no ML infrastructure
+2. **Natural language queries.** Describe what you want, don't configure class labels
+3. **Contextual understanding.** It gets relationships, not just objects
+4. **Accessible pricing.** Gemini 2.5 Flash at $0.30 per million input tokens makes experimentation cheap
+5. **Structured outputs.** Native JSON schema support for predictable responses
 
-The barrier to entry for computer vision has dropped dramatically. What used to require specialized ML teams is now an API call.
+The barrier to entry for computer vision has dropped a lot. What used to require specialized ML teams is now an API call.
 
-## Getting Started
+## Getting started
 
-Here's the minimal code to start experimenting:
+The minimal code to start experimenting:
 
 ```python
 # Install: pip install google-genai Pillow
@@ -287,9 +287,9 @@ print(result)
 
 Change the prompt. Change the image. See what you can find.
 
-## The Bigger Picture
+## The bigger picture
 
-We're moving toward AI applications that truly see, not just process text about images. Detection is the foundation—knowing *what* is *where* unlocks everything else:
+We're moving toward AI applications that actually see, not just process text about images. Detection is the foundation. Knowing *what* is *where* unlocks everything else:
 
 - Editing specific parts of generated images
 - Accessibility tools that understand visual interfaces

@@ -34,28 +34,28 @@ social:
 
 No.
 
-"Alexa Plus can help you with—"
+"Alexa Plus can help you with..."
 
 No.
 
 This happens about 80 times a day now. Amazon turned my Echo from a useful tool into a subscription salesperson. Every weather request, every timer, every simple question gets hijacked by an upsell. I'm done.
 
-So I'm building my own voice assistant. The code is working, the hardware is on the way, and I wanted to share what I've learned so far. Turns out it's surprisingly approachable.
+So I'm building my own. The code is working, the hardware is on the way, and I wanted to share what I've figured out so far. Turns out it's more approachable than I expected.
 
 ![Voice assistant architecture with privacy-first design](../../public/blog/2026-01-12-diy-voice-assistant-privacy/hero-private-voice-assistant.webp)
 
-## The Setup: A Mac Mini That Does Everything
+## The setup: a Mac Mini that does everything
 
-The target system runs on a Mac Mini that already lives in my office as a development server. It handles my AI coding workflows when I'm working remotely, so I can code from anywhere without worrying about compute power. Adding voice assistant duties to a machine that's already running 24/7 makes sense.
+The target system runs on a Mac Mini that already lives in my office as a development server. It handles my AI coding workflows when I'm working remotely, so I can code from anywhere without worrying about compute power. Tacking voice assistant duties onto a machine that's already running 24/7 just makes sense.
 
 **Hardware (incoming):**
 - Mac Mini M2 (already owned for dev work)
 - Omnidirectional USB microphone (picks up voice from anywhere in the room)
 - Omnidirectional speaker for responses
 
-Right now I'm testing with temporary mic and speakers plugged into the Mac Mini. The code works. Once the proper omnidirectional hardware arrives, it becomes a permanent fixture. One machine handling AI development workflows and home assistant duties.
+Right now I'm testing with temporary mic and speakers plugged into the Mac Mini. The code works. Once the proper omnidirectional hardware arrives, it becomes a permanent fixture. One machine, AI development workflows and home assistant duties.
 
-## Architecture: Modular by Design
+## Architecture: modular by design
 
 The system breaks into four independent components:
 
@@ -74,9 +74,9 @@ Each piece is swappable. Don't like OpenAI? Use Claude or a local model. Want di
 | LLM | Understands and responds | GPT-4o | Claude, Ollama, Llama |
 | Text-to-Speech | Speaks the response | OpenAI TTS | Piper (local), ElevenLabs |
 
-## Wake Word Detection: Always Listening, Locally
+## Wake word detection: always listening, locally
 
-The wake word detector runs entirely on-device. No audio leaves your machine until you say "Hey Jarvis" (or whatever phrase you choose).
+The wake word detector runs entirely on-device. No audio leaves your machine until you say "Hey Jarvis" (or whatever phrase you pick).
 
 ```python
 from openwakeword.model import Model
@@ -97,13 +97,13 @@ class WakeWordDetector:
 - `hey_mycroft`
 - `hey_rhasspy`
 
-You can also train your own custom wake word. I'm considering designing a personality for my assistant with a unique name and training a wake word to match.
+You can also train a custom wake word. I'm tempted to design a personality for my assistant with a unique name and train a wake word to match.
 
-The key difference from commercial assistants: this runs locally. The audio stream never leaves your machine until after wake word detection triggers recording.
+The key difference from commercial assistants: this runs locally. The audio stream never leaves your machine until wake word detection actually triggers a recording.
 
-## Speech-to-Text: Record Until Silence
+## Speech-to-text: record until silence
 
-After hearing the wake word, the system records your command until you stop speaking. Voice Activity Detection (VAD) handles this automatically:
+Once the wake word hits, the system records your command until you stop talking. Voice Activity Detection (VAD) handles that automatically:
 
 ```python
 import webrtcvad
@@ -137,7 +137,7 @@ The recorded audio goes to Whisper for transcription. OpenAI's API is fast and a
 
 For a fully local setup, `faster-whisper` with the `base` model gives you excellent accuracy with minimal latency.
 
-## The LLM: Your Brain, Your Choice
+## The LLM: your brain, your choice
 
 This is where it gets interesting. The LLM handles understanding your request and deciding what to do. Mine uses GPT-4o, but the architecture supports any model with tool calling:
 
@@ -176,11 +176,11 @@ client = Anthropic()
 client = OpenAI(base_url="http://localhost:11434/v1")
 ```
 
-The system prompt tells the LLM it's a voice assistant, so responses stay concise and conversational rather than verbose and markdown-heavy.
+The system prompt tells the LLM it's a voice assistant, so responses stay short and conversational instead of verbose and markdown-heavy.
 
-## Tools: The Magic of Pydantic
+## Tools: the magic of Pydantic
 
-Here's the elegant part. Each capability is defined as a Pydantic model:
+This is the elegant part. Each capability is defined as a Pydantic model:
 
 ```python
 from pydantic import BaseModel, Field
@@ -198,11 +198,11 @@ def get_weather(params: GetWeather) -> str:
     return f"It's currently {temp}°F in {location} with {condition}."
 ```
 
-That single class definition provides:
-1. **LLM function schema** - The model knows how to call it
-2. **CLI interface** - Test with `uv run weather "Tokyo"`
-3. **Validation** - Type checking and constraints
-4. **Documentation** - Docstring becomes the function description
+That single class definition gives you:
+1. An LLM function schema, so the model knows how to call it
+2. A CLI interface, so you can test with `uv run weather "Tokyo"`
+3. Validation through type checking and constraints
+4. Documentation, since the docstring becomes the function description
 
 Adding a new capability is just writing a model and handler:
 
@@ -227,7 +227,7 @@ def control_light(params: ControlLight) -> str:
 - System volume (macOS AppleScript)
 - Conversation history lookup
 
-## Text-to-Speech: The Response
+## Text-to-speech: the response
 
 Finally, the assistant speaks. OpenAI's TTS is fast and natural:
 
@@ -244,11 +244,11 @@ def speak(client, text, voice="alloy"):
 
 **Voice options:** alloy, echo, fable, onyx, nova, shimmer
 
-For fully local operation, Piper TTS is excellent and runs on CPU with minimal latency.
+For fully local operation, Piper TTS sounds great and runs on CPU with minimal latency.
 
-My aspiration: design a custom personality for my assistant and clone a unique voice with ElevenLabs. Combined with a custom wake word, it becomes a truly personal assistant rather than a generic one.
+My aspiration: design a custom personality for my assistant and clone a unique voice with ElevenLabs. Pair that with a custom wake word and you get a truly personal assistant instead of a generic one.
 
-## Running It
+## Running it
 
 ```bash
 # Install
@@ -272,7 +272,7 @@ uv run assistant --repl          # Text mode (no audio)
 uv run assistant "weather Tokyo" # One-shot query
 ```
 
-## Going Fully Local
+## Going fully local
 
 Want zero cloud dependency? Every component has a local alternative:
 
@@ -285,7 +285,7 @@ Want zero cloud dependency? Every component has a local alternative:
 
 With faster-whisper for transcription, Ollama running Llama 3.2 for the brain, and Piper for speech, everything stays on your machine. Responses are slightly slower, but privacy is absolute. No data leaves your network.
 
-## Why This Beats Commercial Assistants
+## Why this beats commercial assistants
 
 | | Alexa/Google | DIY Assistant |
 |--|--------------|---------------|
@@ -299,7 +299,7 @@ With faster-whisper for transcription, Ollama running Llama 3.2 for the brain, a
 
 The Mac Mini setup has another benefit: it's already my remote development server. When I'm coding from my laptop at a coffee shop, I SSH into it for heavy AI workloads. The voice assistant becomes just another daemon running in the background.
 
-## What I'm Testing
+## What I'm testing
 
 **Working well:**
 - "Hey Jarvis, what's the weather?"
@@ -317,15 +317,15 @@ The Mac Mini setup has another benefit: it's already my remote development serve
 - Custom wake word and personality
 - Custom voice via ElevenLabs
 
-## The Privacy Difference
+## The privacy difference
 
-Commercial assistants optimize for data collection. Their business model depends on knowing everything about you. That's why they're "free" (after buying the device). And now Amazon wants $20/month for Alexa Plus on top of that.
+Commercial assistants optimize for data collection. Their business model depends on knowing everything about you. That's why they're "free" (after you buy the device). And now Amazon wants $20/month for Alexa Plus on top of that.
 
 This system optimizes for functionality. It only processes what you explicitly ask, only when you trigger it, and you control where the data goes.
 
 No subscription nagging. No upsells. Just a voice assistant that does what you ask.
 
-## Getting Started
+## Getting started
 
 If you want to build your own, here are the key libraries:
 
@@ -341,9 +341,9 @@ If you want to build your own, here are the key libraries:
 - [ollama](https://ollama.com/) - Local LLMs
 - [piper](https://github.com/rhasspy/piper) - Local TTS
 
-The architecture is straightforward: wake word detection loops until triggered, then record until silence, transcribe, send to LLM with tools, speak the response. Each piece is independent and swappable.
+The architecture is straightforward. Wake word detection loops until triggered, then record until silence, transcribe, send to LLM with tools, speak the response. Each piece is independent and swappable.
 
-The Pydantic tool pattern is the standout feature. Once you understand it, adding any capability becomes trivial. Weather, lights, music, calendars, home automation... all just a model and a handler function.
+The Pydantic tool pattern is the standout feature. Once it clicks, adding any capability becomes trivial. Weather, lights, music, calendars, home automation, all just a model and a handler function.
 
 I'll share more as the hardware arrives and the system matures. For now, the core is solid and the Alexa can stay unplugged.
 

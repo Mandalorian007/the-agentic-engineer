@@ -12,28 +12,28 @@ social:
     text: "Prompt fatigue is real.\n\nAfter working with AI coding tools for months, you realize that getting consistent quality requires increasingly detailed, exhausting prompts every single session.\n\nThere's a better way: spec-driven development.\n\nInstead of crafting perfect instructions every time, create planning templates that encode your development process once, then apply consistently.\n\nEvery great plan needs:\n\n1. Problem/Solution/Outcome framing\n• What are we solving?\n• How are we solving it?\n• What's the expected result?\n\n2. Approach & Implementation Strategy  \n• Technologies and libraries\n• Reusing existing code or adding dependencies\n• Testing frameworks (pytest, vitest, etc.)\n\n3. Architecture of Changes\n• UI components needed\n• Data models\n• API contracts\n• Integration points\n\n4. Implementation Tasks (Critical)\n• Exact files that need changes\n• What needs to change and why\n• New files to create\n• Edge cases and handling\n\n5. Verification & Testing\n• Build commands\n• Test commands\n• Types of tests to write\n\n6. Acceptance Criteria\n• Clear, testable success conditions\n• Can hand to another agent for automated validation\n\n7. Documentation Updates\n• Existing docs needing updates\n• New documentation to create\n\nThe payoff? Create a high-quality template once, get dramatically better code forever.\n\nPlanning is the foundation that determines quality across your entire workflow.\n\nComplete planning template guide:"
 ---
 
-If you've been using AI coding tools for more than a few sessions, you've hit the wall. The one where you realize that getting consistent, quality results requires increasingly detailed, exhausting prompts. You're mentally drained from crafting the perfect instructions every single time.
+If you've used AI coding tools for more than a few sessions, you've hit the wall. The one where consistent quality demands increasingly detailed, exhausting prompts. You're mentally drained from crafting the perfect instructions every single time.
 
-There's a better way. The industry is shifting toward **spec-driven development** - templating your commands so you can simply ask for what you want, not exhaustively explain how to do it.
+There's a better way. The industry is shifting toward **spec-driven development**. You template your commands once, then ask for what you want without re-explaining how to do it.
 
 ![Spec-driven development workflow showing template-based planning](../../public/blog/2025-11-10-spec-driven-development-planning-templates/hero-spec-driven-workflow.webp)
 
-## The Problem: Prompt Fatigue is Real
+## The problem: prompt fatigue is real
 
-Let's be honest about what happens when you work with AI agents for extended sessions:
+Here's what happens when you work with AI agents for long stretches:
 
 - You need increasingly detailed prompts to get what you want
-- Each session requires mental energy to craft perfect instructions
-- Quality degrades when your prompts aren't comprehensive
-- You're essentially re-teaching the same workflows every time
+- Each session burns mental energy on crafting perfect instructions
+- Quality drops when your prompts aren't comprehensive
+- You're re-teaching the same workflows every time
 
-The solution? **Specification templates** - reusable planning frameworks that encode your development process once, then apply it consistently across all your work.
+The solution? **Specification templates.** Reusable planning frameworks that encode your development process once, then apply it consistently across all your work.
 
-## What Makes a Great Planning Template?
+## What makes a great planning template?
 
-After studying highly recommended planning approaches from across the industry and comparing them to my own experience, I've found they share common structural elements. The differences are minimal - what matters is creating clear, concise, accurate plans that are easy for both humans and AI to understand.
+I studied a bunch of recommended planning approaches from across the industry and compared them to my own experience. They share common structural elements. The differences are minimal. What matters is producing clear, concise, accurate plans that are easy for both humans and AI to understand.
 
-### The Foundation: Problem, Solution, Outcome
+### The foundation: problem, solution, outcome
 
 Every great plan starts by framing the work properly:
 
@@ -43,24 +43,24 @@ Every great plan starts by framing the work properly:
 
 **Outcome**: What result do we expect from solving this problem with this solution?
 
-This isn't just project management theater - it's critical for aligning the LLM's understanding with your own. When the AI understands *why* it's doing something, it makes better decisions throughout implementation.
+This isn't project management theater. It aligns the LLM's understanding with your own. When the AI knows *why* it's doing something, it makes better decisions throughout implementation.
 
-## The Complete Planning Framework
+## The complete planning framework
 
-Think about your agent's limited context as a single operation window. You want to follow a software development lifecycle: plan → implement → test → review → document. Let's break down how to encode each phase into your template.
+Think of your agent's limited context as a single operation window. You want to follow a software development lifecycle: plan, implement, test, review, document. Here's how to encode each phase into your template.
 
-### 1. Approach and Implementation Strategy
+### 1. Approach and implementation strategy
 
 **What to include:**
 - Technologies, tools, libraries, and frameworks needed
 - Whether you're reusing existing code or bringing in new dependencies
 - Specific library choices (pytest, vitest, playwright, etc.)
 
-Why specify this upfront? Because you want *consistency*. You don't want your agent randomly deciding to bring in a new testing framework mid-implementation. Make these decisions during planning, not coding.
+Why specify this upfront? Consistency. You don't want your agent randomly deciding to pull in a new testing framework mid-implementation. Make those decisions during planning, not coding.
 
 ![Planning template structure showing key sections](../../public/blog/2025-11-10-spec-driven-development-planning-templates/diagram-planning-framework.webp)
 
-### 2. Architecture of Changes
+### 2. Architecture of changes
 
 Describe the structural impact of this change:
 
@@ -70,9 +70,9 @@ Describe the structural impact of this change:
 - State flow changes
 - New integration points
 
-A high-level architectural view helps structure what the agent will build. It's the difference between reactive coding and intentional architecture.
+A high-level architectural view shapes what the agent will build. It's the difference between reactive coding and intentional architecture.
 
-### 3. Implementation Tasks (The Critical Section)
+### 3. Implementation tasks (the critical section)
 
 This is where relevant context becomes key. If you want agents to parallelize work or pick up where they left off, you need specific, actionable tasks.
 
@@ -90,7 +90,7 @@ Update src/auth/login.ts to handle OAuth2 flow with Google provider
 - Return proper error codes for invalid credentials
 ```
 
-### 4. Verification and Testing
+### 4. Verification and testing
 
 List your testing commands and frameworks:
 
@@ -104,7 +104,7 @@ List your testing commands and frameworks:
 - Integration tests
 - End-to-end tests (playwright, cypress)
 
-### 5. Acceptance Criteria
+### 5. Acceptance criteria
 
 This is what ties into your review process. List clear, testable criteria:
 
@@ -112,9 +112,9 @@ This is what ties into your review process. List clear, testable criteria:
 - "Invalid credentials return 401 status code"
 - "Token refresh happens automatically before expiration"
 
-Here's where it gets interesting: you can hand this section to *another agent* with access to playwright or Chrome DevTools and have it **validate your implementation automatically**. Imagine getting a video recording or screenshot series proving each acceptance criterion works.
+Here's where it gets interesting. You can hand this section to *another agent* with access to playwright or Chrome DevTools and have it **validate your implementation automatically**. Picture getting a video recording or screenshot series that proves each acceptance criterion works.
 
-### 6. Documentation Updates
+### 6. Documentation updates
 
 No feature should land without documentation. Specify:
 
@@ -122,9 +122,9 @@ No feature should land without documentation. Specify:
 - New documents to create (and what they should cover)
 - Links to documentation patterns or templates
 
-If you want feature after feature to land with quality and reliability, documentation ensures your agent understands your codebase's current state. This automates the entire end-to-end flow and gives humans (including future you) a place to understand what changed.
+If you want feature after feature to land with quality and reliability, documentation keeps your agent oriented to your codebase's current state. That automates the entire end-to-end flow and gives humans (including future you) a place to understand what changed.
 
-## What NOT to Include in Your Plans
+## What NOT to include in your plans
 
 Bad plans often include:
 
@@ -135,31 +135,28 @@ Bad plans often include:
 
 If your agent is returning fully written code in the planning phase, your template went too far. You need the top-level view, not the implementation.
 
-## What to DO in Your Plans
+## What to DO in your plans
 
 Great plans include:
 
-**Checklists for implementation steps** - One-time tasks agents can mark complete. If your session crashes, you know where you are.
+- **Checklists for implementation steps.** One-time tasks agents can mark complete. If your session crashes, you know where you are.
+- **File and architecture structures.** Models, flows, and components that describe what should happen.
+- **Verification commands.** Exact commands to validate success.
+- **Acceptance criteria.** Clear definitions of what success looks like.
 
-**File and architecture structures** - Models, flows, and components that describe what should happen.
+## Optimize for your stack
 
-**Verification commands** - Exact commands to validate success.
+The examples above are generic on purpose, but you can tune templates for your specific application:
 
-**Acceptance criteria** - Clear definitions of what success looks like.
-
-## Optimize for Your Stack
-
-The examples above are generic on purpose, but you can optimize templates for your specific application:
-
-- If your verification steps are always A, B, C, D, E - **put them in the template**
-- If you always use the same testing libraries - **specify them by default**
-- If you have specific mocking conventions - **link to the docs or patterns**
+- If your verification steps are always A, B, C, D, E, **put them in the template**
+- If you always use the same testing libraries, **specify them by default**
+- If you have specific mocking conventions, **link to the docs or patterns**
 
 Don't make your agent guess what you always do consistently. Encode those patterns in your template.
 
-## The Payoff: Quality at Scale
+## The payoff: quality at scale
 
-Planning is the most critical phase of agentic development. A high-quality plan template is the foundation that determines code quality across your entire workflow.
+Planning is the most critical phase of agentic development. A quality plan template is the foundation that determines code quality across your entire workflow.
 
 If you need agents to:
 1. Understand application state
@@ -172,11 +169,11 @@ If you need agents to:
 
 ...then planning is where you set up success for every subsequent step.
 
-**The promise**: Create an incredibly quality plan template, and the quality of code you get will increase dramatically. If you start generating plans you hate, it's time to work on your template.
+**The promise**: Build a high-quality plan template, and the code you get back will improve dramatically. If you start generating plans you hate, it's time to work on your template.
 
-## Beyond Feature Development
+## Beyond feature development
 
-The templates I've described focus on iterating applications with new features or infrastructure changes. But agents aren't limited to this. You could create planning templates for:
+The templates I've described focus on iterating applications with new features or infrastructure changes. Agents aren't limited to that. You could create planning templates for:
 
 - Troubleshooting production alerts from PagerDuty or monitoring tools
 - Research workflows for evaluating new features
@@ -186,7 +183,7 @@ The templates I've described focus on iterating applications with new features o
 
 The framework adapts to whatever workflow you need to systematize.
 
-## Getting Started
+## Getting started
 
 Start with a basic template covering:
 - Problem/Solution/Outcome framing
@@ -197,14 +194,14 @@ Start with a basic template covering:
 - Acceptance criteria
 - Documentation updates
 
-Then iterate based on your experience. Fine-tune for your preferences, your style, your application. Add your specific tech stack details. Remove ambiguity where you have established patterns.
+Then iterate based on your experience. Tune it for your preferences, your style, your application. Add your specific tech stack details. Remove ambiguity where you have established patterns.
 
-The quality underpinnings remain the same, but optimization comes from adapting the template to your context.
+The quality underpinnings stay the same. Optimization comes from adapting the template to your context.
 
-## What's Next
+## What's next
 
-I'm working on publishing a high-quality planning template for application development on this site. If you don't want to create your own from scratch, that'll be a solid starting point you can customize.
+I'm working on publishing a high-quality planning template for application development on this site. If you don't want to roll your own from scratch, that'll be a solid starting point you can customize.
 
-Until then: start templating your commands. Stop exhausting yourself with perfect prompts. Let your templates do the heavy lifting, and watch your agents deliver consistent quality across every session.
+Until then, start templating your commands. Stop exhausting yourself with perfect prompts. Let your templates do the heavy lifting, and watch your agents deliver consistent quality across every session.
 
-The art of the plan isn't just about planning better - it's about planning once and executing everywhere.
+The art of the plan isn't really about planning better. It's about planning once and executing everywhere.

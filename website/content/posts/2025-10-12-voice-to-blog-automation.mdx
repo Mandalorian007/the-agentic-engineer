@@ -14,21 +14,21 @@ social:
 
 ![AI-powered blog automation workflow](../../public/blog/2025-10-12-voice-to-blog-automation/hero-voice-to-blog-pipeline.webp)
 
-## Hello World (But Make It Meta)
+## Hello world (but make it meta)
 
-Welcome to my first blog post ever. And here's the thing: **I built an entire blog automation system just so I could write this post**.
+Welcome to my first blog post ever. Quick admission: **I built an entire blog automation system just so I could write this post**.
 
 I know that sounds backwards. Most people start a blog by writing "Hello World" in WordPress. I started by building a voice-to-published-blog pipeline powered by AI agents. Then I used it to write about itself.
 
-Why? Because I kept putting off starting a blog. The friction was too high. Every time I had an idea, the thought of manually formatting markdown, finding images, configuring a blog platform, dealing with SEO... it killed the momentum before I even started.
+Why? I kept putting off starting a blog. The friction was too high. Every time I had an idea, the thought of manually formatting markdown, finding images, configuring a blog platform, dealing with SEO... it killed the momentum before I even started.
 
-So I did what any engineer does when procrastinating: I built a tool to automate the thing I was avoiding.
+So I did what any engineer does when procrastinating. I built a tool to automate the thing I was avoiding.
 
-## What I Built
+## What I built
 
-Here's what I ended up with: **A complete voice-to-published-blog pipeline** that took me from zero to this post you're reading.
+I ended up with a complete voice-to-published-blog pipeline that took me from zero to this post you're reading.
 
-You literally just ramble about your idea—like you're explaining it to a friend at a coffee shop—and the system:
+You literally just ramble about your idea, like you're explaining it to a friend at a coffee shop, and the system:
 
 1. ✅ **Converts your rambling into a structured blog post**
 2. ✅ **Generates professional images with AI** (OpenAI GPT-Image-1)
@@ -40,13 +40,13 @@ You literally just ramble about your idea—like you're explaining it to a frien
 
 Then you review it, change `status: draft` to `status: published`, run one command, and **you're live**.
 
-That's it. That's the whole workflow.
+That's the whole workflow.
 
-## How It Works: The Four-Command Workflow
+## How it works: the four-command workflow
 
-Here's the actual workflow I use now:
+This is the workflow I use now.
 
-### Step 1: Create the Post (Voice or Text)
+### Step 1: Create the post (voice or text)
 
 I have a Claude Code slash command called `/create-post`. I just talk about my idea:
 
@@ -65,9 +65,9 @@ Claude Code (powered by Anthropic's Sonnet) then:
 - Suggests detailed AI prompts for each image (hero images, diagrams, etc.)
 - Saves everything to `posts/YYYY-MM-DD-slug/post.md`
 
-Here's the magic: the `/create-post` command doesn't just write text—it **actively generates the images** as part of the workflow. The command has access to the `generate_image.py` tool, so it crafts detailed prompts and creates the images while writing the post.
+The trick is that `/create-post` doesn't just write text. It **actively generates the images** as part of the workflow. The command has access to the `generate_image.py` tool, so it crafts detailed prompts and creates the images while writing the post.
 
-### Step 2: Generate Images (If Needed)
+### Step 2: Generate images (if needed)
 
 If you want more images beyond what the command created, you can run:
 
@@ -78,9 +78,9 @@ publishing, blue and purple gradient, clean tech aesthetic, isometric
 view, professional futuristic mood" posts/2025-10-12-my-post/hero.png
 ```
 
-Each image costs about **$0.015** (less than two cents) and looks way better than stock photos. We save the images directly in the post directory.
+Each image costs about **$0.015** (less than two cents) and looks way better than stock photos. The images get saved directly in the post directory.
 
-### Step 3: Quality Check, Build, and Publish
+### Step 3: Quality check, build, and publish
 
 With the post written and images generated, I run three more slash commands:
 
@@ -95,7 +95,7 @@ With the post written and images generated, I run three more slash commands:
 /publish posts/2025-10-12-my-post/
 ```
 
-**The `/quality-check` command** runs both Vale prose linting and SEO analysis, catching issues like passive voice, wordy phrases, missing meta descriptions, and title length problems.
+**The `/quality-check` command** runs both Vale prose linting and SEO analysis. It catches issues like passive voice, wordy phrases, missing meta descriptions, and title length problems.
 
 **The `/build` command** validates everything:
 - Checks frontmatter and tag registry
@@ -110,17 +110,17 @@ With the post written and images generated, I run three more slash commands:
 - Creates OR updates the post on Blogger (no duplicates!)
 - Saves the `blogger_id` back to frontmatter for future updates
 
-When I'm ready to go live, I just change `status: draft` to `status: published` in the markdown and run `/publish` again. **One command. Live blog post.**
+When I'm ready to go live, I change `status: draft` to `status: published` in the markdown and run `/publish` again. **One command. Live blog post.**
 
-## The Technical Stack
+## The technical stack
 
-Here's what makes this work:
+This is what makes it work.
 
-### AI Content Generation
+### AI content generation
 - **Claude Code (Anthropic Sonnet 4.5)** - Converts rambling to structured posts
 - **OpenAI GPT-Image-1** - Generates custom blog images from prompts
 
-### Content Pipeline
+### Content pipeline
 - **Python 3.13** with `uv` for dependency management
 - **Markdown → HTML** conversion with Python-Markdown
 - **Pygments** for code syntax highlighting
@@ -132,17 +132,17 @@ Here's what makes this work:
 - **Vale** - Prose linting for readability and style
 - Custom **SEO checker** - Validates title length, meta descriptions, headings, content length
 
-### Smart Features
+### Smart features
 - **Idempotent publishing** - Detects existing posts by directory path, updates instead of duplicating
 - **Hash-based image deduplication** - Only uploads changed images to Cloudinary
 - **Tag registry** - Enforced tag consistency (no tag sprawl!)
 - **Path-based URLs** - `2025-10-12-hello-world` → `/2025/10/hello-world.html`
 
-## The Architecture: How Everything Fits Together
+## The architecture: how everything fits together
 
 ![Blog automation architecture diagram](../../public/blog/2025-10-12-voice-to-blog-automation/diagram-blog-automation-architecture.webp)
 
-Here's the flow:
+The flow looks like this:
 
 1. **Voice/Text Input** → Claude Code `/create-post` command
 2. **AI Processing** → Structured markdown + image prompts + frontmatter
@@ -156,15 +156,15 @@ Here's the flow:
    - Save `blogger_id` to frontmatter
 7. **Status Toggle** → Change `draft` → `published` and republish
 
-Everything is idempotent—you can run commands many times safely. The system is smart enough to:
+Everything is idempotent. You can run commands many times safely. The system is smart enough to:
 - Detect existing posts by directory name
 - Only upload images when their hashes change
 - Update instead of duplicate
 - Preserve your `blogger_id` across runs
 
-## What This Actually Looks Like in Practice
+## What this actually looks like in practice
 
-Let me show you a real example. Here's my actual workflow for creating **this exact post** (my first blog post ever):
+Here's a real example. This is my actual workflow for creating **this exact post** (my first blog post ever):
 
 ```bash
 # 1. Talk about my idea (literally just rambled into Claude Code)
@@ -186,7 +186,7 @@ Let me show you a real example. Here's my actual workflow for creating **this ex
 /publish posts/2025-10-12-voice-to-blog-automation/
 ```
 
-**Total hands-on time: ~5 minutes** (most of it reviewing the AI output—the images generated automatically!)
+**Total hands-on time: ~5 minutes** (most of it spent reviewing the AI output. The images generated automatically.)
 
 This is my **first blog post ever**. It took 5 minutes of actual work. The system I built to enable it took a day to build, but now the barrier to writing is gone.
 
@@ -197,15 +197,15 @@ Compare that to traditional blogging:
 - Upload to blog platform: 10-15 minutes
 - SEO checks: 10 minutes
 
-**Traditional first post: 2+ hours of friction. This approach: Build once, write forever in 5 minutes.**
+**Traditional first post: 2+ hours of friction. This approach: build once, write forever in 5 minutes.**
 
-## The Quality Checks: Making Sure It's Actually Good
+## The quality checks: making sure it's actually good
 
 One concern with AI-generated content: is it any good? Will it rank? Is it readable?
 
-The `/quality-check` command runs two automated checks:
+The `/quality-check` command runs two automated checks.
 
-### 1. SEO Analysis
+### 1. SEO analysis
 
 Checks for search optimization best practices:
 - ✅ Title length (30-60 chars for Google)
@@ -225,7 +225,7 @@ Checks for search optimization best practices:
 ✅ 3 images with alt text
 ```
 
-### 2. Prose Linting with Vale
+### 2. Prose linting with Vale
 
 Vale checks writing quality automatically:
 - Passive voice detection
@@ -241,11 +241,11 @@ Vale checks writing quality automatically:
 
 You can ignore suggestions, but the system catches common mistakes before publishing. Run `/quality-check` on any post to get instant feedback.
 
-## Why This Matters: Starting Is the Hardest Part
+## Why this matters: starting is the hardest part
 
-Here's the truth: **I'd been putting off starting a blog for years**.
+The honest truth: **I'd been putting off starting a blog for years**.
 
-Not because I didn't have ideas. Not because I couldn't write. But because every time I thought about starting, I'd get overwhelmed by the setup:
+Not because I didn't have ideas. Not because I couldn't write. Every time I thought about starting, I'd get overwhelmed by the setup:
 - Pick a blogging platform
 - Learn how to use it
 - Figure out themes and styling
@@ -258,7 +258,7 @@ So I'd think "I'll do it later" and never actually start.
 
 This automation system changed that. By building it, I removed every excuse I had. Now the barrier to writing is **as low as talking**. I went from years of procrastination to a published post in 5 minutes of actual writing.
 
-### What's Next?
+### What's next?
 
 I'm planning to add:
 - **Automatic social media posts** (LinkedIn, Twitter) from blog content
@@ -267,11 +267,11 @@ I'm planning to add:
 - **Analytics integration** (track what actually performs)
 - **Automated internal linking** (connect related posts automatically)
 
-## What's Coming Next
+## What's coming next
 
-This blog will dive deep into each piece of this automation pipeline—from setting up the Blogger API and OAuth flows, to building the markdown converter, to integrating Cloudinary for image optimization. I'll walk through the architecture decisions, the code, and the lessons learned along the way.
+This blog will dive deep into each piece of this automation pipeline. From setting up the Blogger API and OAuth flows, to building the markdown converter, to integrating Cloudinary for image optimization. I'll walk through the architecture decisions, the code, and the lessons learned along the way.
 
-But here's where it gets even more interesting: **adding an agentic layer on top**.
+But it gets even more interesting when you add **an agentic layer on top**.
 
 Imagine the system automatically:
 - Generating follow-up posts based on engagement metrics
@@ -284,11 +284,11 @@ We're just scratching the surface of what's possible when you combine AI agents 
 
 **Stay tuned for more.** The future of content creation is autonomous, and we're going to build it together.
 
-## Conclusion: The Best Way to Start Is to Remove the Excuses
+## Conclusion: the best way to start is to remove the excuses
 
 So this is my first blog post. Not a typical "Hello World," but a working system that made starting possible.
 
-The irony isn't lost on me: I spent a day building automation to avoid spending 2 hours writing a blog post. But that's not really what happened. I spent a day **removing the barrier** that kept me from starting for years.
+The irony isn't lost on me. I spent a day building automation to avoid spending 2 hours writing a blog post. That's not really what happened, though. I spent a day **removing the barrier** that kept me from starting for years.
 
 Now I have no excuses. The system is built. Writing takes 5 minutes. Publishing is one command.
 
