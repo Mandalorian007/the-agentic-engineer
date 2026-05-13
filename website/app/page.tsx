@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
 import { getRecentPosts } from "@/lib/posts";
 import { CATEGORY_LABELS } from "@/lib/categories";
@@ -17,27 +18,45 @@ export default function Home() {
   return (
     <div className="container py-12 md:py-24">
       {/* Hero Section */}
-      <section className="flex flex-col items-center text-center space-y-6 max-w-3xl mx-auto">
+      <section className="flex flex-col items-center text-center space-y-6 max-w-4xl mx-auto">
+        <Badge variant="outline">Agentic Developer Platform Engineering</Badge>
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-          Welcome to The Agentic Engineer
+          I build agentic developer platforms that make engineering teams measurably faster.
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl">
-          Exploring AI agents, automation, and engineering with practical
-          insights and real-world examples.
+          Vendor-agnostic. Production-grade. Outcome-focused. I help engineering
+          organizations turn AI coding tools into developer platforms their teams
+          actually use.
         </p>
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           <Button size="lg" asChild>
-            <Link href="/blog">Read the Blog</Link>
+            <Link href="/services">
+              Work with me
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link href="/blog/category/tutorials">View Tutorials</Link>
+            <Link href="/approach">How I work</Link>
           </Button>
         </div>
       </section>
 
       {/* Recent Posts Section */}
       <section className="mt-24">
-        <h2 className="text-3xl font-bold mb-8">Recent Posts</h2>
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-4">
+          <div>
+            <h2 className="text-3xl font-bold">From the blog</h2>
+            <p className="text-muted-foreground mt-2">
+              Field notes on agentic engineering: patterns, tooling, and lessons from real engagements.
+            </p>
+          </div>
+          <Button variant="ghost" asChild>
+            <Link href="/blog">
+              All posts
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
+          </Button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {recentPosts.map((post, index) => (
             <Link key={post.slug} href={`/blog/${post.slug}`} className="block h-full w-full">

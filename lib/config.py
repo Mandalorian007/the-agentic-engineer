@@ -118,7 +118,7 @@ def get_publishing_config(config: Dict[str, Any]) -> Dict[str, Any]:
         - frequency: "weekly" or "monthly"
         - time: publish time string (e.g., "11:00:00")
         For weekly: days (list of day names)
-        For monthly: day (single day name), week_of_month (int)
+        For monthly: day (single day name), weeks_of_month (list of ints)
     """
     publishing = config.get('publishing', {})
     frequency = publishing.get('frequency', 'weekly')
@@ -130,7 +130,12 @@ def get_publishing_config(config: Dict[str, Any]) -> Dict[str, Any]:
 
     if frequency == 'monthly':
         result['day'] = publishing.get('day', 'monday')
-        result['week_of_month'] = publishing.get('week_of_month', 2)
+        weeks = publishing.get('weeks_of_month', [2])
+        if not isinstance(weeks, list) or not weeks:
+            raise ConfigError(
+                "❌ publishing.weeks_of_month must be a non-empty list of integers (1-5)"
+            )
+        result['weeks_of_month'] = sorted(set(int(w) for w in weeks))
     else:
         result['days'] = publishing.get('days', ['monday'])
 
@@ -150,9 +155,10 @@ def get_publishing_rate(config: Dict[str, Any]) -> Dict[str, Any]:
     frequency = pub_config.get('frequency', 'weekly')
 
     if frequency == 'monthly':
+        weeks_count = len(pub_config.get('weeks_of_month', [2]))
         return {
-            'posts_per_month': 1.0,
-            'frequency_label': '1/month',
+            'posts_per_month': float(weeks_count),
+            'frequency_label': f'{weeks_count}/month',
         }
     else:
         days_count = len(pub_config.get('days', ['monday']))

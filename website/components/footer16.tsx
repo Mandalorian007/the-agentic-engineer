@@ -11,9 +11,15 @@ import {
 
 const NAVIGATION = [
   {
+    title: "Work",
+    links: [
+      { name: "Services", href: "/services" },
+      { name: "Approach", href: "/approach" },
+    ],
+  },
+  {
     title: "Content",
     links: [
-      { name: "Home", href: "/" },
       { name: "Blog", href: "/blog" },
     ],
   },
@@ -46,7 +52,9 @@ const Footer16 = () => {
               <span className="text-2xl font-bold">The Agentic Engineer</span>
             </Link>
             <p className="text-muted-foreground text-sm max-w-md">
-              Exploring AI agents, automation, and engineering with practical insights and real-world examples.
+              I help engineering organizations turn AI coding tools into
+              production-grade developer platforms. Vendor-agnostic.
+              Outcome-focused.
             </p>
             <Link
               href="/feed.xml"
@@ -59,7 +67,7 @@ const Footer16 = () => {
             </Link>
           </div>
           <div>
-            <div className="hidden md:flex md:gap-10 lg:gap-24 xl:gap-32">
+            <div className="hidden md:flex md:gap-8 lg:gap-16 xl:gap-24">
               {NAVIGATION.map((section) => (
                 <div className="flex flex-col gap-4" key={section.title}>
                   <h6 className="text-foreground mb-2 text-sm font-semibold uppercase">

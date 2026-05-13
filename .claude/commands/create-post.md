@@ -175,17 +175,19 @@ Create a complete blog post following this project's structure:
 3. **Full MDX content** with proper heading hierarchy
 4. **Image suggestions** - **REQUIRED: Every post must have at least one image** (hero/featured image). When suggesting images, provide the exact command to generate them with detailed, descriptive prompts:
    ```bash
-   uv run tools/generate_image.py "3D rendered illustration of a robot writing code at a desk, vibrant blue and purple gradients with orange accents, volumetric lighting, depth of field, cinematic composition, detailed textures, professional tech aesthetic" website/public/blog/YYYY-MM-DD-slug/image-name.webp
+   aitk image generate '3D rendered illustration of a robot writing code at a desk, vibrant blue and purple gradients with orange accents, volumetric lighting, depth of field, cinematic composition, detailed textures, professional tech aesthetic' -o website/public/blog/YYYY-MM-DD-slug/image-name.webp -s 1536x1024 -q high -f webp
    ```
    - Minimum: 1 hero image at the top of the post
    - Recommended: Additional images for major sections, diagrams, or examples
+   - **Use single quotes** around the prompt (per `aitk image generate --help`)
+   - **Default hero size**: `-s 1536x1024` (landscape). Use `-s 1024x1024` for square, `-s 1024x1536` for portrait
    - **Prompt tips**: Create vibrant, dimensional images with depth and visual interest:
      - **3D Style**: Use terms like "3D rendered", "volumetric", "depth of field", "detailed textures", "realistic materials"
      - **Rich Colors**: Specify vibrant, bold color palettes with complementary accents (e.g., "vibrant blue and purple with orange highlights")
      - **Lighting**: Add depth with "volumetric lighting", "rim lighting", "dramatic shadows", "soft ambient glow"
      - **Composition**: Use "cinematic composition", "dynamic perspective", "isometric view with depth", "layered elements"
      - **Details**: Include "detailed textures", "realistic materials", "environmental effects", "atmospheric elements"
-   - **Note**: Images are automatically generated and converted to WebP format by `generate_image.py`
+   - **Note**: `aitk` writes WebP directly with `-f webp`. Credentials are configured once via `aitk config`.
 
 ## Saving the Post to Disk
 
@@ -221,7 +223,7 @@ hashtags: ["python", "automation", "workflow"]
 
 ### Image References & Naming
 - Use relative paths from MDX location: `![Alt text](../../public/blog/YYYY-MM-DD-slug/hero-blog-automation.webp)`
-- Images are automatically generated in WebP format by `generate_image.py`
+- Images are generated in WebP format by `aitk image generate ... -f webp`
 - Name images with descriptive slugs: `hero-topic-name.webp`, `diagram-what-it-shows.webp`, `screenshot-feature-name.webp`
 - Save to: `website/public/blog/YYYY-MM-DD-slug/`
 - Path format: `../../public/blog/[post-slug]/[image-name].webp` (relative from `content/posts/` to `public/blog/`)
@@ -243,7 +245,7 @@ hashtags: ["python", "automation", "workflow"]
 
 5. **Write the complete post** following the chosen format as MDX
 
-6. **Generate images** - Create at least one hero image using `generate_image.py` (outputs WebP directly)
+6. **Generate images** - Create at least one hero image using `aitk image generate` with `-f webp` (outputs WebP directly)
 
 7. **Save to disk** - Write MDX file to `website/content/posts/YYYY-MM-DD-slug.mdx` with proper frontmatter
 

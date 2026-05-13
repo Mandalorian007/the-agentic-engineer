@@ -16,65 +16,65 @@ social:
   linkedin:
     text: "Have you noticed your AI coding sessions getting... dumber over time?\n\nIt's not your imagination. It's context compaction.\n\nWhen Claude Code's context window gets full, auto-compact kicks in—compressing older messages into summaries and discarding details.\n\nThe problem? Variable names become \"the variable.\" Error messages become \"some errors occurred.\" Code patterns you established get forgotten.\n\nWorse: auto-compact reserves 22.5% of your 200K token context window (45,000 tokens!) before you even start.\n\nThe solution? Stop fighting the context window. Design workflows around it.\n\nInstead of one massive session (plan → code → test → review), break into focused sessions:\n• /prime → /plan → save plan.md → /clear\n• /implement plan.md → save code → /clear  \n• /test plan.md → save results → /clear\n\nEach session starts fresh with maximum context. State lives in files, not conversation history.\n\nBonus: Disable auto-compact for standalone workflows and reclaim that 22.5%.\n\nThe result? Every workflow runs with full intelligence, clean context, and predictable results.\n\nContext windows are limiting, but we can design around them.\n\nComplete guide to context management:"
 ---
-Have you ever been deep in a coding session with Claude, everything flowing perfectly, when suddenly you see that dreaded message: **"compacting..."**?
+You're deep in a Claude session. Code is flowing. Then you see it: **"compacting..."**
 
-Your heart sinks. You know what's coming next. The quality drops. The responses get vaguer. What was once a brilliant coding partner just got noticeably... dumber.
+Your stomach drops, because you know what comes next. Vaguer answers. Missed details. The coding partner that felt sharp ten minutes ago suddenly feels lobotomized.
 
-This isn't your imagination. It's a fundamental constraint of AI coding tools, and understanding it is the difference between fighting your tools and designing workflows that actually work.
+It isn't your imagination. It's a real constraint baked into how these tools work, and the gap between developers who fight it and developers who design around it is enormous.
 
-## The Hidden Cost of Auto-Compact
+## The hidden cost of auto-compact
 
-Let's run a quick experiment. Start a fresh Claude Code session and run these commands:
+Try a quick experiment. Open a fresh Claude Code session and run:
 
 ```bash
 /prime          # Load your codebase context
 /context        # Check context window usage
 ```
 
-Here's what you'll see:
+You'll see something like this:
 
 ![Claude context window breakdown showing auto-compact buffer usage](../../public/blog/2025-10-28-taming-context-windows/claude-context.webp)
 
-Notice anything alarming? **The auto-compact buffer is consuming 22.5% of your available context window** — that's 45,000 tokens out of 200,000 — before you've even started coding.
+Look at the auto-compact buffer. **It's eating 22.5% of your available context window.** That's 45,000 tokens out of 200,000, gone before you've typed a single instruction.
 
-### What Is Auto-Compact?
+### What auto-compact actually does
 
-Auto-compact is Claude's safety mechanism. When your conversation history approaches the context limit, Claude automatically:
+Auto-compact is Claude's safety mechanism. As your conversation history approaches the context limit, Claude automatically:
 
-1. **Compresses older messages** into summaries
-2. **Discards details** it deems less relevant
-3. **Continues the conversation** without hitting a hard limit
+1. Compresses older messages into summaries
+2. Drops details it deems less relevant
+3. Keeps the conversation going past what would otherwise be a hard limit
 
-This sounds great for interactive chat sessions. But for agentic coding workflows? It's a silent performance killer.
+For casual chat, fine. For agentic coding workflows, it's a silent performance tax.
 
-## Why Context Loss Makes AI "Dumber"
+## Why context loss makes AI "dumber"
 
-Every time Claude compacts, you lose information. Not just any information — often the **precise technical details** that matter most:
+Every compact event loses information. And not random information. It loses the **precise technical details** that mattered most:
 
-- **Variable names** get generalized to "the variable"
-- **Specific error messages** become "some errors occurred"
-- **Architecture decisions** fade into "we discussed this earlier"
-- **Code patterns** you established get forgotten
+- Variable names get generalized to "the variable"
+- Specific error messages become "some errors occurred"
+- Architecture decisions fade into "we discussed this earlier"
+- Code patterns you established get forgotten
 
-The more you compact, the vaguer everything becomes. This is why long coding sessions feel like they degrade over time. **You're literally watching the AI forget.**
+The more compacts you stack, the vaguer everything becomes. That's why long coding sessions feel like they decay. **You're literally watching the AI forget.**
 
-## The Traditional Flow: Fighting the Context Window
+## The traditional flow: fighting the context window
 
-Most developers use AI tools in a continuous, linear flow:
+Most developers work in a long, continuous loop:
 
 ```
 Start session → Code → Code → Code → Compact → Code (worse) → Compact → Code (even worse)
 ```
 
-This "in-the-loop developer flow" is typical of agentic coding. You're constantly building context, asking questions, making changes, all within a single session.
+This "in-the-loop developer flow" is typical of agentic coding. You build context, ask questions, make changes, all inside one session.
 
-**The problem:** You're trapped in one context window that keeps degrading.
+The problem? You're trapped in one context window that keeps degrading.
 
-## The Agentic Engineering Solution: Workflow Composition
+## The agentic engineering solution: workflow composition
 
-Here's the shift: **Stop trying to do everything in one session.**
+The shift is simple. Stop trying to do everything in one session.
 
-Instead of fighting the context window, design workflows that **externalize state** and **compose cleanly**:
+Instead of fighting the context window, design workflows that **externalize state** and compose cleanly:
 
 ```
 /prime → /plan → save plan.md → /clear
@@ -85,55 +85,55 @@ Instead of fighting the context window, design workflows that **externalize stat
 ```
 
 Each workflow:
-- ✅ **Starts fresh** with maximum context available
-- ✅ **Reads its inputs** from files (plan, code, specs)
-- ✅ **Writes its outputs** to files (code, tests, docs)
-- ✅ **Never compacts** because it finishes before hitting limits
+- Starts fresh with maximum context available
+- Reads its inputs from files (plan, code, specs)
+- Writes its outputs to files (code, tests, docs)
+- Never compacts because it finishes before hitting limits
 
-### The Power of File-Based State
+### The power of file-based state
 
-Instead of relying on conversation history, you rely on **artifacts**:
+Instead of leaning on conversation history, you lean on **artifacts**:
 
-- **Plan files** capture decisions and architecture
-- **Code files** are the source of truth
-- **Test results** document what works
-- **Review comments** track quality checks
+- Plan files capture decisions and architecture
+- Code files are the source of truth
+- Test results document what works
+- Review comments track quality checks
 
-Each new Claude session reads these artifacts and has **full context** of what matters, without the accumulated noise of every conversational back-and-forth.
+Each new Claude session reads these artifacts and has full context of what matters, with none of the accumulated noise from every conversational back-and-forth.
 
-## Turning Off Auto-Compact
+## Turning off auto-compact
 
-If you're designing standalone workflows, you don't want that 22.5% buffer eating your context:
+If you're designing standalone workflows, that 22.5% buffer is dead weight:
 
 1. Open Claude Code settings
 2. Find the **Auto-Compact** toggle
-3. **Turn it off**
+3. Turn it off
 
-Now check your context again with `/context`:
+Run `/context` again:
 
 ![Context window after disabling auto-compact, showing 22.5% more available space](../../public/blog/2025-10-28-taming-context-windows/diagram-context-comparison.webp)
 
-You just gained back **45,000 tokens** — over a fifth of your total context window.
+You just got back 45,000 tokens. Over a fifth of your total context window.
 
-### When to Use This Setting
+### When to use this setting
 
-**Turn OFF auto-compact when:**
-- Building standalone workflow commands
+Turn OFF auto-compact when:
+- You're building standalone workflow commands
 - Each task has a clear output artifact
 - You're okay with sessions ending when context is full
 
-**Keep auto-compact ON when:**
-- Doing exploratory coding with no clear endpoint
-- Having long conversational debugging sessions
+Keep auto-compact ON when:
+- You're doing exploratory coding with no clear endpoint
+- You're in a long conversational debugging session
 - You need the session to continue indefinitely
 
-## Designing Context-Efficient Workflows
+## Designing context-efficient workflows
 
-Here's how to structure your workflows for maximum AI intelligence:
+A few patterns make this work in practice.
 
-### 1. **One Job Per Session**
+### 1. One job per session
 
-Don't ask Claude to plan, implement, test, and document in one go. Each of these is a separate workflow:
+Don't ask Claude to plan, implement, test, and document in one go. Each of those is a separate workflow:
 
 ```bash
 # Planning session
@@ -152,7 +152,7 @@ Don't ask Claude to plan, implement, test, and document in one go. Each of these
 # Outputs: test results
 ```
 
-### 2. **Push Context to Files**
+### 2. Push context to files
 
 Every workflow should produce an artifact:
 
@@ -164,9 +164,9 @@ Every workflow should produce an artifact:
 - Add password reset flow
 ```
 
-Now your next session can read `plan.md` and has **perfect context** without conversational drift.
+Your next session reads `plan.md` and has perfect context without conversational drift.
 
-### 3. **Compose Workflows Like Functions**
+### 3. Compose workflows like functions
 
 Think of each workflow as a pure function:
 
@@ -178,12 +178,9 @@ review(plan.md, code/) → feedback.md
 document(plan.md, code/) → docs/
 ```
 
-Each function:
-- Has clear inputs (files)
-- Produces clear outputs (files)
-- Doesn't depend on previous conversation state
+Each function has clear inputs (files), produces clear outputs (files), and doesn't depend on previous conversation state.
 
-## Real-World Example: My Blog Workflow
+## Real-world example: my blog workflow
 
 I use this pattern for generating blog posts:
 
@@ -205,45 +202,45 @@ git commit -m "Add post about context management"
 git push
 ```
 
-Each slash command is a **standalone workflow**. They don't share conversation state. They read from and write to files.
+Each slash command is a standalone workflow. They don't share conversation state. They read from and write to files.
 
-Result? **Every workflow runs with maximum context and intelligence.**
+The result? Every workflow runs with maximum context and intelligence.
 
-## The Memory Constraint Reality
+## The memory constraint reality
 
-Here's the truth: **AI tools are incredibly intelligent, but their memories are very limiting.**
+The honest truth: AI tools are incredibly intelligent, but their memories are very limiting.
 
 No matter how smart Claude gets, it's still bound by:
-- **200K token context windows** (for now)
-- **Information loss during compaction**
-- **Degraded quality over long sessions**
+- 200K token context windows (for now)
+- Information loss during compaction
+- Degraded quality over long sessions
 
-We can't change these constraints (yet). But we can **design around them**.
+We can't change those constraints yet. We can design around them.
 
-## Key Takeaways
+## Key takeaways
 
-1. **Auto-compact costs you 22.5% of your context window** before you start
-2. **Every compact loses information** and makes responses vaguer
-3. **Long sessions degrade** because the AI is literally forgetting details
-4. **File-based workflows** let you compose clean, standalone tasks
-5. **Turning off auto-compact** gives you more power per session, but requires workflow discipline
+1. Auto-compact costs you 22.5% of your context window before you start
+2. Every compact loses information and makes responses vaguer
+3. Long sessions degrade because the AI is literally forgetting details
+4. File-based workflows let you compose clean, standalone tasks
+5. Turning off auto-compact gives you more power per session, but requires workflow discipline
 
-## Quick Tips for Context Management
+## Quick tips for context management
 
-- ✅ Use `/context` regularly to check your usage
-- ✅ Turn off auto-compact for workflow-based coding
-- ✅ Start new sessions for each major task
-- ✅ Push important decisions to plan files
-- ✅ Let workflows read files instead of relying on conversation history
-- ✅ Think of Claude sessions as stateless functions
+- Use `/context` regularly to check your usage
+- Turn off auto-compact for workflow-based coding
+- Start new sessions for each major task
+- Push important decisions to plan files
+- Let workflows read files instead of relying on conversation history
+- Think of Claude sessions as stateless functions
 
-## The Future
+## The future
 
 One day, AI tools might have perfect context management. Infinite windows. Zero information loss.
 
-Until that day, **design your workflows around the constraints.**
+Until that day, design your workflows around the constraints.
 
-The developers who understand context windows aren't fighting their tools — they're architecting workflows that maximize every available token.
+The developers who understand context windows aren't fighting their tools. They're architecting workflows that maximize every available token.
 
 ---
 

@@ -11,17 +11,17 @@ social:
     text: "The hidden cost of MCP servers isn't just setup time—it's context.\n\nEvery MCP you load consumes tokens before you type a single prompt. More capabilities? More MCPs. Less context for actual work.\n\nClaude Code Skills flips this equation.\n\nInstead of configuring different toolsets per project, Skills give you one universal toolkit that travels everywhere. The key insight: Skills activate dynamically based on need, not configuration.\n\nYou can have 50, 100, even 200+ skills available and they consume zero context until the moment you actually need one.\n\nThe paradigm shift:\n• MCPs: \"What tools do I enable for this project?\"\n• Skills: \"What tools exist? I'll use what I need.\"\n\nPractical example: A Markdown-to-PowerPoint converter. As an MCP, it consumes context in every session whether you're making presentations or not. As a Skill, it costs nothing until you actually want a slideshow.\n\nThis changes how you think about agent capabilities. Instead of managing tool configurations, you invest in building your toolkit once. Every skill you create or adopt becomes permanently available across all projects without overhead.\n\nMCPs taught us agents can have tools. Skills teach us tools don't have to cost context.\n\nStart with one skill. Convert an occasional-use MCP. Experience the zero-context-until-needed workflow. Then watch your toolkit grow while your configuration overhead stays at zero."
 ---
 
-If you've been working with Model Context Protocol (MCP) servers, you know the drill. Every project requires a different set of MCPs. You're constantly toggling them on and off, adding and removing, tweaking configurations. It's micromanagement that steals time from actual work.
+You know the drill if you've spent time with Model Context Protocol (MCP) servers. Every project wants a different set of MCPs. You toggle them on and off, add some, remove others, tweak the config. It's micromanagement that eats into actual work.
 
-And then there's the context problem. Load up several MCPs and you've consumed a massive chunk of your context window before typing a single prompt. Want more capabilities? Add more MCPs. Watch your available context shrink further.
+Then there's the context tax. Load up a handful of MCPs and you've burned a chunk of your context window before typing a prompt. Want more capabilities? Add more MCPs. Watch your available context shrink.
 
-Claude Code Skills changes this equation entirely.
+Claude Code Skills changes the equation.
 
 ![Hero image showing a single unified toolbox replacing scattered MCP configurations](../../public/blog/2025-12-29-skills-unified-agent-toolbox/hero-unified-toolbox.webp)
 
-## The MCP Juggling Act
+## The MCP juggling act
 
-Here's what MCP management looks like for many developers:
+Here's what MCP management looks like for a lot of developers:
 
 **Project A** (web development):
 - Firecrawl MCP for web scraping
@@ -38,28 +38,28 @@ Here's what MCP management looks like for many developers:
 - Translation MCP
 - Grammar checking MCP
 
-Every time you switch projects, you're reconfiguring your agent's capabilities. And if you leave all MCPs enabled across projects, you're burning context on capabilities you don't need. It's a lose-lose situation.
+Switch projects and you're reconfiguring your agent's capabilities. Leave everything enabled and you burn context on tools you don't need. Lose-lose.
 
-## Skills: Dynamic Activation Changes Everything
+## Skills: dynamic activation changes everything
 
-Skills trigger based on need, not configuration. You can have 40, 50, even 100+ skills in a repository and they consume zero context until the moment you actually need them.
+Skills trigger on need, not configuration. You can have 40, 50, even 100+ skills in a repository and they consume zero context until the moment you actually need them.
 
 ![Diagram comparing MCP configuration overhead versus Skills dynamic activation](../../public/blog/2025-12-29-skills-unified-agent-toolbox/diagram-activation-comparison.webp)
 
-Think about the implications:
+Think about what that means:
 
-- **No toggling** - Skills activate automatically when relevant
-- **No context waste** - Zero overhead until invoked
-- **No configuration per project** - Same skills work everywhere
-- **No accidental triggers** - Well-written skills only activate when appropriate
+- No toggling. Skills activate automatically when relevant.
+- No context waste. Zero overhead until invoked.
+- No configuration per project. Same skills work everywhere.
+- No accidental triggers. Well-written skills only activate when appropriate.
 
-You stop managing tool configurations and start just using tools.
+You stop managing tool configurations and just use the tools.
 
-## The Universal Toolbox Paradigm
+## The universal toolbox paradigm
 
-Here's the conceptual shift that matters most: With Skills, you build one toolbox that goes everywhere.
+This is the conceptual shift that matters most. With Skills, you build one toolbox that goes everywhere.
 
-Consider a practical example. Let's say you build a skill that converts Markdown documents to PowerPoint presentations. It's useful occasionally, but not something you need every day. As an MCP:
+Take a practical case. Say you build a skill that converts Markdown documents to PowerPoint presentations. Useful occasionally, but not something you reach for every day. As an MCP:
 
 - It would consume context in every session
 - You'd toggle it off for most projects
@@ -71,11 +71,11 @@ As a Skill:
 - Available in every repository automatically
 - Works whenever you think "I should make a slideshow of this"
 
-The capability is always available without being always loaded.
+The capability stays available without being loaded.
 
-## Building Your Personal Toolkit
+## Building your personal toolkit
 
-This paradigm shift has compounding benefits. Every skill you create or adopt becomes part of your permanent toolkit:
+The shift compounds. Every skill you create or adopt becomes part of your permanent toolkit:
 
 ```
 Your Agent Toolkit
@@ -97,7 +97,7 @@ Your Agent Toolkit
     └── report-generation/
 ```
 
-Every skill you add to this toolkit:
+Every skill you add:
 1. Becomes instantly available in every project
 2. Costs zero context until needed
 3. Never requires configuration or toggling
@@ -105,50 +105,50 @@ Every skill you add to this toolkit:
 
 You're building a powerhouse agent that grows more capable over time without growing more context-hungry.
 
-## Skills vs. MCPs: When to Use Each
+## Skills vs. MCPs: when to use each
 
-Skills don't replace MCPs entirely. They serve different purposes:
+Skills don't replace MCPs entirely. They serve different jobs.
 
-### Use Skills When
+### Use Skills when
 
-- **Occasional capabilities** - Tools you need sometimes, not always
-- **Universal utilities** - Things useful across many project types
-- **Growing toolkit** - Adding new capabilities frequently
-- **Context-sensitive work** - Complex tasks needing maximum context
+- Occasional capabilities. Tools you need sometimes, not always.
+- Universal utilities. Things useful across many project types.
+- Growing toolkit. Adding new capabilities frequently.
+- Context-sensitive work. Complex tasks needing maximum context.
 
-### Use MCPs When
+### Use MCPs when
 
-- **Constant requirements** - Tools needed in every session
-- **Real-time integrations** - Live data streams or webhooks
-- **Team standardization** - Shared tools across multiple people
-- **Complex state management** - Tools that maintain session state
+- Constant requirements. Tools needed in every session.
+- Real-time integrations. Live data streams or webhooks.
+- Team standardization. Shared tools across multiple people.
+- Complex state management. Tools that maintain session state.
 
-### The Best of Both Worlds
+### The best of both worlds
 
-Many developers will find the sweet spot is using both:
+Most developers will end up using both:
 
-- **MCPs for core, always-on capabilities** - Your must-have tools that you use in nearly every session
-- **Skills for everything else** - The long tail of capabilities you need occasionally
+- MCPs for core, always-on capabilities. Your must-have tools that show up in nearly every session.
+- Skills for everything else. The long tail of capabilities you need occasionally.
 
-Your core MCPs might be 3-5 servers. Your skills library could grow to 50, 100, or more without impacting context.
+Your core MCPs might be 3-5 servers. Your skills library can grow to 50, 100, or more without touching context.
 
-## The Abstraction That Scales
+## The abstraction that scales
 
-Here's what makes Skills particularly powerful: they package as regular files that travel with your code or configuration.
+Skills are powerful for another reason: they package as regular files that travel with your code or configuration.
 
 You can:
-- **Version control your skills** - Track changes like any other code
-- **Share skill libraries** - Create team or community skill packs
-- **Fork and customize** - Adapt community skills to your workflow
-- **Bundle into plugins** - Package related skills together
+- Version control your skills. Track changes like any other code.
+- Share skill libraries. Build team or community skill packs.
+- Fork and customize. Adapt community skills to your workflow.
+- Bundle into plugins. Package related skills together.
 
-One developer or team can build skills that instantly benefit everyone using them, without context negotiation or MCP server management.
+One developer or team can build skills that benefit everyone using them, without context negotiation or MCP server management.
 
-## Share via the Claude Marketplace
+## Share via the Claude marketplace
 
-Claude Code has a decentralized marketplace system for distributing plugins—and skills bundle perfectly into this ecosystem.
+Claude Code has a decentralized marketplace system for distributing plugins, and skills bundle perfectly into that ecosystem.
 
-The marketplace isn't a single app store. Instead, anyone can create a `marketplace.json` file in a GitHub repository listing their plugins. Others add your marketplace and install your skills with simple commands:
+The marketplace isn't a single app store. Anyone can create a `marketplace.json` file in a GitHub repository listing their plugins. Others add your marketplace and install your skills with simple commands:
 
 ```bash
 # Add a marketplace
@@ -161,20 +161,20 @@ The marketplace isn't a single app store. Instead, anyone can create a `marketpl
 /plugin install research-toolkit@my-skills-marketplace
 ```
 
-This means your carefully crafted skill library can become a shareable plugin that others install in seconds. No npm publishing, no package management complexity—just a JSON file pointing to your skills.
+Your carefully crafted skill library becomes a shareable plugin that others install in seconds. No npm publishing, no package management complexity. Just a JSON file pointing to your skills.
 
-**Community marketplaces already exist:**
+Community marketplaces already exist:
 - Official Anthropic marketplace with demo plugins and the Agent SDK
 - Community collections like research tools, CMS integrations, and workflow templates
 - Aggregator sites that catalog available marketplaces
 
-The pattern is elegant: build skills for yourself, package them as a plugin when they're polished, publish to a marketplace, and suddenly your toolkit helps the entire community. All while maintaining zero context overhead for everyone who installs them.
+The pattern is elegant. Build skills for yourself, package them as a plugin once they're polished, publish to a marketplace, and suddenly your toolkit helps the entire community. All while keeping zero context overhead for everyone who installs them.
 
-Your investment in building skills compounds—not just across your own projects, but across everyone who discovers and uses your marketplace.
+Your investment in building skills compounds. Not just across your own projects, but across everyone who discovers and uses your marketplace.
 
-## Practical Implementation
+## Practical implementation
 
-Getting started with Skills is straightforward. The basic structure:
+Getting started is straightforward. The basic structure:
 
 ```
 .claude/skills/my-skill/
@@ -205,22 +205,22 @@ Run with: `uv run .claude/skills/markdown-to-ppt/scripts/convert.py --help`
 
 The agent reads this metadata only when relevant to your query. If you never ask for a presentation, this skill never loads.
 
-## The Discovery Protocol
+## The discovery protocol
 
 Skills work through a simple protocol:
 
-1. **Relevance check** - Agent scans skill descriptions for matches to your query
-2. **Metadata load** - Only matching skills have their SKILL.md read
-3. **Interface discovery** - Agent runs `--help` to learn the tool
-4. **Execution** - Tool runs with your parameters
+1. Relevance check. The agent scans skill descriptions for matches to your query.
+2. Metadata load. Only matching skills have their SKILL.md read.
+3. Interface discovery. The agent runs `--help` to learn the tool.
+4. Execution. The tool runs with your parameters.
 
-At each step, only the minimum necessary information enters context. The implementation details, dependencies, and internal logic stay out of sight.
+At each step, only the minimum necessary information enters context. Implementation details, dependencies, and internal logic stay out of sight.
 
-Compare this to MCPs where every tool's full description loads at session start, regardless of whether you'll use it.
+Compare that to MCPs, where every tool's full description loads at session start whether you'll use it or not.
 
-## Eliminating Micromanagement
+## Eliminating micromanagement
 
-The real win isn't just technical efficiency—it's workflow efficiency.
+The real win isn't technical efficiency. It's workflow efficiency.
 
 With MCPs, you're constantly asking:
 - "Do I need this MCP for this project?"
@@ -228,22 +228,22 @@ With MCPs, you're constantly asking:
 - "Should I toggle something off?"
 - "Why is my agent slower today?"
 
-With Skills, you stop asking. Your toolkit is always available, never in the way, and grows with your needs rather than fighting them.
+With Skills, you stop asking. Your toolkit is always available, never in the way, and grows with your needs instead of fighting them.
 
 You stop managing tools and start using them.
 
-## Building for the Future
+## Building for the future
 
-As you work with Claude Code, consider investing in your Skills library:
+As you work with Claude Code, invest in your Skills library:
 
-1. **Start with high-value, occasional-use tools** - Things you need periodically but not constantly
-2. **Convert redundant MCPs** - MCPs you only use sometimes are prime skill candidates
-3. **Build project-agnostic utilities** - Tools that work across any repository
-4. **Share with your team** - Skills that help you likely help others
+1. Start with high-value, occasional-use tools. Things you need periodically but not constantly.
+2. Convert redundant MCPs. MCPs you only use sometimes are prime skill candidates.
+3. Build project-agnostic utilities. Tools that work across any repository.
+4. Share with your team. Skills that help you likely help others.
 
-Every skill you create is an investment that pays dividends across every future project.
+Every skill you create is an investment that pays dividends on every future project.
 
-## The Paradigm Shift
+## The paradigm shift
 
 MCPs taught us that agents can have tools. Skills teach us that tools don't have to cost context.
 
@@ -255,9 +255,9 @@ The shift from "configure tools per project" to "build one universal toolkit" is
 
 Your agent becomes a platform you invest in, not a configuration you manage.
 
-## Get Started
+## Get started
 
-If you're tired of MCP juggling, start with one skill. Convert something you use occasionally but not constantly. Experience the zero-context-until-needed workflow.
+If you're tired of MCP juggling, start with one skill. Convert something you use occasionally but not constantly. See what zero-context-until-needed actually feels like.
 
 Then build another. And another.
 

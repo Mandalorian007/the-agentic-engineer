@@ -16,15 +16,13 @@ social:
 
 You want your AI agent to process a million loops of code? A million individual tasks? It's going to get confused and go off the rails.
 
-But here's the thing: **we're engineers, not prompt magicians**. We don't just toss the whole problem at an AI and assume it'll magically work. We build systems.
+But we're engineers, not prompt magicians. We don't just toss the whole problem at an AI and assume it'll magically work. We build systems.
 
-I recently watched a YouTube video that crystallized something I've been experiencing firsthand: LLM accuracy falls apart as you scale up iterations. But there are engineering patterns that let you chain together massive numbers of AI agent calls reliably.
+I recently watched a YouTube video that put words to something I've been seeing firsthand. LLM accuracy falls apart as you scale up iterations. There are engineering patterns that let you chain together massive numbers of AI agent calls reliably, and they're worth talking about.
 
-Let's talk about how to build AI workflows that actually work at scale.
+## The problem: accuracy compounds in sequences
 
-## The Problem: Accuracy Compounds in Sequences
-
-Here's the math that should terrify you: if you have an LLM that's 99% accurate, and you ask it to do 100 sequential tasks, you're not getting 99% accuracy overall.
+Here's the math that should worry you. If your LLM is 99% accurate, and you ask it to do 100 sequential tasks, you're not getting 99% accuracy overall.
 
 You're compounding that 1% error rate across every step in the sequence.
 
@@ -33,15 +31,15 @@ As context grows with each iteration, you're feeding the LLM:
 - All the intermediate states
 - All the unnecessary information that can confuse it
 
-**The result?** LLM accuracy degrades as context increases. That 99% per-task accuracy might drop to 90%, then 80%, then the agent is hallucinating file paths and making changes to code that doesn't exist.
+The result? LLM accuracy degrades as context increases. That 99% per-task accuracy might drop to 90%, then 80%, and then the agent is hallucinating file paths and making changes to code that doesn't exist.
 
-## Solution 1: State-Based Isolation
+## Solution 1: state-based isolation
 
-Let's say you have a single CLI script that needs 100 different changes. That's a lot of work.
+Say you have a single CLI script that needs 100 different changes. That's a lot of work.
 
-**The wrong approach:** One long conversation where the agent makes all 100 changes sequentially, accumulating context and history the entire time.
+The wrong approach: one long conversation where the agent makes all 100 changes sequentially, accumulating context and history the entire time.
 
-**The right approach:** 100 distinct tasks, each with the current state as input.
+The right approach: 100 distinct tasks, each with the current state as input.
 
 ```python
 # Pseudocode for state-based iteration
@@ -55,15 +53,15 @@ for task in tasks:
     write_file("script.py", result)
 ```
 
-**Why this works:**
+Why this works:
 - Each LLM call gets only the current state
 - No accumulated context pollution
 - You maintain 99% accuracy per task instead of compounding errors
-- History doesn't matter—the state IS your history
+- History doesn't matter, because the state IS your history
 
-This is the fundamental shift: **use your state as your history**. You no longer need to track every intermediate step. The current file state tells you everything you need to know.
+That's the fundamental shift. Use your state as your history. You no longer need to track every intermediate step. The current file state tells you everything you need to know.
 
-## Solution 2: Structured Validation with Automatic Retry
+## Solution 2: structured validation with automatic retry
 
 If you require a specific response format, make it structured. Then validate it.
 
@@ -78,9 +76,9 @@ interface AgentResponse {
 
 Now your workflow system can:
 
-1. **Check for error signals** - If the `error` field is populated, something went wrong
-2. **Automatically retry** - That 1% failure rate? Just retry when you detect it
-3. **Validate structure** - If the response doesn't match the schema, reject and retry
+1. Check for error signals. If the `error` field is populated, something went wrong.
+2. Automatically retry. That 1% failure rate? Just retry when you detect it.
+3. Validate structure. If the response doesn't match the schema, reject and retry.
 
 ```python
 def execute_with_retry(agent, task, max_retries=3):
@@ -100,19 +98,19 @@ def execute_with_retry(agent, task, max_retries=3):
     raise Exception(f"Failed after {max_retries} attempts")
 ```
 
-This is a **system outside the LLM call**. You could make it much more sophisticated:
+This is a system outside the LLM call. You could make it much more sophisticated:
 - Custom validation logic per task type
 - Exponential backoff between retries
 - Different retry strategies based on error types
 - Logging and metrics for failure patterns
 
-## Solution 3: Git-Based Quality Gates
+## Solution 3: git-based quality gates
 
 ![Diagram showing validation gates in AI workflow](../../public/blog/2025-12-11-building-reliable-ai-workflows-millions-iterations/diagram-validation-gates.webp)
 
-Let's say you're using an agent like Claude Code to write code. You send it off with a single task.
+Say you're using an agent like Claude Code to write code. You send it off with a single task.
 
-**Set up a validation gate:** If `git status` shows 12 edited files when you expected 1, something went wrong.
+Set up a validation gate. If `git status` shows 12 edited files when you expected 1, something went wrong.
 
 ```python
 def execute_code_task(agent, task, expected_files=1):
@@ -135,20 +133,20 @@ def execute_code_task(agent, task, expected_files=1):
     return changed_files
 ```
 
-**More validation gates you can implement:**
+More validation gates you can implement:
 - Test suite must pass
 - Type checking must succeed
 - Linter errors shouldn't increase
 - Bundle size shouldn't exceed threshold
 - Performance benchmarks must stay within range
 
-These are **programmatic quality checks** that catch agent drift before it cascades.
+These are programmatic quality checks that catch agent drift before it cascades.
 
-## Solution 4: Parallel Consensus for Critical Decisions
+## Solution 4: parallel consensus for critical decisions
 
-Here's a powerful pattern for architectural decisions or complex problems: **run the same prompt across multiple agents and vote**.
+Here's a powerful pattern for architectural decisions or complex problems. Run the same prompt across multiple agents and vote.
 
-Let's say you need to choose an image storage solution for your app. This is a critical decision with long-term implications.
+Say you need to choose an image storage solution for your app. That's a critical decision with long-term implications.
 
 ```python
 def parallel_consensus(prompt, num_agents=5, required_agreement=3):
@@ -170,7 +168,7 @@ def parallel_consensus(prompt, num_agents=5, required_agreement=3):
     raise ConsensusException(f"No agreement: {vote_counts}")
 ```
 
-**The math here is compelling:**
+The math here is compelling.
 
 If an LLM has 90% accuracy on architectural decisions:
 - Running 1 agent: 90% chance of correct answer
@@ -179,21 +177,21 @@ If an LLM has 90% accuracy on architectural decisions:
 
 Even if 1-2 agents go off the rails, you still get the right answer because you're looking at the outputs and voting.
 
-**When to use parallel consensus:**
+When to use parallel consensus:
 - Architectural decisions
 - Design pattern selection
 - Security-critical choices
 - Anything where a wrong answer is expensive to fix later
 
-**Implementation variations:**
+Implementation variations:
 - Simple majority voting for structured outputs (JSON comparison)
 - LLM-as-judge for freeform responses
 - Weighted voting based on agent confidence scores
 - Hybrid approach with human review for low-confidence results
 
-## The Meta Insight: Build Workflow Systems
+## The meta insight: build workflow systems
 
-Here's the key realization: **LLMs and agents are API calls**.
+Here's the realization that ties everything together. LLMs and agents are API calls.
 
 If you can call an API, you can:
 - Wrap it in validation logic
@@ -202,9 +200,9 @@ If you can call an API, you can:
 - Implement quality gates
 - Build entire workflow orchestration systems
 
-We have enormous power to configure workflows. Why are we limited to single-shot prompts and hoping for the best?
+We have enormous power to configure workflows. So why limit yourself to single-shot prompts and hoping for the best?
 
-**You're not limited.** Build the validation process. Check the work. Create feedback loops.
+You're not limited. Build the validation process. Check the work. Create feedback loops.
 
 ```python
 class AIWorkflow:
@@ -227,15 +225,15 @@ class AIWorkflow:
             return result
 ```
 
-This is the engineering mindset applied to AI agents. **You can do a million, two million, ten million iterations** as long as you guarantee quality along the way.
+This is the engineering mindset applied to AI agents. You can do a million, two million, ten million iterations as long as you guarantee quality along the way.
 
-## Practical Example: 100 Changes to a CLI Script
+## Practical example: 100 changes to a CLI script
 
-Let's put it all together with a concrete example.
+Let's put it together with a concrete example.
 
-**Scenario:** You have a CLI script that needs 100 refactoring tasks—extracting functions, adding type hints, improving error handling, etc.
+Scenario: you have a CLI script that needs 100 refactoring tasks. Extracting functions, adding type hints, improving error handling, that kind of work.
 
-**Naive approach (will fail):**
+Naive approach (will fail):
 ```python
 # DON'T DO THIS
 agent.execute("""
@@ -247,7 +245,7 @@ Make these 100 changes to script.py:
 """)
 ```
 
-**Engineered approach (will succeed):**
+Engineered approach (will succeed):
 ```python
 tasks = load_tasks("refactoring_tasks.json")
 
@@ -281,17 +279,17 @@ for i, task in enumerate(tasks):
     git_commit(f"Refactor: {task.description}")
 ```
 
-**What makes this reliable:**
-- ✅ Each task operates on current state (no context pollution)
-- ✅ Structured validation with automatic retry
-- ✅ Git-based quality gates (syntax, tests)
-- ✅ Incremental commits (easy rollback)
-- ✅ Progress tracking
-- ✅ Can pause and resume
+What makes this reliable:
+- Each task operates on current state (no context pollution)
+- Structured validation with automatic retry
+- Git-based quality gates (syntax, tests)
+- Incremental commits (easy rollback)
+- Progress tracking
+- Can pause and resume
 
-This pattern scales. You could run 1,000 tasks. 10,000 tasks. As long as each individual task maintains high accuracy and you validate at each step, the system stays reliable.
+The pattern scales. You could run 1,000 tasks. 10,000 tasks. As long as each individual task maintains high accuracy and you validate at each step, the system stays reliable.
 
-## Scaling to Millions: The Workflow is the Product
+## Scaling to millions: the workflow is the product
 
 The secret to scaling AI agents isn't better prompts. It's better workflows.
 
@@ -302,17 +300,17 @@ When you build systems around LLM calls instead of relying on single-shot magic:
 - You can parallelize independent work
 - You can build feedback loops that improve over time
 
-**This is engineering.** We build reliable systems from unreliable components all the time. AI agents are no different.
+This is engineering. We build reliable systems from unreliable components all the time. AI agents are no different.
 
-The workflows you build—the validation gates, the retry logic, the quality checks, the consensus mechanisms—these are your actual product. The LLM is just a component.
+The workflows you build, the validation gates, the retry logic, the quality checks, the consensus mechanisms. Those are your actual product. The LLM is just a component.
 
-## Key Takeaways
+## Key takeaways
 
-- **State isolation beats history accumulation** - Use current state as input, skip the context pollution
-- **Structure + validation = reliability** - Structured outputs with automatic retry handle the 1% error rate
-- **Quality gates catch drift** - Git status, tests, linters, benchmarks—program your expectations
-- **Parallel consensus for critical decisions** - Run multiple agents, vote on the answer, get 99%+ accuracy
-- **Engineers build systems** - Wrap LLM calls in workflow orchestration with validation and retry logic
+- State isolation beats history accumulation. Use current state as input, skip the context pollution.
+- Structure plus validation equals reliability. Structured outputs with automatic retry handle the 1% error rate.
+- Quality gates catch drift. Git status, tests, linters, benchmarks. Program your expectations.
+- Parallel consensus for critical decisions. Run multiple agents, vote on the answer, get 99%+ accuracy.
+- Engineers build systems. Wrap LLM calls in workflow orchestration with validation and retry logic.
 
 You can absolutely build AI agent systems that handle millions of iterations reliably. You just have to stop thinking like a prompt engineer and start thinking like a systems engineer.
 

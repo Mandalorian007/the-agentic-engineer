@@ -14,34 +14,34 @@ social:
 
 ![Focused AI agent working on a single clear task in a clean organized workspace](../../public/blog/2025-11-13-one-session-one-purpose/hero-focused-context.webp)
 
-You've probably seen the horror stories in developer forums: "Claude wiped my entire Git repo." "It force-pushed to main and nuked the project." "My agent went completely off the rails and did terrible things."
+You've probably seen the horror stories in developer forums. "Claude wiped my entire Git repo." "It force-pushed to main and nuked the project." "My agent went completely off the rails and did terrible things."
 
-If you've worked with AI coding agents for any length of time, you know that feeling when a session starts to get a little... funky. The agent's thinking becomes less accurate. It makes strange decisions. Performance degrades noticeably.
+If you've worked with AI coding agents for any length of time, you know the feeling. A session starts to get a little funky. The agent's thinking becomes less accurate. It makes strange decisions. Performance degrades.
 
 **The problem isn't the AI. It's how we're managing context.**
 
-In this post, I'll show you the exact pattern I use to prevent these disasters while unlocking advanced capabilities most developers never even attempt. It's called **one session, one purpose** — and it's the difference between babysitting an unpredictable assistant and running a reliable engineering machine.
+This post walks through the exact pattern I use to prevent these disasters while unlocking capabilities most developers never attempt. It's called **one session, one purpose**, and it's the difference between babysitting an unpredictable assistant and running a reliable engineering machine.
 
-## The Hidden Problem: Context Windows Are Working Against You
+## The hidden problem: context windows are working against you
 
-Let's talk about what's really happening inside your AI coding sessions.
+What's actually happening inside your AI coding sessions?
 
-### Long Sessions = Degraded Performance
+### Long sessions degrade performance
 
-The longer your session runs, the more information your agent needs to consider with every action. That might sound obvious, but the implications are serious:
+The longer your session runs, the more information your agent has to consider with every action. That sounds obvious, but the implications are serious:
 
-- **More mistakes** - The agent gets confused by earlier context
-- **Less accuracy** - Precision drops as context fills up
-- **Strange behavior** - Decisions become increasingly unpredictable
-- **Catastrophic actions** - In the worst cases, destructive operations
+- **More mistakes.** The agent gets confused by earlier context.
+- **Less accuracy.** Precision drops as context fills up.
+- **Strange behavior.** Decisions become increasingly unpredictable.
+- **Catastrophic actions.** In the worst cases, destructive operations.
 
-You're essentially asking the agent to hold an ever-growing pile of information in its working memory while trying to write precise code. It doesn't scale.
+You're asking the agent to hold an ever-growing pile of information in working memory while writing precise code. It doesn't scale.
 
-### Auto-Compact: The 22.5% Tax on Your Context
+### Auto-compact: the 22.5% tax on your context
 
-Here's something most developers don't know: when you're using Claude Code, **22.5% of your 200K token context window is reserved for auto-compact**.
+Most developers don't know this. When you're using Claude Code, **22.5% of your 200K token context window is reserved for auto-compact**.
 
-Run `/context` in Claude Code right now and check. That's approximately **45,000 tokens** — nearly a quarter of your available space — set aside just to handle context compression when your window gets too full.
+Run `/context` in Claude Code right now and check. That's roughly **45,000 tokens**, nearly a quarter of your available space, set aside just to handle context compression when your window gets too full.
 
 Think about what that means:
 - Less room for your actual code and specs
@@ -49,41 +49,41 @@ Think about what that means:
 - Fewer MCP tools you can load (each tool's metadata consumes context)
 - Compressed, "dense" context that's harder for the agent to parse
 
-But here's the thing: **you probably don't even need auto-compact** if you structure your workflow correctly.
+Here's the kicker: **you probably don't need auto-compact at all** if you structure your workflow correctly.
 
-## The Solution: One Session, One Purpose
+## The solution: one session, one purpose
 
-The breakthrough pattern is deceptively simple:
+The pattern is simple.
 
 **Use separate AI sessions for each distinct phase of your workflow, and clear context between them.**
 
-Instead of one massive session that tries to plan, implement, test, review, and document all at once, you break it into focused sessions:
+Instead of one massive session that tries to plan, implement, test, review, and document all at once, break it into focused sessions:
 
-1. **Planning session** - Generate specs
-2. **Implementation session** - Write the code
-3. **Testing session** - Validate functionality
-4. **Review session** - Ensure quality
-5. **Documentation session** - Create docs
+1. **Planning session.** Generate specs.
+2. **Implementation session.** Write the code.
+3. **Testing session.** Validate functionality.
+4. **Review session.** Ensure quality.
+5. **Documentation session.** Create docs.
 
 Each session starts fresh with only the context it needs.
 
-### Why This Works
+### Why this works
 
-**Focus:** The agent has one clear goal and doesn't get confused by unrelated context.
+**Focus.** The agent has one clear goal and doesn't get confused by unrelated context.
 
-**Context efficiency:** You're not carrying around 40 web searches, 12 exploratory ideas, and implementation struggles into your testing phase.
+**Context efficiency.** You're not carrying around 40 web searches, 12 exploratory ideas, and implementation struggles into your testing phase.
 
-**Reduced risk:** Each session is isolated, so a confused agent in the testing phase can't accidentally destroy your implementation.
+**Reduced risk.** Each session is isolated, so a confused agent in the testing phase can't accidentally destroy your implementation.
 
-**Better results:** Targeted context means more accurate decisions.
+**Better results.** Targeted context means more accurate decisions.
 
-## The Complete Workflow Pattern
+## The complete workflow pattern
 
-Let me show you exactly how this works in practice. I'll use Claude Code slash commands as examples, but this pattern works with any AI coding tool.
+Here's exactly how this works in practice. I'll use Claude Code slash commands as examples, but the pattern works with any AI coding tool.
 
 ![Software development lifecycle workflow showing separate isolated sessions for each phase](../../public/blog/2025-11-13-one-session-one-purpose/diagram-session-workflow.webp)
 
-### Phase 1: Prime Your Agent
+### Phase 1: prime your agent
 
 Start every session by loading foundational context:
 
@@ -96,11 +96,11 @@ Your `/prime` command should:
 - Read your README
 - Read relevant docs from your `/docs` folder
 
-After this, the agent has a high-level understanding of your application without being overwhelmed by implementation details.
+After this, the agent has a high-level understanding of your application without being buried in implementation details.
 
 **Pro tip:** Make this a reusable slash command so you can run it consistently across all sessions.
 
-### Phase 2: Planning Session
+### Phase 2: planning session
 
 With context loaded, create your specification:
 
@@ -108,9 +108,9 @@ With context loaded, create your specification:
 /plan Build a user authentication system with JWT tokens
 ```
 
-This generates a detailed spec file that outlines exactly what needs to be built.
+This generates a detailed spec file outlining what needs to be built.
 
-**Key insight:** All the research, web searches, and exploratory work happens here. The agent might investigate 12 different approaches, read documentation, compare libraries, etc. This creates a ton of context.
+**Key insight:** All the research, web searches, and exploratory work happens here. The agent might investigate 12 different approaches, read documentation, compare libraries. That creates a ton of context.
 
 **Then clear the session:**
 
@@ -120,7 +120,7 @@ This generates a detailed spec file that outlines exactly what needs to be built
 
 You now have a spec file on disk, but all that messy research context is gone.
 
-### Phase 3: Implementation Session
+### Phase 3: implementation session
 
 Start fresh:
 
@@ -129,14 +129,14 @@ Start fresh:
 /implement @spec.md
 ```
 
-Now your agent implements the feature with:
+Your agent implements the feature with:
 - Clean context (no research noise)
 - Clear requirements (from the spec)
 - Focused purpose (just implementation)
 
-All the "should we use library X or Y?" confusion is already resolved. The agent just builds.
+All the "should we use library X or Y?" confusion was already resolved. The agent just builds.
 
-### Phase 4: Testing Session
+### Phase 4: testing session
 
 After implementation, clear again:
 
@@ -147,14 +147,14 @@ After implementation, clear again:
 /test @spec.md
 ```
 
-Now the agent validates:
+The agent now validates:
 - Tests pass
 - Functionality matches spec
 - Edge cases are covered
 
 **Critical advantage:** If the implementation agent made a mistake or developed a "bad belief" during coding, the testing agent starts with a fresh perspective. It's not trying to justify earlier decisions.
 
-### Phase 5: Review Session
+### Phase 5: review session
 
 Another fresh start:
 
@@ -173,7 +173,7 @@ This agent:
 
 No need to remember UI traversal patterns from implementation. Just focused validation.
 
-### Phase 6: Documentation Session
+### Phase 6: documentation session
 
 One more time:
 
@@ -192,13 +192,13 @@ The documentation agent creates:
 
 Clean context, clear purpose.
 
-### Pro Tip: Commands Can Call Commands
+### Pro tip: commands can call commands
 
-Here's a workflow optimization you might not know about: **Claude Code slash commands can call other slash commands**.
+Here's a workflow optimization you might not know about. **Claude Code slash commands can call other slash commands.**
 
-That's right — your `/implement`, `/test`, `/review`, and `/document` commands can automatically call `/prime` and run `!git diff main` internally. You don't even need to type them!
+Your `/implement`, `/test`, `/review`, and `/document` commands can automatically call `/prime` and run `!git diff main` internally. You don't even need to type them.
 
-For example, your `/implement` command could look like:
+Your `/implement` command might look like:
 
 ```markdown
 # Implement Feature
@@ -213,36 +213,36 @@ Read the spec at $ARGUMENT (spec location) and implement the feature.
 
 Now you just type `/implement @spec.md` and everything happens automatically.
 
-**But here's the critical warning:** Don't chain these commands together in a single session. If you run `/plan` then `/implement` then `/test` all in one session, you're back to the same context pollution problem we're trying to solve.
+**Critical warning:** Don't chain these commands together in a single session. Running `/plan` then `/implement` then `/test` all in one session puts you right back into the context pollution problem we're trying to solve.
 
 The power of slash commands calling slash commands is **consistency** and **convenience**, not automation. You still need to `/clear` between phases to get the benefits of focused context.
 
-Think of it this way:
+Another way to look at it:
 - ✅ Each command calls `/prime` internally = good (consistent setup)
 - ❌ Chaining commands without `/clear` = bad (context pollution)
 
 The workflow stays the same: prime → plan → **clear** → prime → implement → **clear** → prime → test → **clear** → etc.
 
-## The Massive Benefits You Unlock
+## The massive benefits you unlock
 
-### 1. Reclaim 22.5% of Your Context Window
+### 1. Reclaim 22.5% of your context window
 
-If you're consistently using separate focused sessions, you can actually **disable auto-compact** for individual sessions.
+If you're consistently using separate focused sessions, you can **disable auto-compact** for individual sessions.
 
 That's 45,000 tokens back in your pocket.
 
 What can you do with that?
-- **Bigger specs** - Handle more complex features
-- **More MCP tools** - Each MCP tool's metadata consumes context; now you can afford a much richer toolset
-- **Deeper problem-solving** - More room for the agent to think
+- **Bigger specs.** Handle more complex features.
+- **More MCP tools.** Each MCP tool's metadata consumes context, so you can afford a much richer toolset.
+- **Deeper problem-solving.** More room for the agent to think.
 
-If you're typically using 8-12% of your context for MCP tools, reclaiming 22.5% means you could allocate 18-20% just for tools. That's a massively more capable agent.
+If you typically use 8-12% of your context for MCP tools, reclaiming 22.5% means you could allocate 18-20% just for tools. A massively more capable agent.
 
-### 2. Prevent Catastrophic Mistakes
+### 2. Prevent catastrophic mistakes
 
 When your agent has a clear, focused purpose and clean context, the chances of it going rogue drop dramatically.
 
-No more: "It wiped my Git repo."
+No more "It wiped my Git repo."
 
 Why? Because:
 - Each session has limited scope
@@ -250,9 +250,9 @@ Why? Because:
 - Confused beliefs from earlier phases don't carry forward
 - You can add safety hooks to specific session types
 
-### 3. Enable Parallel Development
+### 3. Enable parallel development
 
-Here's where it gets really interesting.
+This is where it gets interesting.
 
 **You don't have to run these sessions sequentially.**
 
@@ -273,9 +273,9 @@ build-feature.sh "add email notifications"
 
 While you're doing something else, you have N features being built simultaneously by isolated agents in separate worktrees, each following the same reliable workflow.
 
-## Automation: Programmatic Session Chaining
+## Automation: programmatic session chaining
 
-You don't need to manually type `/clear` and restart sessions. We're engineers — we can script this.
+You don't need to manually type `/clear` and restart sessions. We're engineers. We can script this.
 
 Claude Code supports programmatic execution:
 
@@ -285,7 +285,7 @@ claude -p "Say hello"
 
 This runs Claude in headless mode and returns output.
 
-With this, you can chain entire workflows:
+With it, you can chain entire workflows:
 
 ```bash
 #!/bin/bash
@@ -307,11 +307,11 @@ claude -p "/review @specs/amazing-spec.md"
 claude -p "/document @specs/amazing-spec.md"
 ```
 
-**Note:** You'll need to configure permission hooks to allow automated file edits, but this is exactly what hooks are for (see my previous post on taming Claude's YOLO mode).
+**Note:** You'll need to configure permission hooks to allow automated file edits, which is exactly what hooks are for (see my previous post on taming Claude's YOLO mode).
 
 ![Context window optimization showing before and after with 22.5% reclaimed space highlighted](../../public/blog/2025-11-13-one-session-one-purpose/diagram-context-optimization.webp)
 
-## Context Handoffs: How Information Flows Between Sessions
+## Context handoffs: how information flows between sessions
 
 The key question: **How do you share context between sessions without carrying over the noise?**
 
@@ -325,13 +325,13 @@ Each session creates specific output:
 - Documentation → Updated docs
 
 The next session loads:
-- Base context (`/prime` - project structure and docs)
-- Current state (`git diff` - what changed)
+- Base context (`/prime` for project structure and docs)
+- Current state (`git diff` for what changed)
 - Requirements (the spec file)
 
-This gives each agent exactly what it needs, nothing more.
+Each agent gets exactly what it needs, nothing more.
 
-### Example: Spec-Driven Workflow
+### Example: spec-driven workflow
 
 Your planning agent generates:
 
@@ -363,7 +363,7 @@ Your testing agent:
 
 Clean handoffs, minimal context pollution.
 
-## This Is Agentic Engineering
+## This is agentic engineering
 
 What we're really doing here is **templating engineering practices.**
 
@@ -374,9 +374,9 @@ Traditional engineering already has phases:
 - Code review
 - Documentation
 
-We're not inventing something new. We're taking proven software development practices and turning them into reusable, automatable agent workflows.
+Nothing new here. We're taking proven software development practices and turning them into reusable, automatable agent workflows.
 
-This is the difference between "vibe coding" (just tell the AI what to do and hope) and **agentic engineering** (systematically applying engineering discipline through AI agents).
+That's the difference between "vibe coding" (tell the AI what to do and hope) and **agentic engineering** (systematically applying engineering discipline through AI agents).
 
 When you template your process like this:
 - Quality becomes consistent
@@ -384,13 +384,13 @@ When you template your process like this:
 - Automation becomes possible
 - Scale becomes achievable
 
-You're not babysitting an unpredictable assistant anymore. You're running a reliable engineering pipeline that happens to be powered by AI.
+You're not babysitting an unpredictable assistant. You're running a reliable engineering pipeline that happens to be powered by AI.
 
-## Getting Started: Your First One-Session-One-Purpose Workflow
+## Getting started: your first one-session-one-purpose workflow
 
-Here's how to implement this pattern today:
+How to implement this pattern today:
 
-### Step 1: Create a `/prime` Command
+### Step 1: create a `/prime` command
 
 In `.claude/commands/prime.md`:
 
@@ -404,11 +404,11 @@ Read: README.md
 Read: docs/architecture.md
 ```
 
-### Step 2: Structure Your Specs
+### Step 2: structure your specs
 
 Create a `specs/` directory and have your planning sessions output to it.
 
-### Step 3: Add Clear Points Between Phases
+### Step 3: add clear points between phases
 
 Explicitly use `/clear` between:
 - Planning → Implementation
@@ -416,11 +416,11 @@ Explicitly use `/clear` between:
 - Testing → Review
 - Review → Documentation
 
-### Step 4: Track Context Usage
+### Step 4: track context usage
 
 Run `/context` regularly to see how much context you're actually using. If you're consistently under 60-70%, consider disabling auto-compact for that session type.
 
-### Step 5: Build Your First Automated Chain
+### Step 5: build your first automated chain
 
 Start simple:
 
@@ -434,7 +434,7 @@ claude -p "/prime && implement the dark mode spec in specs/dark-mode.md"
 
 Gradually expand to include testing, review, and documentation.
 
-## Common Questions
+## Common questions
 
 **Q: Doesn't clearing context between sessions slow me down?**
 
@@ -446,17 +446,17 @@ That's what your artifacts are for. Write important decisions and context to fil
 
 **Q: Can this work with tools other than Claude Code?**
 
-Absolutely. The principle is universal: focused sessions with deliberate context handoffs. The implementation details vary by tool, but the pattern works everywhere.
+Absolutely. The principle is universal: focused sessions with deliberate context handoffs. Implementation details vary by tool, but the pattern works everywhere.
 
 **Q: How do I handle really complex features that need continuous context?**
 
 Break them into smaller features. If you can't clearly define phases, your feature is probably too big and should be decomposed anyway.
 
-## The Bottom Line
+## The bottom line
 
-Long-running AI coding sessions degrade in performance, consume massive context space, and occasionally go off the rails in catastrophic ways.
+Long-running AI coding sessions degrade in performance, eat massive context space, and occasionally go off the rails in catastrophic ways.
 
-The solution isn't to give up on AI agents. It's to **structure how we use them.**
+The fix isn't giving up on AI agents. It's **structuring how we use them.**
 
 One session, one purpose:
 - ✅ Better performance (focused context)
@@ -465,7 +465,7 @@ One session, one purpose:
 - ✅ Parallel development (isolated worktrees)
 - ✅ Automation potential (scriptable workflows)
 
-This is agentic engineering: taking software development best practices and turning them into reliable, repeatable, automatable AI workflows.
+This is agentic engineering. Take software development best practices and turn them into reliable, repeatable, automatable AI workflows.
 
 Stop fighting your context window. Start using it strategically.
 
@@ -473,4 +473,4 @@ Stop fighting your context window. Start using it strategically.
 
 **Ready to level up your agentic engineering?** Start by creating your `/prime` command today. Then experiment with clearing context between your next feature's implementation and testing phases. You'll immediately feel the difference in agent clarity and accuracy.
 
-The future isn't one AI session doing everything. It's orchestrated workflows where each session excels at one thing — and the results compound into something greater than any single session could achieve.
+The future isn't one AI session doing everything. It's orchestrated workflows where each session excels at one thing, and the results compound into something greater than any single session could achieve.

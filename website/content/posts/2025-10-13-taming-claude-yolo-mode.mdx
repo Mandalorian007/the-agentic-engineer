@@ -14,17 +14,17 @@ social:
 
 ![Hero image showing a safe with code symbols](../../public/blog/2025-10-13-taming-claude-yolo-mode/hero-safe-yolo-mode.webp)
 
-You've discovered Claude Code's `--dangerously-skip-permissions` flag (affectionately known as "YOLO mode"), and suddenly your workflow is **10x faster**. No more clicking "approve" 100 times per session. But then you remember the horror stories: accidental `rm -rf /`, exposed `.env` credentials, force-pushed over `main`.
+You found Claude Code's `--dangerously-skip-permissions` flag (the "YOLO mode" everyone whispers about), and suddenly your workflow runs **10x faster**. No more clicking "approve" 100 times per session. Then you remember the war stories: accidental `rm -rf /`, exposed `.env` credentials, force-pushed over `main`.
 
-The dilemma is real: you want speed **and** safety. Good news—you can have both.
+The dilemma is real. You want speed **and** safety. Good news. You can have both.
 
-## The YOLO Mode Dilemma
+## The YOLO mode dilemma
 
 **Without `--dangerously-skip-permissions`:**
 - Constant approval prompts for every Read, Edit, and Bash command
 - 100+ interruptions per session
 - Workflow grinds to a halt
-- Completely unusable for real work
+- Unusable for real work
 
 **With `--dangerously-skip-permissions`:**
 - Fast, productive, uninterrupted workflow
@@ -32,11 +32,11 @@ The dilemma is real: you want speed **and** safety. Good news—you can have bot
 - Risk of destructive commands (`rm -rf`, `git push --force`)
 - One mistake could nuke your project
 
-We need both: **speed AND safety**.
+You need both: **speed AND safety**.
 
-## Solution: Pre-Tool-Use Hooks
+## Solution: pre-tool-use hooks
 
-Claude Code introduced a powerful feature called **hooks**—scripts that intercept operations before they execute. Think of them as a safety net that catches dangerous operations while letting safe ones through automatically.
+Claude Code ships with a feature called **hooks**. These are scripts that intercept operations before they run. Think of them as a safety net that catches dangerous operations while letting safe ones through automatically.
 
 ![Diagram showing hook flow](../../public/blog/2025-10-13-taming-claude-yolo-mode/diagram-hook-flow.webp)
 
@@ -49,11 +49,11 @@ Every tool call (Read, Write, Edit, Bash) passes through your hook script first.
 - **Exit code 0**: Allow (operation proceeds)
 - **Exit code 2**: Block (operation stopped, error message shown)
 
-This gives you 100% coverage with zero manual intervention.
+You get 100% coverage with zero manual intervention.
 
-## Setting Up Safety Hooks
+## Setting up safety hooks
 
-### Step 1: Configure the Hook in `.claude/settings.json`
+### Step 1: configure the hook in `.claude/settings.json`
 
 Add the `PreToolUse` hook to your project settings:
 
@@ -75,12 +75,12 @@ Add the `PreToolUse` hook to your project settings:
 }
 ```
 
-**Key points:**
+A few notes on this config:
 - `$CLAUDE_PROJECT_DIR` is an environment variable pointing to your project root
-- The `matcher` field is empty, meaning this hook applies to **all** tool calls
+- The `matcher` field is empty, so this hook applies to **all** tool calls
 - `uv run` executes the Python script with proper dependency management
 
-### Step 2: Create the Hook Script
+### Step 2: create the hook script
 
 Create `.claude/hooks/pre_tool_use.py`:
 
@@ -196,15 +196,15 @@ if __name__ == "__main__":
     main()
 ```
 
-### Step 3: Make the Script Executable
+### Step 3: make the script executable
 
 ```bash
 chmod +x .claude/hooks/pre_tool_use.py
 ```
 
-## What This Hook Protects Against
+## What this hook protects against
 
-### 1. Credential File Access
+### 1. Credential file access
 
 **Blocks:**
 - `cat .env` or `cat .env.local`
@@ -216,9 +216,9 @@ chmod +x .claude/hooks/pre_tool_use.py
 - `cat .env.sample` (safe template files)
 - `cat .env.example`
 
-**Why it matters:** Claude can't accidentally expose your API keys, database passwords, or OAuth tokens.
+Why it matters: Claude can't accidentally expose your API keys, database passwords, or OAuth tokens.
 
-### 2. Destructive rm Commands
+### 2. Destructive rm commands
 
 **Blocks:**
 - `rm -rf /` (nuclear option)
@@ -230,9 +230,9 @@ chmod +x .claude/hooks/pre_tool_use.py
 - `rm -rf node_modules` (safe, specific deletions)
 - `rm file.txt`
 
-**Why it matters:** Typos happen. One misplaced space in `rm -rf / tmp` instead of `rm -rf /tmp` could destroy your system.
+Why it matters: typos happen. One misplaced space in `rm -rf / tmp` instead of `rm -rf /tmp` could destroy your system.
 
-### 3. Git History Damage
+### 3. Git history damage
 
 **Blocks:**
 - `git push --force` (overwrites remote history)
@@ -244,9 +244,9 @@ chmod +x .claude/hooks/pre_tool_use.py
 - `git reset --soft`
 - `git config user.name` (local config)
 
-**Why it matters:** Force pushes to shared branches can destroy team members' work. Global config changes affect all your projects.
+Why it matters: force pushes to shared branches can destroy team members' work. Global config changes affect all your projects.
 
-### 4. Permission Exploits
+### 4. Permission exploits
 
 **Blocks:**
 - `chmod 777` (world-writable, security risk)
@@ -257,11 +257,11 @@ chmod +x .claude/hooks/pre_tool_use.py
 - `chmod +x script.sh` (making scripts executable)
 - `chmod 644 file.txt` (safe permissions)
 
-**Why it matters:** World-writable files can be modified by any user. Setuid binaries can escalate privileges.
+Why it matters: world-writable files can be modified by any user. Setuid binaries can escalate privileges.
 
-## The .env.mcp Pattern: Separating Credentials
+## The .env.mcp pattern: separating credentials
 
-A smart convention: separate your credential files by purpose.
+A useful convention is to split your credential files by purpose.
 
 ```
 .env.local      # App credentials (Blogger, Cloudinary, OpenAI)
@@ -269,7 +269,7 @@ A smart convention: separate your credential files by purpose.
 .env.sample     # Safe template (commit to git)
 ```
 
-**Why separate files?**
+Why separate files?
 - Different rotation schedules (MCP keys vs app keys)
 - Different access patterns (Claude loads MCP, app uses local)
 - Explicit about what loads where
@@ -311,9 +311,9 @@ In `.mcp.json`, reference environment variables with `${VAR_NAME}` syntax:
 
 When you start Claude Code with the env vars loaded, MCP servers receive them securely.
 
-## The Alias Pattern: One Command to Rule Them All
+## The alias pattern: one command to rule them all
 
-Set up a shell alias to start Claude Code with MCP credentials loaded and YOLO mode active:
+Set up a shell alias to start Claude Code with MCP credentials loaded and YOLO mode active.
 
 **Add to `.zshrc` or `.bashrc`:**
 ```bash
@@ -321,7 +321,7 @@ Set up a shell alias to start Claude Code with MCP credentials loaded and YOLO m
 alias claudey='env $(grep -v "^#" .env.mcp | grep -v "^$" | xargs) claude --dangerously-skip-permissions'
 ```
 
-**Breakdown:**
+Breakdown:
 1. `grep -v "^#"` - Skip comment lines
 2. `grep -v "^$"` - Skip empty lines
 3. `xargs` - Convert to `KEY=VALUE` pairs
@@ -336,7 +336,7 @@ claudey  # Start Claude with MCP creds + safety hooks
 
 Now your MCP servers (Perplexity, Firecrawl, YouTube, etc.) work seamlessly, and your credentials stay protected.
 
-## Real-World Example Session
+## Real-world example session
 
 ```bash
 $ claudey
@@ -360,9 +360,9 @@ You: rm -rf node_modules
 (Claude would need to use a safer alternative or you override manually)
 ```
 
-The hook catches dangerous operations **before** they execute, giving you peace of mind.
+The hook catches dangerous operations **before** they execute, which is the whole point.
 
-## Project Structure
+## Project structure
 
 Here's how your `.claude/` directory should look:
 
@@ -386,13 +386,13 @@ Here's how your `.claude/` directory should look:
 .mcp.json                      # MCP server configuration
 ```
 
-**Key insight:** The `.claude/` directory is your control panel for AI behavior.
+The `.claude/` directory is your control panel for AI behavior.
 
-## Advanced: Customizing the Hook
+## Advanced: customizing the hook
 
-You can extend `pre_tool_use.py` to match your team's needs:
+You can extend `pre_tool_use.py` to match your team's needs.
 
-### Allow Read-Only Access to Specific Env Files
+### Allow read-only access to specific env files
 
 ```python
 def is_credential_file_access(tool_name, tool_input):
@@ -414,7 +414,7 @@ def is_credential_file_access(tool_name, tool_input):
     return False
 ```
 
-### Log All Blocked Attempts
+### Log all blocked attempts
 
 ```python
 import logging
@@ -435,7 +435,7 @@ def main():
     sys.exit(0)
 ```
 
-### Whitelist Specific rm Commands
+### Whitelist specific rm commands
 
 ```python
 def is_dangerous_rm(command):
@@ -458,14 +458,14 @@ def is_dangerous_rm(command):
     return False
 ```
 
-## Key Takeaways
+## Key takeaways
 
-1. **YOLO mode + hooks = safe automation** - No more approval fatigue, no more risk
-2. **Hooks run automatically** - Every tool call passes through your security layer
-3. **Separate .env files** - `.env.local` for app, `.env.mcp` for MCP servers
-4. **Alias pattern simplifies workflow** - One command (`claudey`) starts everything safely
-5. **Exit code 2 blocks operations** - Simple, effective contract
-6. **Customize to your needs** - The hook script is yours to extend
+1. YOLO mode + hooks = safe automation. No more approval fatigue, no more risk.
+2. Hooks run automatically. Every tool call passes through your security layer.
+3. Separate .env files. `.env.local` for app, `.env.mcp` for MCP servers.
+4. The alias pattern simplifies workflow. One command (`claudey`) starts everything safely.
+5. Exit code 2 blocks operations. Simple, effective contract.
+6. Customize to your needs. The hook script is yours to extend.
 
 ## Resources
 
@@ -480,6 +480,6 @@ Running Claude Code with `--dangerously-skip-permissions` doesn't have to be dan
 
 The setup takes 15 minutes. The peace of mind lasts forever.
 
-Now go forth and code—confidently, quickly, and safely. May your hard drive remain un-nuked.
+Now go forth and code, confidently, quickly, and safely. May your hard drive remain un-nuked.
 
 **Want to see this in action?** Check out this project's `.claude/hooks/pre_tool_use.py` for a production-ready implementation. Share your own hook patterns and help make AI-assisted development safer for everyone.

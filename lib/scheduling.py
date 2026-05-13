@@ -101,26 +101,35 @@ def _next_weekly_date(after_date: datetime, pub_config: Dict[str, Any],
 
 def _next_monthly_date(after_date: datetime, pub_config: Dict[str, Any],
                        hour: int, minute: int, second: int) -> datetime:
-    """Find next monthly publish date (nth weekday of month)."""
+    """Find next monthly publish date (nth weekday of month).
+
+    Supports multiple `weeks_of_month` entries (e.g. [1, 3] for bi-weekly on
+    1st and 3rd Mondays). Comparison is by calendar date, so a candidate
+    falling on the same calendar day as `after_date` is treated as already
+    used and skipped (mirrors the weekly path which starts from after+1day).
+    """
     day_name = pub_config.get('day', 'monday')
-    week_of_month = pub_config.get('week_of_month', 2)
+    weeks_of_month = pub_config.get('weeks_of_month', [2])
     weekday = DAY_MAP[day_name.lower()]
 
     year = after_date.year
     month = after_date.month
+    after_calendar_date = after_date.date()
 
     # Check up to 13 months ahead
     for _ in range(13):
-        try:
-            target_day = get_nth_weekday_of_month(year, month, weekday, week_of_month)
-            candidate = datetime(
-                year, month, target_day,
-                hour, minute, second
-            )
-            if candidate > after_date:
-                return candidate
-        except ValueError:
-            pass
+        month_candidates = []
+        for week_n in weeks_of_month:
+            try:
+                target_day = get_nth_weekday_of_month(year, month, weekday, week_n)
+                candidate = datetime(year, month, target_day, hour, minute, second)
+                if candidate.date() > after_calendar_date:
+                    month_candidates.append(candidate)
+            except ValueError:
+                continue
+
+        if month_candidates:
+            return min(month_candidates)
 
         # Advance to next month
         month += 1
@@ -130,7 +139,7 @@ def _next_monthly_date(after_date: datetime, pub_config: Dict[str, Any],
 
     raise ValueError(
         f"Could not find next monthly publish date within 13 months. "
-        f"Config: {day_name}, week {week_of_month}"
+        f"Config: {day_name}, weeks {weeks_of_month}"
     )
 
 
@@ -140,15 +149,23 @@ def format_schedule_label(pub_config: Dict[str, Any]) -> str:
 
     Examples:
         "Monday" (weekly)
-        "2nd Monday of each month" (monthly)
+        "2nd Monday of each month" (monthly, single week)
+        "1st and 3rd Monday of each month" (monthly, multiple weeks)
     """
     frequency = pub_config.get('frequency', 'weekly')
+    ordinal_map = {1: '1st', 2: '2nd', 3: '3rd', 4: '4th', 5: '5th'}
 
     if frequency == 'monthly':
         day_name = pub_config.get('day', 'monday').capitalize()
-        week_of_month = pub_config.get('week_of_month', 2)
-        ordinal = {1: '1st', 2: '2nd', 3: '3rd', 4: '4th', 5: '5th'}
-        return f"{ordinal.get(week_of_month, f'{week_of_month}th')} {day_name} of each month"
+        weeks = pub_config.get('weeks_of_month', [2])
+        ordinals = [ordinal_map.get(w, f'{w}th') for w in weeks]
+        if len(ordinals) == 1:
+            week_str = ordinals[0]
+        elif len(ordinals) == 2:
+            week_str = f"{ordinals[0]} and {ordinals[1]}"
+        else:
+            week_str = ", ".join(ordinals[:-1]) + f", and {ordinals[-1]}"
+        return f"{week_str} {day_name} of each month"
     else:
         days = pub_config.get('days', ['monday'])
         return ", ".join(day.capitalize() for day in days)

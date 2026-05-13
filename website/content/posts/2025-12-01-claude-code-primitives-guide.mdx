@@ -12,33 +12,33 @@ social:
     text: "Claude Code has evolved rapidly. What started as a simple AI coding assistant now has four distinct primitives—slash commands, MCPs, subagents, and skills.\n\nThe challenge? Knowing when to use each one.\n\nI just wrote a comprehensive guide breaking down:\n\n• Context efficiency of each primitive\n• When to use slash commands vs MCPs vs subagents vs skills\n• How to compose them into powerful workflows\n• Real-world examples of composition patterns\n\nKey insights:\n\n→ Slash commands are your workflow templates (high efficiency)\n→ MCPs bring external tools and data (necessary but costly)\n→ Subagents enable parallel execution without context pollution\n→ Skills package local domain expertise (write them carefully)\n\nThe secret? Don't use these in isolation—compose them. A slash command can orchestrate MCPs, trigger subagents, and leverage skills. That's where the real power lives.\n\nIf you're building with Claude Code or any AI coding assistant, understanding these architectural patterns will help you build more efficient, maintainable workflows.\n\nRead the full breakdown:"
 ---
 
-Claude Code has evolved from a simple powerhouse into a sophisticated development environment with multiple features. Now we have slash commands, MCPs, subagents, and skills—all amazing tools, but when should you use each one? Let's break down these four primitives and understand how to compose them effectively.
+Claude Code grew up fast. What started as a coding assistant is now a real development environment with four distinct primitives: slash commands, MCPs, subagents, and skills. They all look useful in isolation. The harder question is when to reach for each one, and how they fit together.
 
 ![Four interconnected primitives of Claude Code](../../public/blog/2025-12-01-claude-code-primitives-guide/hero-four-primitives.webp)
 
-## The Four Primitives of Claude Code
+## The four primitives of Claude Code
 
-### 1. Slash Commands: Reusable Prompt Templates
+### 1. Slash commands: reusable prompt templates
 
-Remember when success meant typing out the perfect prompt every single time? Slash commands eliminate that repetition by templating your workflows into reusable markdown files.
+You used to type the same long prompt every single time. Slash commands fix that. They turn a workflow into a markdown file you can trigger with a slash.
 
-**What they are:** Reusable prompts for specific workflows or processes. Just a simple markdown doc that you can trigger with a slash.
+**What they are:** Reusable prompts for specific workflows or processes. A simple markdown doc, nothing more.
 
 **Example use cases:**
-- `/prime` - Teach your agent about your codebase structure
+- `/prime` for teaching your agent about your codebase structure
 - Templated React component creation
 - Standardized git commits
 - Any repeatable workflow you run frequently
 
-Slash commands were the first feature that went viral in Claude Code, and for good reason—they're beautifully simple and incredibly effective.
+Slash commands were the first Claude Code feature to go viral, and the reason is obvious: they're simple and they work.
 
-### 2. MCPs: External Tool Integration
+### 2. MCPs: external tool integration
 
-MCP stands for "Model Context Protocol" (admittedly a terrible name that doesn't describe what it does). Think of MCPs as **tools for your agents**—they extend what your AI can do by bringing in external capabilities.
+MCP stands for "Model Context Protocol" (a terrible name that tells you nothing about what it does). Think of MCPs as tools for your agents. They extend what your AI can do by pulling in external capabilities.
 
 **What they are:** External integrations that bring tools, data, and functionality into your LLM from outside systems.
 
-**Why they exist:** LLMs originally had knowledge cutoffs, thinking it was a year ago. Tools like "get weather" or "get coordinates" demonstrated how to bring current, external information into the model. Now MCPs cover almost anything you can dream of.
+**Why they exist:** Early LLMs had knowledge cutoffs and thought it was a year ago. Simple tools like "get weather" or "get coordinates" showed the pattern for bringing fresh, external information into the model. Today MCPs cover almost anything you can think of.
 
 **Example use cases:**
 - Pull JIRA or Asana tickets into your workflow
@@ -46,43 +46,43 @@ MCP stands for "Model Context Protocol" (admittedly a terrible name that doesn't
 - Get real-time weather data
 - Access any external API or service
 
-**Key insight:** When you think MCP, think **external**. These are your bridges to the outside world.
+**Key insight:** When you think MCP, think external. These are your bridges to the outside world.
 
-### 3. Subagents: Parallel Task Execution
+### 3. Subagents: parallel task execution
 
-Subagents are the crowd favorites—and with good reason. These specialists can work in parallel, complete their tasks, and return results without polluting your main agent's context window.
+Subagents tend to be the crowd favorite, and for good reason. These specialists run in parallel, finish their task, and hand back results without polluting your main agent's context window.
 
-**What they are:** Isolated agent instances that can run in parallel and focus on specific tasks.
+**What they are:** Isolated agent instances that run in parallel and focus on a specific task.
 
 **Unique traits:**
-- **Parallelizable** - Spin off 2, 3, 4, or more at once
-- **No context persistence** - They hand back results but forget their work
+- **Parallelizable.** Spin off 2, 3, 4, or more at once.
+- **No context persistence.** They return results, then forget their work.
 
-**The trade-off:** Context persistence is both a pro and a con. If you wanted all that intermediate work, it's gone. But if you needed to scrape 400 websites and only want the final research report, you just saved massive amounts of context by not keeping all that HTML.
+**The trade-off:** Context persistence cuts both ways. If you wanted that intermediate work, it's gone. But if you needed to scrape 400 websites and only care about the final research report, you just saved a huge amount of context by not keeping all that HTML around.
 
 **Example use cases:**
 - Research 400 websites and return one summary report
-- Fix failing tests without caring about the investigation process
+- Fix failing tests when you don't care about the investigation process
 - Parallel processing of multiple independent tasks
 - Any workflow where you only care about the output, not the steps
 
-If you're having context window issues, check out our other posts on taming context windows for solutions!
+If context window issues are biting you, check out our other posts on taming context windows.
 
-### 4. Skills: Local Capability Packages
+### 4. Skills: local capability packages
 
-Skills are the newest addition to Claude Code—packaged workflows that unlock new capabilities for your agent.
+Skills are the newest addition to Claude Code. They're packaged workflows that unlock new capabilities for your agent.
 
 **What they are:** Local processes that give your agent specialized expertise in a particular domain.
 
 **Key characteristics:**
-- **Not stored in memory** like tools/MCPs
-- Use a grep-like process to find relevant skills when needed
-- Load into context only when triggered
-- Often use libraries under the hood to perform tasks
+- Not stored in memory like tools or MCPs
+- A grep-like process finds relevant skills when needed
+- Loaded into context only when triggered
+- Often use libraries under the hood
 
 **The difference from MCPs:**
-- **MCPs** = External (API calls, remote services)
-- **Skills** = Local (libraries, local processes)
+- MCPs are external (API calls, remote services)
+- Skills are local (libraries, local processes)
 
 **Example use cases:**
 - Extract text from images
@@ -90,55 +90,59 @@ Skills are the newest addition to Claude Code—packaged workflows that unlock n
 - Manage git worktrees with your preferred workflow
 - Any local process or specialized expertise domain
 
-**Best practices:** Skills are great for managing a **classification of a problem**, not a specific flow. For instance, don't use a skill to "create a worktree"—use it to "manage worktrees" with all your preferred conventions built in.
+**Best practice:** Skills work best for a classification of problems, not a specific flow. Don't write a skill called "create a worktree." Write one called "manage worktrees" with your preferred conventions built in.
 
-## Context Efficiency Comparison
+## Context efficiency comparison
 
-Understanding how each primitive uses context helps you make better architectural decisions:
+How each primitive uses context shapes what you should build with it.
 
 ![Context efficiency comparison across primitives](../../public/blog/2025-12-01-claude-code-primitives-guide/diagram-context-efficiency.webp)
 
-### Slash Commands: High Efficiency ✅
-Designed for straightforward, direct tasks. Everything runs with minimal token waste—exactly what you need, nothing more.
+### Slash commands: high efficiency
 
-### MCPs: Context Cost ⚠️
-Tools are loaded into memory (almost like a system prompt), which reduces available context. Large descriptions and verbose tool definitions eat tokens. Be mindful of which MCPs you load.
+Built for straightforward, direct tasks. Minimal token waste. You get exactly what you asked for, nothing more.
 
-### Subagents: High Efficiency ✅
-Specialized agents that excel at their task without polluting your main context. The lack of persistence means massive context savings when you don't need the intermediate steps.
+### MCPs: context cost
 
-### Skills: Mid Efficiency ⚙️
-Not stored in memory like tools, but can accidentally load when you don't want them to. Skills use grep to find relevant matches, so imprecise descriptions or wandering language can trigger unwanted context loading.
+Tools are loaded into memory, almost like a system prompt, which eats into available context. Verbose descriptions and bloated tool definitions add up fast. Be picky about which MCPs you load.
 
-**Pro tip for skills:** Write precise, targeted descriptions. Don't wander into related topics or you'll accidentally blow up your context window.
+### Subagents: high efficiency
 
-## Composition: The Secret Sauce
+Specialized agents that do their job without leaking back into your main context. The lack of persistence is exactly why they save so much context when you don't need the intermediate steps.
 
-Here's the real insight: **You don't want to use these in isolation—you want to compose them.**
+### Skills: mid efficiency
 
-### Composition Rules
+Not stored in memory like tools, but they can load when you didn't want them to. Skills use grep to find matches, so imprecise descriptions or wandering language will trigger context loads you didn't plan for.
+
+**Pro tip for skills:** Write precise, targeted descriptions. Wander into related topics and you'll blow up your context window by accident.
+
+## Composition: the secret sauce
+
+Here's the real point. You don't use these in isolation. You compose them.
+
+### Composition rules
 
 **MCPs:**
 - Used by everything
-- Enhance capabilities of slash commands, subagents, and skills
-- Don't use MCPs to orchestrate other primitives—use them as building blocks
+- Enhance slash commands, subagents, and skills
+- Don't use MCPs to orchestrate other primitives. Use them as building blocks.
 
-**Slash Commands:**
-- Can run: slash commands, MCPs, subagents, skills
-- Most foundational primitive for orchestration
-- Example: "Get Asana ticket details (MCP) → research in Slack (subagent) → write plan"
+**Slash commands:**
+- Can run slash commands, MCPs, subagents, and skills
+- The most foundational primitive for orchestration
+- Example: "Get Asana ticket details (MCP), research in Slack (subagent), write plan"
 
 **Subagents:**
-- Can run: slash commands, MCPs, skills
-- **Cannot run other subagents** (no recursive agent spawning)
+- Can run slash commands, MCPs, and skills
+- Cannot run other subagents. No recursive agent spawning.
 - Only the main agent orchestrates subagents
 
 **Skills:**
-- Can run: slash commands, MCPs, subagents, skills
+- Can run slash commands, MCPs, subagents, and skills
 - Similar orchestration power to slash commands
-- Best for domain-specific expertise management
+- Best for domain-specific expertise
 
-### Composition Matrix
+### Composition matrix
 
 ![Composition matrix showing how primitives can orchestrate each other](../../public/blog/2025-12-01-claude-code-primitives-guide/diagram-composition-matrix.webp)
 
@@ -149,35 +153,35 @@ Here's the real insight: **You don't want to use these in isolation—you want t
 | Subagents | ✅ | ✅ | ❌ | ✅ |
 | Skills | ✅ | ✅ | ✅ | ✅ |
 
-## When to Use Each Primitive
+## When to use each primitive
 
-### Use Slash Commands When:
+### Use slash commands when:
 - You have a repeatable workflow
 - You want to template a process
 - You need to orchestrate multiple primitives
 - You want the most foundational building block
 
-### Use MCPs When:
+### Use MCPs when:
 - You need external data or services
 - You're integrating with APIs
 - You want to extend agent capabilities with outside tools
 - You need real-time or current information
 
-### Use Subagents When:
+### Use subagents when:
 - You can parallelize work
 - You only care about output, not process
 - You want to avoid context pollution
 - You need isolated task execution
 
-### Use Skills When:
+### Use skills when:
 - You want to package domain expertise
 - You need local process capabilities
 - You're managing a classification of problems
 - You want conditional context loading
 
-## Real-World Composition Examples
+## Real-world composition examples
 
-### Example 1: Feature Development Workflow
+### Example 1: feature development workflow
 
 ```
 Slash Command: /build-feature
@@ -187,7 +191,7 @@ Slash Command: /build-feature
 └── Skill: Generate technical specification document
 ```
 
-### Example 2: Content Research Pipeline
+### Example 2: content research pipeline
 
 ```
 Subagent (parallel): Research 10 websites each × 4 instances
@@ -196,7 +200,7 @@ Subagent (parallel): Research 10 websites each × 4 instances
 → Return: Single consolidated research report
 ```
 
-### Example 3: Git Workflow Management
+### Example 3: git workflow management
 
 ```
 Skill: Manage git worktrees
@@ -205,19 +209,19 @@ Skill: Manage git worktrees
 └── Slash Command: /sync-branches
 ```
 
-## Key Takeaways
+## Key takeaways
 
-1. **Slash commands** = Reusable workflow templates (high context efficiency)
-2. **MCPs** = External tools and data (context cost, but necessary)
-3. **Subagents** = Parallel task execution without context persistence (high efficiency)
-4. **Skills** = Local domain expertise packages (mid efficiency, write carefully)
+1. Slash commands are reusable workflow templates (high context efficiency).
+2. MCPs bring external tools and data (context cost, but often necessary).
+3. Subagents handle parallel task execution without context persistence (high efficiency).
+4. Skills package local domain expertise (mid efficiency, write them carefully).
 
-5. **Composition is key** - Don't use these in isolation. Mix and match to create powerful workflows.
+5. Composition is where the real power is. Don't use these in isolation. Mix and match.
 
-6. **Think about context** - Understanding efficiency helps you architect better solutions.
+6. Think about context. Knowing the efficiency profile of each primitive helps you architect better solutions.
 
-7. **Match primitives to use cases** - External = MCP, Parallel = Subagent, Workflow = Slash Command, Expertise = Skill
+7. Match primitives to use cases. External means MCP. Parallel means subagent. Workflow means slash command. Expertise means skill.
 
-Claude Code has evolved into a sophisticated platform with powerful primitives. By understanding when to use each one—and more importantly, how to compose them—you'll build more efficient, maintainable, and powerful AI-assisted workflows.
+Claude Code has turned into a serious platform with serious primitives. Once you know when to use each one, and how to compose them, your workflows get sharper, smaller, and easier to maintain.
 
-Now go forth and compose wisely. Don't get discombobulated! 🚀
+Now go compose wisely. Don't get discombobulated. 🚀

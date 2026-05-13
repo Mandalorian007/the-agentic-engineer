@@ -38,15 +38,6 @@
       "mcp__playwright__browser_tab_select",
       "mcp__playwright__browser_tab_close",
       "mcp__playwright__browser_wait_for",
-      "mcp__perplexity-ask__perplexity_ask",
-      "mcp__firecrawl-mcp__firecrawl_scrape",
-      "mcp__firecrawl-mcp__firecrawl_map",
-      "mcp__firecrawl-mcp__firecrawl_crawl",
-      "mcp__firecrawl-mcp__firecrawl_check_crawl_status",
-      "mcp__firecrawl-mcp__firecrawl_search",
-      "mcp__firecrawl-mcp__firecrawl_extract",
-      "mcp__firecrawl-mcp__firecrawl_deep_research",
-      "mcp__firecrawl-mcp__firecrawl_generate_llmstxt",
       "mcp__youtube-data__getVideoDetails",
       "mcp__youtube-data__searchVideos",
       "mcp__youtube-data__getTranscripts",
@@ -62,8 +53,6 @@
     "deny": []
   },
   "enabledMcpjsonServers": [
-    "perplexity-ask",
-    "firecrawl-mcp",
     "youtube-data",
     "reddit"
   ],

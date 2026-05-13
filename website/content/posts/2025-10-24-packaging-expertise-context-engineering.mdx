@@ -19,15 +19,15 @@ social:
 ---
 ![A software engineer teaching an AI assistant about a codebase through documentation and file structures](../../public/blog/2025-10-24-packaging-expertise-context-engineering/hero-context-engineering.webp)
 
-Agentic engineering at its core is about **packaging your experience**. But what does that really mean?
+Agentic engineering at its core is about **packaging your experience**. What does that actually mean in practice?
 
-Think about it: when you hire a new software engineer, you don't immediately hand them a critical feature and expect magic. You onboard them. You teach them about your codebase, your architecture, your patterns, your team's preferences.
+When you hire a new software engineer, you don't immediately hand them a critical feature and expect magic. You onboard them. You teach them about your codebase, your architecture, your patterns, your team's preferences.
 
 **AI agents need the exact same treatment.**
 
-## The Empathy Gap in AI Development
+## The empathy gap in AI development
 
-Here's the uncomfortable truth: when you open a new Claude Code session, the agent knows absolutely nothing about your codebase. Zero. Zilch.
+Open a fresh Claude Code session and the agent knows absolutely nothing about your codebase. Zero. Zilch.
 
 It doesn't know:
 - Your project structure
@@ -38,25 +38,25 @@ It doesn't know:
 
 **And yet, we expect it to just "figure things out."**
 
-This is where most developers struggle with AI coding tools. They get frustrated when the agent makes poor decisions or suggests irrelevant solutions. But the problem isn't the agent—it's the **packaging**.
+This is where most developers struggle with AI coding tools. They get frustrated when the agent makes poor decisions or suggests irrelevant solutions. The problem isn't the agent. It's the **packaging**.
 
-## What Is Context Engineering?
+## What is context engineering?
 
 Context engineering is the practice of deliberately and systematically loading the right information into your AI agent so it can work effectively.
 
-This isn't about dumping your entire codebase into the context window. That's wasteful and ineffective. Instead, it's about **curating** the essential knowledge an agent needs to be productive.
+This isn't about dumping your entire codebase into the context window. That's wasteful and ineffective. The goal is to **curate** the essential knowledge an agent needs to be productive.
 
-Think of it as writing the perfect onboarding documentation—but for an AI that will read it every single time.
+Think of it as writing the perfect onboarding documentation, except your audience is an AI that reads it every single time.
 
-## The `/prime` Command: Your Agent's Onboarding Script
+## The `/prime` command: your agent's onboarding script
 
 The most fundamental command you'll create for any codebase is what I call the **`/prime`** command (some prefer `/context`, `/load`, or `/learn`).
 
-This command serves as your agent's onboarding checklist. Every time you start a new session, you run `/prime`, and suddenly your agent is ready to work.
+This command acts as your agent's onboarding checklist. Every time you start a new session, you run `/prime`, and your agent is ready to work.
 
-### Creating Your First Prime Command
+### Creating your first prime command
 
-In Claude Code, custom commands live in `.claude/commands/`. Let's create `prime.md`:
+In Claude Code, custom commands live in `.claude/commands/`. Create `prime.md`:
 
 ```markdown
 # Prime Context
@@ -68,11 +68,11 @@ Read the README and anything in the docs directory that would be relevant for an
 
 **That's it.** Save the file, restart Claude Code, and you now have a `/prime` command.
 
-### What Should Your Prime Command Include?
+### What should your prime command include?
 
 Here's what I recommend every `/prime` command should do:
 
-#### 1. **List Your Project Structure**
+#### 1. List your project structure
 
 ```bash
 git ls-files
@@ -85,31 +85,31 @@ This gives the agent a complete map of your codebase. Even if it doesn't read ev
 
 Good naming conventions pay dividends here. If you have directories like `components/`, `lib/`, `tests/`, the agent immediately understands your architecture.
 
-#### 2. **Read Core Documentation**
+#### 2. Read core documentation
 
 ```markdown
 Read the README and anything in the docs directory that would be relevant for an overview.
 ```
 
-Your README and docs are your first line of defense against context gaps. Make sure they exist and are up-to-date.
+Your README and docs are your first line of defense against context gaps. Make sure they exist and stay current.
 
-#### 3. **Read Architecture Documentation**
+#### 3. Read architecture documentation
 
 If you have files like:
 - `docs/architecture.md`
 - `CONTRIBUTING.md`
 - `DEVELOPMENT.md`
 
-Tell your agent to read them. These documents contain the "why" behind your code—something that's invisible from reading source files alone.
+Tell your agent to read them. These documents carry the "why" behind your code, which is invisible from reading source files alone.
 
-#### 4. **Understand Key Configuration Files**
+#### 4. Understand key configuration files
 
 Depending on your project, you might want to explicitly read:
 - `package.json` / `pyproject.toml` (dependencies)
 - `tsconfig.json` / `.eslintrc` (tooling config)
 - `.env.example` (available environment variables)
 
-## The Compound Effect of Good Packaging
+## The compound effect of good packaging
 
 Here's where it gets powerful.
 
@@ -123,7 +123,7 @@ Once you have a reliable `/prime` command, you can build on top of it. Now you c
 
 Each of these commands assumes the agent already knows your codebase because you've run `/prime`.
 
-### Example: A `/plan` Command
+### Example: a `/plan` command
 
 ```markdown
 # Plan a Feature
@@ -138,11 +138,11 @@ Then, based on the user's request:
 5. Provide a testing strategy
 ```
 
-See how this builds on `/prime`? It doesn't need to rediscover your codebase—it already knows it.
+See how this builds on `/prime`? It doesn't need to rediscover your codebase. It already knows it.
 
 ![Workflow diagram showing how the prime command loads context and enables other slash commands](../../public/blog/2025-10-24-packaging-expertise-context-engineering/diagram-prime-workflow.webp)
 
-## The New Engineer Mindset
+## The new engineer mindset
 
 The key mental shift is this: **treat your agent like a talented but completely inexperienced engineer**.
 
@@ -152,13 +152,13 @@ When your agent produces a bad plan, don't blame the agent. Ask yourself:
 
 > "What context did I fail to provide?"
 
-This mindset shift changes everything. Instead of fighting the tool, you start improving your packaging.
+That shift changes everything. Instead of fighting the tool, you start improving your packaging.
 
-## Iterative Improvement
+## Iterative improvement
 
 Your first `/prime` command won't be perfect. That's okay.
 
-Here's the loop:
+The loop:
 1. Run `/prime`
 2. Ask your agent to do something
 3. Notice what it gets wrong
@@ -166,11 +166,11 @@ Here's the loop:
 5. Update `/prime` to include that context
 6. Repeat
 
-Over time, your `/prime` command becomes incredibly refined. You'll find that new sessions become productive immediately.
+Over time, your `/prime` command becomes incredibly refined. New sessions become productive immediately.
 
-## Real-World Example: This Blog
+## Real-world example: this blog
 
-Let me show you a real example. Here's the `/prime` command for The Agentic Engineer blog:
+Here's a concrete example. The `/prime` command for The Agentic Engineer blog:
 
 ```markdown
 # Prime Context
@@ -198,7 +198,7 @@ In under 30 seconds, Claude understands:
 
 **All without me explaining anything.**
 
-## Advanced: Stitching Commands Together
+## Advanced: stitching commands together
 
 Once you have strong individual commands, you can combine them into workflows.
 
@@ -210,9 +210,9 @@ For example, my `/create-quality-review` command:
 5. Fixes any issues automatically
 6. Reminds me to commit and push
 
-This is **workflow automation built on top of packaged expertise**.
+That's **workflow automation built on top of packaged expertise**.
 
-## Why This Matters
+## Why this matters
 
 The developers who master agentic engineering aren't the ones with the best AI tools.
 
@@ -224,9 +224,9 @@ When you can effectively teach an agent about your codebase, you unlock:
 - ✅ **Workflow automation** - Compose commands into powerful pipelines
 - ✅ **Knowledge transfer** - Your documentation benefits human developers too
 
-## Getting Started Today
+## Getting started today
 
-Here's your action plan:
+Your action plan:
 
 1. **Create `.claude/commands/prime.md`** in your project
 2. **Start simple** - Just read README and list files
@@ -236,7 +236,7 @@ Here's your action plan:
 
 The key is to start. Your first `/prime` command will be basic. That's fine. You'll improve it every time you use it.
 
-## The Bottom Line
+## The bottom line
 
 Agentic engineering is about **empathy**.
 
