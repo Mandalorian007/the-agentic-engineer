@@ -17,10 +17,27 @@ import { Badge } from "@/components/ui/badge";
 
 const CONTACT_EMAIL = "matthew.fontana@agentic-engineer.com";
 
+const SERVICES_TITLE = "Work With Me";
+const SERVICES_DESCRIPTION =
+  "I help engineering organizations turn AI coding tools into production-grade developer platforms. Vendor-agnostic. Outcome-focused. Fixed-scope, fixed-fee engagements.";
+
 export const metadata: Metadata = {
-  title: "Work With Me | The Agentic Engineer",
-  description:
-    "I help engineering organizations turn AI coding tools into production-grade developer platforms. Vendor-agnostic. Outcome-focused. Fixed-scope, fixed-fee engagements.",
+  title: SERVICES_TITLE,
+  description: SERVICES_DESCRIPTION,
+  alternates: { canonical: "/services" },
+  openGraph: {
+    title: SERVICES_TITLE,
+    description: SERVICES_DESCRIPTION,
+    url: "/services",
+    type: "website",
+    images: [{ url: "/og", width: 1200, height: 630, alt: SERVICES_TITLE }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SERVICES_TITLE,
+    description: SERVICES_DESCRIPTION,
+    images: ["/og"],
+  },
 };
 
 const PHASES = [
@@ -108,9 +125,68 @@ const ALTERNATIVES = [
   },
 ];
 
+const SERVICES_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  name: "The Agentic Engineer",
+  url: "https://agentic-engineer.com/services",
+  description: SERVICES_DESCRIPTION,
+  image: "https://agentic-engineer.com/the-agentic-engineer-logo.webp",
+  email: CONTACT_EMAIL,
+  serviceType: "Agentic developer platform engineering",
+  areaServed: [
+    { "@type": "Country", name: "United States" },
+    { "@type": "Place", name: "Remote, worldwide" },
+  ],
+  provider: {
+    "@type": "Person",
+    name: "Matthew Fontana",
+    email: CONTACT_EMAIL,
+    url: "https://agentic-engineer.com",
+    jobTitle: "Agentic developer platform engineer",
+  },
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Engagements",
+    itemListElement: [
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Discovery sprint",
+          description:
+            "Two- to three-week audit, gap analysis, success metrics, and written platform blueprint.",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Platform build",
+          description:
+            "Ten- to fourteen-week implementation across discovery, platform, and enablement. Fixed-scope, fixed-fee.",
+        },
+      },
+      {
+        "@type": "Offer",
+        itemOffered: {
+          "@type": "Service",
+          name: "Retainer",
+          description:
+            "Ongoing platform evolution: new tools, new patterns, eval maintenance, quarterly adoption reviews.",
+        },
+      },
+    ],
+  },
+};
+
 export default function ServicesPage() {
   return (
     <div className="container py-12 md:py-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(SERVICES_JSON_LD) }}
+      />
       {/* Hero */}
       <section className="max-w-4xl mx-auto text-center space-y-6">
         <Badge variant="outline" className="mx-auto">

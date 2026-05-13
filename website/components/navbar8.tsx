@@ -3,13 +3,6 @@ import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import {
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -136,27 +129,6 @@ const Navbar8 = () => {
             </NavigationMenu>
             <div className="flex items-center gap-3.5">
               <ThemeToggle />
-              <SignedOut>
-                <SignInButton mode="modal">
-                  <Button variant="ghost" size="sm" className="hidden md:flex">
-                    Log in
-                  </Button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <Button size="sm" className="hidden md:flex">
-                    Sign up
-                  </Button>
-                </SignUpButton>
-              </SignedOut>
-              <SignedIn>
-                <UserButton
-                  appearance={{
-                    elements: {
-                      avatarBox: "size-9",
-                    },
-                  }}
-                />
-              </SignedIn>
               <div className="lg:hidden">
                 <Button variant="ghost" size="icon" onClick={handleMobileMenu}>
                   <Menu className="size-5.5" />
@@ -196,45 +168,17 @@ const MobileNavigationMenu = ({ open, setOpen }: MobileNavigationMenuProps) => {
                 </Button>
               </SheetClose>
             </div>
-            <div className="gap-30 flex h-full flex-col justify-between pt-24">
-              <div className="flex w-full flex-col gap-8">
-                {NAVIGATION.map((item, index) => (
-                  <Link
-                    key={`mobile-nav-link-${index}`}
-                    href={item.url}
-                    className="text-primary-foreground text-2xl font-medium leading-normal"
-                    onClick={() => setOpen(false)}
-                  >
-                    {item.title}
-                  </Link>
-                ))}
-              </div>
-              <div className="flex flex-col gap-4 pt-8">
-                <SignedOut>
-                  <SignInButton mode="modal">
-                    <Button variant="outline" size="lg">
-                      Log in
-                    </Button>
-                  </SignInButton>
-                  <SignUpButton mode="modal">
-                    <Button size="lg">Sign up</Button>
-                  </SignUpButton>
-                </SignedOut>
-                <SignedIn>
-                  <div className="flex items-center gap-3">
-                    <UserButton
-                      appearance={{
-                        elements: {
-                          avatarBox: "size-10",
-                        },
-                      }}
-                    />
-                    <span className="text-primary-foreground text-lg">
-                      Account
-                    </span>
-                  </div>
-                </SignedIn>
-              </div>
+            <div className="flex w-full flex-col gap-8 pt-24">
+              {NAVIGATION.map((item, index) => (
+                <Link
+                  key={`mobile-nav-link-${index}`}
+                  href={item.url}
+                  className="text-primary-foreground text-2xl font-medium leading-normal"
+                  onClick={() => setOpen(false)}
+                >
+                  {item.title}
+                </Link>
+              ))}
             </div>
           </div>
         </div>
