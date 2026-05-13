@@ -83,9 +83,18 @@ def main():
     # Get next publish date based on configuration
     next_date = get_next_publish_date(after_date, pub_config)
 
-    # Check if this date is already taken
-    while next_date in post_dates:
+    # Existing posts are stored at midnight (filename precision); candidates
+    # carry the publish time. Compare by calendar date so collisions resolve
+    # correctly even when the time-of-day differs.
+    post_calendar_dates = {d.date() for d in post_dates}
+    while next_date.date() in post_calendar_dates:
         print(f"⚠️  {format_date_for_dirname(next_date)} is already scheduled, trying next publish day...")
+        next_date = get_next_publish_date(next_date, pub_config)
+
+    # If the cadence has fallen behind real time, advance past today so the
+    # answer is always a future slot you can actually publish into.
+    today = datetime.now()
+    while next_date < today:
         next_date = get_next_publish_date(next_date, pub_config)
 
     # Output the result
