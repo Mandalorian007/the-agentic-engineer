@@ -16,9 +16,11 @@ When the user runs `/quality-check <path>`:
    - Run `vale sync` (ignore in final results, just ensures vale settings are updated)
 
 3. **Run Vale prose linting:**
-   - Execute: `vale <path-to-post.mdx>`
-   - Parse the output
-   - Vale works with MDX files (ignores code blocks and frontmatter)
+   - Execute: `cat <path-to-post.mdx> | vale --ext=.md`
+   - The `--ext=.md` flag is required because `.vale.ini` only matches `*.md/*.txt`. Calling `vale <file.mdx>` directly returns "0 files" and silently passes.
+   - Parse the output (filename in output will appear as `stdin.md`)
+   - Vale ignores code blocks and frontmatter via the `BlockIgnores` config
+   - If `vale` is not installed (`command not found`), note it as optional per README and skip this step
 
 4. **Run SEO analysis:**
    - Execute: `uv run tools/seo_check.py <path-to-post.mdx>`
@@ -34,7 +36,8 @@ When the user runs `/quality-check <path>`:
 
 5. **Run social media validation:**
    - Extract slug from the filename (remove .mdx extension)
-   - Execute: `uv run python -c "from pathlib import Path; from lib.social_validator import validate_social_posts, print_validation_results; from lib.frontmatter import parse_frontmatter; path='<path-to-post.mdx>'; slug=Path(path).stem; fm=parse_frontmatter(path); issues=validate_social_posts(fm, slug); print_validation_results(issues); import sys; sys.exit(1 if any(i.severity == 'error' for i in issues) else 0)"`
+   - `parse_frontmatter()` takes file *content* (str), not a path — read the file first or it raises `FrontmatterError: No frontmatter found`
+   - Execute: `uv run python -c "from pathlib import Path; from lib.social_validator import validate_social_posts, print_validation_results; from lib.frontmatter import parse_frontmatter; path='<path-to-post.mdx>'; slug=Path(path).stem; content=Path(path).read_text(); fm,_=parse_frontmatter(content); issues=validate_social_posts(fm, slug); print_validation_results(issues); import sys; sys.exit(1 if any(i.severity == 'error' for i in issues) else 0)"`
    - Parse the output
    - Validates:
      - Twitter total length (280 chars max including actual URL)
