@@ -119,10 +119,6 @@ def get_publishing_config(config: Dict[str, Any]) -> Dict[str, Any]:
         - time: publish time string (e.g., "11:00:00")
         For weekly: days (list of day names)
         For monthly: day (single day name), weeks_of_month (list of ints)
-
-    Note:
-        For backwards compatibility, the legacy "week_of_month" (single int)
-        is accepted and normalized into "weeks_of_month" (list).
     """
     publishing = config.get('publishing', {})
     frequency = publishing.get('frequency', 'weekly')
@@ -134,16 +130,12 @@ def get_publishing_config(config: Dict[str, Any]) -> Dict[str, Any]:
 
     if frequency == 'monthly':
         result['day'] = publishing.get('day', 'monday')
-
-        if 'weeks_of_month' in publishing:
-            weeks = publishing['weeks_of_month']
-            if not isinstance(weeks, list) or not weeks:
-                raise ConfigError(
-                    "❌ publishing.weeks_of_month must be a non-empty list of integers (1-5)"
-                )
-            result['weeks_of_month'] = sorted(set(int(w) for w in weeks))
-        else:
-            result['weeks_of_month'] = [publishing.get('week_of_month', 2)]
+        weeks = publishing.get('weeks_of_month', [2])
+        if not isinstance(weeks, list) or not weeks:
+            raise ConfigError(
+                "❌ publishing.weeks_of_month must be a non-empty list of integers (1-5)"
+            )
+        result['weeks_of_month'] = sorted(set(int(w) for w in weeks))
     else:
         result['days'] = publishing.get('days', ['monday'])
 
