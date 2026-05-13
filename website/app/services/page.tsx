@@ -20,7 +20,7 @@ const CONTACT_EMAIL = "matthew.fontana@agentic-engineer.com";
 export const metadata: Metadata = {
   title: "Work With Me | The Agentic Engineer",
   description:
-    "I help engineering organizations turn AI coding tools into production-grade developer platforms. Vendor-agnostic. Outcome-focused. Engagements start at $60K.",
+    "I help engineering organizations turn AI coding tools into production-grade developer platforms. Vendor-agnostic. Outcome-focused. Fixed-scope, fixed-fee engagements.",
 };
 
 const PHASES = [
@@ -301,9 +301,10 @@ export default function ServicesPage() {
 
       {/* Pricing & engagement */}
       <section className="mt-24 max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold mb-4">Pricing & engagement model</h2>
+        <h2 className="text-3xl font-bold mb-4">Engagement model</h2>
         <p className="text-lg text-muted-foreground mb-8">
-          Fixed-scope, fixed-fee. No surprises, no hourly billing games.
+          Fixed-scope, fixed-fee. Scoped after a 30-minute conversation, agreed
+          in writing before kickoff.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card>
@@ -320,18 +321,18 @@ export default function ServicesPage() {
           <Card className="border-primary/40">
             <CardContent className="p-6 space-y-3">
               <Badge>Platform build</Badge>
-              <div className="text-3xl font-bold">From $60K</div>
+              <div className="text-3xl font-bold">10–14 weeks</div>
               <p className="text-muted-foreground text-sm">
                 Full implementation across discovery, platform, and enablement.
-                Typical range $60K–$150K depending on org size, tool
-                footprint, and compliance scope.
+                Scope and fee shaped to org size, tool footprint, and
+                compliance needs.
               </p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 space-y-3">
               <Badge variant="secondary">Retainer</Badge>
-              <div className="text-3xl font-bold">$15–25K/mo</div>
+              <div className="text-3xl font-bold">Ongoing</div>
               <p className="text-muted-foreground text-sm">
                 Optional follow-on for ongoing platform evolution: new tools,
                 new patterns, eval maintenance, and quarterly adoption
