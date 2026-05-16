@@ -1,4 +1,7 @@
 "use client";
+// TODO: zodResolver TypeScript overload fails with zod >=4.3.x due to version-branded type
+// constraints. Tracked at https://github.com/react-hook-form/resolvers/issues/842
+// Using /zod subpath for compatibility. Remove this comment once the issue is resolved upstream.
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback } from "react";
 import { ControllerRenderProps, useForm } from "react-hook-form";

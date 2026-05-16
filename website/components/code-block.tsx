@@ -45,7 +45,7 @@ export function CodeBlock({ language, children }: CodeBlockProps) {
 
   // Avoid hydration mismatch by waiting for client mount
   useEffect(() => {
-    setMounted(true);
+    setMounted(true); // eslint-disable-line react-hooks/set-state-in-effect
   }, []);
 
   const handleCopy = async () => {
