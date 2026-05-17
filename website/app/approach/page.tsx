@@ -47,7 +47,7 @@ const PRINCIPLES = [
   {
     icon: Layers,
     title: "Vendor-agnostic by design",
-    body: "Claude Code, Codex, Cursor, Copilot, Windsurf are tactical. The platform layer is strategic. I build to the meta-layer so the system survives the next tool launch.",
+    body: "Codex, Copilot, Claude Code, Cursor, Windsurf are tactical. The platform layer is strategic. I build to the meta-layer so the system survives the next tool launch.",
   },
   {
     icon: GaugeCircle,
