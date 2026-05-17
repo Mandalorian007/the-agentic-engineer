@@ -46,7 +46,7 @@ const PHASES = [
     label: "Phase 1",
     title: "Discovery & strategy",
     duration: "2–3 weeks",
-    body: "I audit how your teams actually use AI coding tools today (Claude Code, Codex, Cursor, Copilot, Windsurf, whatever you've licensed) and map adoption gaps, friction points, and security blockers. We agree on the metrics that prove the platform is working: cycle time, PR throughput, eval quality, developer satisfaction.",
+    body: "I audit how your teams actually use AI coding tools today (Copilot, Cursor, Claude Code, Codex, Windsurf, whatever you've licensed) and map adoption gaps, friction points, and security blockers. We agree on the metrics that prove the platform is working: cycle time, PR throughput, eval quality, developer satisfaction.",
     deliverables: [
       "Tool usage audit across teams",
       "Adoption + friction analysis",
@@ -221,7 +221,7 @@ export default function ServicesPage() {
         <h2 className="text-3xl font-bold mb-6">The problem you actually have</h2>
         <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
           <p>
-            Your team has Claude Code, Copilot, Cursor, Codex, and three internal
+            Your team has Copilot, Cursor, Claude Code, Codex, and three internal
             AI hackathon winners. Adoption sits at 15%. There&apos;s no
             measurement, security is anxious, and velocity hasn&apos;t moved.
           </p>
@@ -367,7 +367,8 @@ export default function ServicesPage() {
                 </div>
                 <div className="text-sm">
                   AI developer productivity, generative AI tooling, agent platform,
-                  agentic, LLM, Copilot enterprise, Claude
+                  agentic, LLM, multi-model coding assistants, Copilot enterprise,
+                  vendor-neutral AI tooling
                 </div>
               </div>
             </div>

@@ -87,11 +87,11 @@ const CATEGORIES: Array<Category> = [
 
 const PRIMARY_POST: Post = {
   category: "Case Studies",
-  title: "Voice to Blog Automation with Claude Code",
+  title: "Featured Post Placeholder",
   summary:
-    "How I built a fully automated blog publishing pipeline using Claude Code, Python, and AI agents—from voice input to published content.",
-  link: "/blog/2025-10-12-voice-to-blog-automation",
-  cta: "Read Case Study",
+    "Fallback content shown only when no featured post is provided. Real posts from content/posts override this default.",
+  link: "/blog",
+  cta: "Read More",
   thumbnail: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/placeholder-1.svg",
 };
 
