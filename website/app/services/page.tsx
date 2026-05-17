@@ -359,7 +359,7 @@ export default function ServicesPage() {
                 <div className="text-xs font-semibold uppercase text-muted-foreground tracking-wide mb-1">
                   NAICS codes
                 </div>
-                <div className="font-mono text-sm">541511 · 541512 · 541715</div>
+                <div className="font-mono text-sm">541511 · 541512 · 541519 · 541715</div>
               </div>
               <div>
                 <div className="text-xs font-semibold uppercase text-muted-foreground tracking-wide mb-1">
