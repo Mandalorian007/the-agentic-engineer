@@ -8,6 +8,16 @@ on:
 
   # Allow manual trigger for testing
   workflow_dispatch:
+    inputs:
+      date:
+        description: "Target date (YYYY-MM-DD). Leave blank to use today (UTC). Pass a date with no scheduled posts to safely smoke-test the workflow."
+        required: false
+        type: string
+      dry_run:
+        description: "Print the tweet without posting (no API call, no charge)."
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   post-twitter:
@@ -15,10 +25,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v4
+        uses: astral-sh/setup-uv@v8
         with:
           enable-cache: true
 
@@ -34,4 +44,8 @@ jobs:
           TWITTER_API_KEY_SECRET: ${{ secrets.TWITTER_API_KEY_SECRET }}
           TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
           TWITTER_ACCESS_TOKEN_SECRET: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
-        run: uv run tools/post_to_twitter.py
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date ${{ inputs.date }}"; fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
+          uv run tools/post_to_twitter.py $ARGS
