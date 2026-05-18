@@ -26,7 +26,7 @@
 ```
 the-agentic-engineer/
 ├── website/                      # Next.js blog (this subdirectory)
-│   ├── app/                      # Next.js 15 App Router
+│   ├── app/                      # Next.js 16 App Router
 │   │   ├── page.tsx              # Homepage
 │   │   ├── blog/                 # Blog pages (/blog, /blog/[slug])
 │   │   ├── layout.tsx            # Root layout
@@ -50,12 +50,11 @@ the-agentic-engineer/
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 (App Router) with Turbopack
+- **Framework**: Next.js 16 (App Router) with Turbopack
 - **Styling**: Tailwind CSS v4 + @tailwindcss/typography
 - **Components**: shadcn/ui (Clean Slate theme)
 - **Markdown**: react-markdown + remark-gfm
 - **Code Highlighting**: react-syntax-highlighter (oneDark theme)
-- **Auth**: Clerk (configured but not required for features)
 - **Hosting**: Vercel (deploy from `website/` subdirectory)
 
 ---
