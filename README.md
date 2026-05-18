@@ -4,7 +4,7 @@ Next.js blog with automated content generation and AI-powered image creation.
 
 ## Features
 
-- ✅ **Next.js 15**: Modern static site generation with App Router
+- ✅ **Next.js 16**: Modern static site generation with App Router
 - ✅ **MDX Content**: Write in MDX with frontmatter, deploy with git push
 - ✅ **AI Content Generation**: Complete blog posts with AI-generated images via the `aitk` CLI
 - ✅ **Social Media Automation**: Auto-generate and post to Twitter/LinkedIn via GitHub Actions
@@ -535,7 +535,7 @@ Direct tool usage without Claude Code commands:
 
 ### Tech Stack
 
-- **Frontend**: Next.js 15 (App Router) + Tailwind CSS
+- **Frontend**: Next.js 16 (App Router) + Tailwind CSS
 - **Content**: MDX files with gray-matter frontmatter
 - **Styling**: shadcn/ui + @tailwindcss/typography
 - **Deployment**: Vercel (auto-deploy on push)
