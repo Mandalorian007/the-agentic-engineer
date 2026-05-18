@@ -400,7 +400,7 @@ https://agentic-engineer.com/blog/{slug}
 - ✅ **Easy testing** - Manual trigger via GitHub UI or local script
 
 **Dependencies:**
-- `tweepy>=4.14.0` - Python Twitter API client
+- `tweepy>=4.14.0` - Python Twitter API client (uses OAuth 1.0a User Context against `POST /2/tweets`)
 - GitHub Actions workflows:
   - `.github/workflows/post-to-twitter.yml` - Runs daily at 6:30am EST (11:30am UTC)
   - `.github/workflows/post-to-linkedin.yml` - Future: Runs daily at 6:35am EST (11:35am UTC)
@@ -409,6 +409,7 @@ https://agentic-engineer.com/blog/{slug}
   - `TWITTER_API_KEY_SECRET`
   - `TWITTER_ACCESS_TOKEN`
   - `TWITTER_ACCESS_TOKEN_SECRET`
+- X API Pay-Per-Use credits (Free tier was deprecated Feb 6, 2026). Every tweet contains a URL, so each call is billed at the $0.20 URL rate. Fund the App's account at [console.x.com](https://console.x.com) and enable auto-recharge.
 
 **Error Handling:**
 - Posts without social content are skipped (exit 0)

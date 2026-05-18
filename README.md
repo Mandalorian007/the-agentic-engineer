@@ -433,7 +433,14 @@ This standardized daily schedule means you can publish on ANY day of the week - 
 
 ### Setup
 
-1. **Add Twitter credentials as GitHub secrets:**
+1. **X developer App** — at [console.x.com](https://console.x.com), create an App inside a Project with **Read and Write** permission. OAuth 1.0a User Context is the auth flow used; tweepy 4.16+ handles it.
+
+2. **Fund Pay-Per-Use** — the X Free tier was deprecated Feb 6, 2026. The App's account needs a positive credit balance to post.
+   - **Billing → Spending controls** → set a spending limit ($5/month is ~12× this pipeline's real usage).
+   - **Auto-recharge** is recommended (trigger ~$2, refill $10) so the bot doesn't silently stall when credits run out.
+   - **Cost per tweet:** $0.20 (every tweet contains a URL, which puts it in the URL-rate bucket). At bi-weekly cadence that's ~$0.40/month.
+
+3. **Add Twitter credentials as GitHub secrets:**
    - Go to Settings → Secrets and variables → Actions
    - Add these secrets:
      - `TWITTER_API_KEY`
@@ -441,7 +448,7 @@ This standardized daily schedule means you can publish on ANY day of the week - 
      - `TWITTER_ACCESS_TOKEN`
      - `TWITTER_ACCESS_TOKEN_SECRET`
 
-2. **GitHub Actions workflows:**
+4. **GitHub Actions workflows:**
    - `.github/workflows/post-to-twitter.yml` - Runs daily at 6:30am EST (11:30am UTC)
    - Posts go live at 6am EST (11am UTC), tweets sent 30 minutes later
    - Manually trigger via GitHub UI for testing
