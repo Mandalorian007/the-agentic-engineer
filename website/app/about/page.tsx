@@ -109,7 +109,7 @@ const BEST_FIT = [
 const NOT_A_FIT = [
   "Vendor evaluations that want a deck and a benchmark. I write configs and ship MCP servers; I don't run bake-offs.",
   "Single-tool point solutions like \"help us roll out Copilot.\" The value is in the platform between the tools, not the tools themselves.",
-  "Greenfield startups under ~20 engineers. You don't need the platform layer yet; you need to ship product.",
+  "Engineering orgs under ~50 developers. You don't need the platform layer yet; you need to ship product.",
 ];
 
 // Passport principle: experience as scaffolded reputation. Dates do the
@@ -283,8 +283,8 @@ export default function AboutPage() {
               Hi, I&apos;m Matthew Fontana.
             </h1>
             <p className="text-xl text-muted-foreground">
-              I build agentic developer platforms inside large engineering orgs,
-              and now I&apos;m available to build them inside yours.
+              I build agentic developer platforms inside large engineering orgs.
+              I take on a few outside engagements a year.
             </p>
           </div>
 
@@ -599,9 +599,9 @@ export default function AboutPage() {
       <section className="mt-24 max-w-3xl mx-auto text-center space-y-6">
         <h2 className="text-3xl md:text-4xl font-bold">Let&apos;s talk</h2>
         <p className="text-lg text-muted-foreground">
-          A first conversation is 30 minutes. Tell me what tools you&apos;ve
-          rolled out, where adoption stalled, and what shipping faster would
-          unlock. If we&apos;re a fit, the next step is a discovery sprint.
+          Drop me an email. Tell me about your tools, your team size, and
+          where adoption stalled. If we&apos;re a fit, the next step is a
+          discovery sprint. If not, I&apos;ll usually know someone.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
           <Button size="lg" asChild>
