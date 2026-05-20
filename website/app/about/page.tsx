@@ -30,6 +30,10 @@ const GITHUB_URL = "https://github.com/Mandalorian007";
 const LINKEDIN_URL = "https://www.linkedin.com/in/matthew-fontana/";
 const TAC_URL = "https://tabletopadventurecreator.com";
 
+// Tenure auto-updates each year — anchor is the UPS start (first enterprise role).
+const ENTERPRISE_START_YEAR = 2013;
+const TENURE_YEARS = new Date().getFullYear() - ENTERPRISE_START_YEAR;
+
 const ABOUT_TITLE = "About Matthew Fontana";
 const ABOUT_DESCRIPTION =
   "Staff Software Engineer at Airbnb. I build agentic developer platforms inside large engineering orgs, and the consulting work is the same work I'm shipping in production every week.";
@@ -53,6 +57,7 @@ export const metadata: Metadata = {
   },
 };
 
+// If you edit EXPERIENCE below, update worksFor / alumniOf / knowsAbout here too.
 const PERSON_JSON_LD = {
   "@context": "https://schema.org",
   "@type": "Person",
@@ -263,6 +268,10 @@ export default function AboutPage() {
               Staff Engineer · Airbnb
             </Badge>
             <Badge variant="secondary" className="gap-1.5">
+              <GraduationCap className="w-3 h-3" />
+              {TENURE_YEARS} yrs in enterprise software
+            </Badge>
+            <Badge variant="secondary" className="gap-1.5">
               <MapPin className="w-3 h-3" />
               Hoboken, NJ
             </Badge>
@@ -322,14 +331,15 @@ export default function AboutPage() {
       <section className="mt-20 max-w-3xl mx-auto space-y-5 text-lg leading-relaxed">
         <p>
           I&apos;m a Staff Software Engineer at Airbnb on the Data Management
-          team. I built batch and real-time ingestion for column-level data
-          lineage across the warehouse and designed the Lineage API behind
-          multi-step traversal queries. More recently I shipped an internal
-          AI agent for natural-language search and discovery. It&apos;s a
-          Claude Code Marketplace plugin with skills, subagents, hooks, and
-          commands. CLI and API MCP servers behind it handle internal
-          authentication and authorization. An evaluation framework scores
-          business outcomes, not unit pass rates.
+          team. Most recently I shipped an internal AI agent for
+          natural-language search and discovery across the data warehouse.
+          It&apos;s a Claude Code Marketplace plugin with skills, subagents,
+          hooks, and commands. CLI and API MCP servers behind it handle
+          internal authentication and authorization. An evaluation framework
+          scores business outcomes, not unit pass rates. Earlier on the team
+          I built batch and real-time ingestion for column-level data lineage
+          across the warehouse and designed the Lineage API behind
+          multi-step traversal queries.
         </p>
         <p>
           Before Airbnb I spent seven years at Spotify. I left as Staff in
@@ -377,8 +387,8 @@ export default function AboutPage() {
               Why this works
             </p>
             <p className="text-2xl md:text-3xl font-semibold leading-snug text-balance">
-              The consulting practice isn&apos;t a pivot. The platform I&apos;m
-              selling is the platform I&apos;m shipping.
+              The platform I&apos;m selling is the platform I&apos;m shipping
+              in production every week.
             </p>
           </CardContent>
         </Card>
