@@ -45,6 +45,10 @@ const NAVIGATION: MenuItem[] = [
     url: "/approach",
   },
   {
+    title: "About",
+    url: "/about",
+  },
+  {
     title: "Blog",
     url: "/blog",
   },
