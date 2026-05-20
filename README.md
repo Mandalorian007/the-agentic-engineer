@@ -588,6 +588,19 @@ the-agentic-engineer/
     └── lib/                      # TypeScript utilities
 ```
 
+## Positioning & Strategy
+
+**Credentials (surface everywhere — homepage, /about, /services, blog author bio):**
+Matthew Fontana — Staff Engineer at Airbnb, Staff Engineer at Spotify, Senior Engineer at UPS. Enterprise software since 2013.
+
+**Frame:** This is a credential-leverage play, not a cold-start SEO grind. Deploy credibility, don't earn it. ~90-day foundation, not 18 months.
+
+**Implications:**
+- **Site:** Credentials must be visible on the homepage hero, a dedicated `/about` page, the `/services` "Why me" section, and every blog post's author bio. Without this the brand reads as indie content; with it, enterprise buyers self-qualify in.
+- **Content:** Favor fewer, weightier pieces over a high-volume SEO calendar. The blog is a credibility surface, not the primary lever.
+- **Channels:** LinkedIn (2 substantive posts/week from a Staff-Airbnb byline) > SEO. Podcast and conference pitches are accessible now — resume gets the meeting.
+- **Launch posture:** One loud launch (flagship post + LinkedIn announcement + warm-DM to former colleagues), not a 12-month dark-forest phase.
+
 ## Project History
 
 Migrated from Blogger + Cloudinary to Next.js + Vercel (October 2025). See `docs/architecture.md` for full system details.
