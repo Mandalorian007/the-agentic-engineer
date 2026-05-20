@@ -24,15 +24,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-const CONTACT_EMAIL = "matthew.fontana@agentic-engineer.com";
-const GITHUB_URL = "https://github.com/Mandalorian007";
-const LINKEDIN_URL = "https://www.linkedin.com/in/matthew-fontana/";
-const TAC_URL = "https://tabletopadventurecreator.com";
-
-// Tenure auto-updates each year — anchor is the UPS start (first enterprise role).
-const ENTERPRISE_START_YEAR = 2013;
-const TENURE_YEARS = new Date().getFullYear() - ENTERPRISE_START_YEAR;
+import {
+  CONTACT_EMAIL,
+  GITHUB_URL,
+  LINKEDIN_URL,
+  TAC_URL,
+  TENURE_YEARS,
+} from "@/lib/bio";
 
 const ABOUT_TITLE = "About Matthew Fontana";
 const ABOUT_DESCRIPTION =

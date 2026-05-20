@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { CREDENTIAL_LINE, TENURE_YEARS } from "@/lib/bio";
 
 const CONTACT_EMAIL = "matthew.fontana@agentic-engineer.com";
 
@@ -200,6 +201,16 @@ export default function ServicesPage() {
           orgs turn AI coding tools into developer platforms their teams actually
           use.
         </p>
+        <p className="text-sm text-muted-foreground">
+          By{" "}
+          <Link
+            href="/about"
+            className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
+          >
+            Matthew Fontana
+          </Link>{" "}
+          · {CREDENTIAL_LINE}
+        </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
           <Button size="lg" asChild>
             <a href={`mailto:${CONTACT_EMAIL}?subject=Platform%20engagement%20inquiry`}>
@@ -333,9 +344,10 @@ export default function ServicesPage() {
           ))}
         </div>
         <p className="text-muted-foreground mt-6">
-          I&apos;m the fast, deep, neutral option: a staff-level engineer who
-          has shipped this pattern, working directly with your team for the
-          weeks it takes to land it.
+          I&apos;m the fast, deep, neutral option: Staff Engineer at Airbnb
+          today, ex-Staff at Spotify, ex-UPS — {TENURE_YEARS} years inside the
+          kind of engineering org you&apos;re trying to move — working directly
+          with your team for the weeks it takes to land it.
         </p>
       </section>
 

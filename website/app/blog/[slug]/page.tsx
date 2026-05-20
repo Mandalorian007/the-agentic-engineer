@@ -17,9 +17,11 @@ import { ShareButtons } from "@/components/share-buttons";
 import { TableOfContents } from "@/components/table-of-contents";
 import { ReadingProgress } from "@/components/reading-progress";
 import { HeadingWithAnchor } from "@/components/heading-with-anchor";
+import { AuthorBio } from "@/components/author-bio";
 import { extractHeadings, generateHeadingId } from "@/lib/toc";
 import { formatReadingTime } from "@/lib/reading-time";
 import { getHeroImagePath } from "@/lib/og-image";
+import { AUTHOR_NAME, LINKEDIN_URL } from "@/lib/bio";
 
 // ISR: Revalidate every 1 hour (3600 seconds)
 export const revalidate = 3600;
@@ -112,7 +114,9 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
     "dateModified": post.date,
     "author": {
       "@type": "Person",
-      "name": "The Agentic Engineer"
+      "name": AUTHOR_NAME,
+      "url": "https://agentic-engineer.com/about",
+      "sameAs": [LINKEDIN_URL]
     },
     "publisher": {
       "@type": "Organization",
@@ -279,6 +283,11 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
               ))}
             </div>
           )}
+
+          {/* Author bio — credential surface on every post */}
+          <div className="mt-12">
+            <AuthorBio />
+          </div>
         </article>
 
         {/* Sidebar */}
