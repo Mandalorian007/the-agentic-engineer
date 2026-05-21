@@ -3,8 +3,6 @@ import type { Metadata } from "next";
 import {
   ArrowRight,
   Mail,
-  Github,
-  Linkedin,
   Rss,
   CheckCircle2,
   XCircle,
@@ -20,6 +18,9 @@ import {
   BookOpen,
   ExternalLink,
 } from "lucide-react";
+// Brand icons live outside lucide-react v1 (removed for trademark reasons);
+// react-icons/fa6 is the project's established pattern (see share-buttons.tsx).
+import { FaGithub, FaLinkedinIn } from "react-icons/fa6";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -201,8 +202,10 @@ const WORK_AREAS = [
 
 // Selected public work: the show-don't-tell layer. Concrete artifacts a
 // reader can click into and verify the claims on the rest of the page.
+// Icon type accepts both lucide-react and react-icons components — both
+// expose a className prop, which is all we use at render time.
 type PublicWorkEntry = {
-  icon: typeof Sparkles;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
   body: string;
   href: string;
@@ -220,7 +223,7 @@ const PUBLIC_WORK: PublicWorkEntry[] = [
     external: true,
   },
   {
-    icon: Github,
+    icon: FaGithub,
     title: "@Mandalorian007 on GitHub",
     body: "Public repos including aitk (the portable AI CLI toolkit), claude-code-toolkit, claude-tmux-manager, and other Claude Code tooling.",
     href: GITHUB_URL,
@@ -299,13 +302,13 @@ export default function AboutPage() {
             </Button>
             <Button variant="outline" asChild>
               <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-                <Github className="w-4 h-4 mr-2" />
+                <FaGithub className="w-4 h-4 mr-2" />
                 GitHub
               </a>
             </Button>
             <Button variant="outline" asChild>
               <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
-                <Linkedin className="w-4 h-4 mr-2" />
+                <FaLinkedinIn className="w-4 h-4 mr-2" />
                 LinkedIn
               </a>
             </Button>
