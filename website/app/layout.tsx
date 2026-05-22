@@ -16,7 +16,7 @@ const openSans = Open_Sans({
 const SITE_URL = "https://agentic-engineer.com";
 const SITE_NAME = "The Agentic Engineer";
 const SITE_DESCRIPTION =
-  "I build agentic developer platforms that make engineering teams measurably faster. Vendor-agnostic platform engineering for private industry and federal agencies.";
+  "Matthew Fontana builds the platforms that make AI coding tools work for engineering teams. Writing about what's working in practice. Staff Engineer at Airbnb.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

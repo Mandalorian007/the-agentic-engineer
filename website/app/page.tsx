@@ -3,12 +3,11 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
 import { getRecentPosts } from "@/lib/posts";
 import { CATEGORY_LABELS } from "@/lib/categories";
 import { formatReadingTime } from "@/lib/reading-time";
-import { AUTHOR_NAME, CREDENTIAL_LINE } from "@/lib/bio";
+import { AUTHOR_NAME, CURRENT_ROLE } from "@/lib/bio";
 
 // Revalidate every hour to show new posts as they're published
 export const revalidate = 3600;
@@ -20,34 +19,26 @@ export default function Home() {
     <div className="container py-12 md:py-24">
       {/* Hero Section */}
       <section className="flex flex-col items-center text-center space-y-6 max-w-4xl mx-auto">
-        <Badge variant="outline">Agentic Developer Platform Engineering</Badge>
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-          I build agentic developer platforms that make engineering teams measurably faster.
+        <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-balance">
+          Hi, I&apos;m {AUTHOR_NAME}.
         </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl">
-          Vendor-agnostic. Production-grade. Outcome-focused. I help engineering
-          organizations turn AI coding tools into developer platforms their teams
-          actually use.
+        <p className="text-xl text-muted-foreground max-w-3xl">
+          I build the platforms that make AI coding tools actually work for
+          engineering teams. I write here about what I&apos;m learning
+          along the way.
         </p>
         <p className="text-sm text-muted-foreground">
-          By{" "}
-          <Link
-            href="/about"
-            className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
-          >
-            {AUTHOR_NAME}
-          </Link>{" "}
-          · {CREDENTIAL_LINE}
+          Currently {CURRENT_ROLE}. Previously Spotify, UPS.
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
           <Button size="lg" asChild>
-            <Link href="/services">
-              Work with me
+            <Link href="/blog">
+              Read the blog
               <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link href="/approach">How I work</Link>
+            <Link href="/speaking">Speaking</Link>
           </Button>
         </div>
       </section>

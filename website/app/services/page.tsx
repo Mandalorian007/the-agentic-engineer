@@ -197,9 +197,10 @@ export default function ServicesPage() {
           I build agentic developer platforms that make engineering teams measurably faster.
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Vendor-agnostic. Production-grade. Outcome-focused. I help engineering
-          orgs turn AI coding tools into developer platforms their teams actually
-          use.
+          Most of my work is writing, building, and shipping inside Airbnb. I
+          take on a small number of selective engagements per year when
+          there&apos;s strong fit on agentic platform strategy, MCP
+          architecture, or developer productivity transformation.
         </p>
         <p className="text-sm text-muted-foreground">
           By{" "}

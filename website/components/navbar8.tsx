@@ -37,20 +37,20 @@ const LOGO = {
 
 const NAVIGATION: MenuItem[] = [
   {
-    title: "Services",
-    url: "/services",
+    title: "Blog",
+    url: "/blog",
   },
   {
-    title: "Approach",
-    url: "/approach",
+    title: "Speaking",
+    url: "/speaking",
   },
   {
     title: "About",
     url: "/about",
   },
   {
-    title: "Blog",
-    url: "/blog",
+    title: "Work with me",
+    url: "/services",
   },
 ];
 
