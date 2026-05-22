@@ -601,6 +601,14 @@ Matthew Fontana — Staff Engineer at Airbnb, Staff Engineer at Spotify, Senior 
 - **Channels:** LinkedIn (2 substantive posts/week from a Staff-Airbnb byline) > SEO. Podcast and conference pitches are accessible now — resume gets the meeting.
 - **Launch posture:** One loud launch (flagship post + LinkedIn announcement + warm-DM to former colleagues), not a 12-month dark-forest phase.
 
+## Known Gaps (High Leverage)
+
+### Headshot for `/about`
+
+The About page (`website/app/about/page.tsx`) currently renders an initials placeholder (`"MF"`) in the hero. Drop a real headshot at `website/public/about/matthew-fontana.webp` and replace the placeholder `<div>` with `<Image src="/about/matthew-fontana.webp" ... />`.
+
+This is the single highest-leverage conversion improvement on the site. Faceless consulting About pages underperform significantly; the Airbnb Passport pattern that informed the page's design is grounded in research that says trust requires a face. Environmental shots (at a desk, in a coffee shop) tend to outperform studio headshots for solo-consultant credibility.
+
 ## Project History
 
 Migrated from Blogger + Cloudinary to Next.js + Vercel (October 2025). See `docs/architecture.md` for full system details.

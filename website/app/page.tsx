@@ -8,6 +8,7 @@ import { ArrowRight } from "lucide-react";
 import { getRecentPosts } from "@/lib/posts";
 import { CATEGORY_LABELS } from "@/lib/categories";
 import { formatReadingTime } from "@/lib/reading-time";
+import { AUTHOR_NAME, CREDENTIAL_LINE } from "@/lib/bio";
 
 // Revalidate every hour to show new posts as they're published
 export const revalidate = 3600;
@@ -27,6 +28,16 @@ export default function Home() {
           Vendor-agnostic. Production-grade. Outcome-focused. I help engineering
           organizations turn AI coding tools into developer platforms their teams
           actually use.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          By{" "}
+          <Link
+            href="/about"
+            className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
+          >
+            {AUTHOR_NAME}
+          </Link>{" "}
+          · {CREDENTIAL_LINE}
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
           <Button size="lg" asChild>
