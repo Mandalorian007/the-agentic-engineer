@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,8 +9,14 @@ export function AuthorBio() {
   return (
     <Card className="not-prose">
       <CardContent className="p-6 flex flex-col sm:flex-row gap-5 items-start">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full border bg-gradient-to-br from-primary/15 via-primary/5 to-muted">
-          <span className="text-lg font-bold text-primary/70">MF</span>
+        <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full border bg-muted">
+          <Image
+            src="/about/matthew-fontana.jpeg"
+            alt={AUTHOR_NAME}
+            fill
+            sizes="56px"
+            className="object-cover object-center"
+          />
         </div>
         <div className="flex-1 space-y-3 min-w-0">
           <div>

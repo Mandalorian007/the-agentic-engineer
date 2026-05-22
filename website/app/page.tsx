@@ -1,13 +1,11 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { ArrowRight } from "lucide-react";
 import { getCorpusStats, getRecentPosts } from "@/lib/posts";
-import { CATEGORY_LABELS } from "@/lib/categories";
 import { formatReadingTime } from "@/lib/reading-time";
+import { CATEGORY_LABELS } from "@/lib/categories";
 import { AUTHOR_NAME, CURRENT_ROLE, GITHUB_URL, TAC_URL } from "@/lib/bio";
+import { PostCard } from "@/components/post-card";
 
 // Revalidate every hour to show new posts as they're published
 export const revalidate = 3600;
@@ -105,67 +103,33 @@ export default function Home() {
 
       {/* Recent Posts Section */}
       <section className="mt-24">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-4">
-          <div>
-            <h2 className="text-3xl font-bold">From the blog</h2>
-            <p className="text-muted-foreground mt-2">
-              Notes on agentic developer platforms, MCP, evals, and what
-              ships inside large engineering orgs.
-            </p>
-          </div>
-          <Button variant="ghost" asChild>
+        <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <h2 className="text-2xl font-semibold tracking-tight">
+            From the blog
+          </h2>
+          <Button variant="ghost" size="sm" asChild>
             <Link href="/blog">
               All posts
               <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </Button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
           {recentPosts.map((post, index) => (
-            <Link key={post.slug} href={`/blog/${post.slug}`} className="block h-full w-full">
-              <Card className="size-full rounded-lg border py-0 hover:border-foreground/50 transition-colors">
-                <CardContent className="p-0">
-                  <div className="text-muted-foreground border-b p-2.5 text-sm font-medium leading-[1.2]">
-                    {CATEGORY_LABELS[post.category as keyof typeof CATEGORY_LABELS] || post.category}
-                  </div>
-                  <AspectRatio ratio={1.520833333} className="overflow-hidden bg-muted">
-                    {post.heroImage ? (
-                      <Image
-                        src={post.heroImage}
-                        alt={post.title}
-                        fill
-                        className="object-cover object-center"
-                        priority={index === 0}
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center size-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-950 dark:to-purple-950">
-                        <span className="text-muted-foreground">Coming Soon</span>
-                      </div>
-                    )}
-                  </AspectRatio>
-                  <div className="flex w-full flex-col gap-5 p-5">
-                    <h2 className="text-lg font-medium leading-tight md:text-xl">
-                      {post.title}
-                    </h2>
-                    <div className="w-full max-w-[20rem]">
-                      <p className="text-muted-foreground text-sm font-medium leading-[1.4] line-clamp-3">
-                        {post.description}
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Button size="sm" variant="outline">
-                        Read More
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                      <span className="text-xs text-muted-foreground">
-                        {formatReadingTime(post.readingTime)}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+            <PostCard
+              key={post.slug}
+              slug={post.slug}
+              title={post.title}
+              description={post.description}
+              date={post.date}
+              categoryLabel={
+                CATEGORY_LABELS[post.category as keyof typeof CATEGORY_LABELS] ??
+                post.category
+              }
+              readingTime={formatReadingTime(post.readingTime)}
+              heroImage={post.heroImage}
+              priority={index === 0}
+            />
           ))}
         </div>
       </section>

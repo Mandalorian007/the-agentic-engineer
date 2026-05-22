@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import {
   ArrowRight,
@@ -238,13 +239,15 @@ export default function AboutPage() {
       */}
       <section className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-10 items-start max-w-5xl mx-auto">
         <div className="space-y-4">
-          {/*
-            Placeholder until a real headshot is added at
-            /public/about/matthew-fontana.webp. Square, warm, friendly.
-            Replace this block with <Image /> once the asset exists.
-          */}
-          <div className="aspect-square w-full rounded-lg border bg-gradient-to-br from-primary/15 via-primary/5 to-muted flex items-center justify-center">
-            <span className="text-6xl font-bold text-primary/70">MF</span>
+          <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-muted">
+            <Image
+              src="/about/matthew-fontana.jpeg"
+              alt="Matthew Fontana"
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 260px"
+              className="object-cover object-center"
+            />
           </div>
           <div className="flex flex-wrap gap-2 text-xs">
             <Badge variant="secondary" className="gap-1.5">
