@@ -11,17 +11,18 @@ import {
 
 const NAVIGATION = [
   {
-    title: "Work",
+    title: "Content",
     links: [
-      { name: "Services", href: "/services" },
-      { name: "Approach", href: "/approach" },
+      { name: "Blog", href: "/blog" },
+      { name: "Speaking", href: "/speaking" },
+      { name: "About", href: "/about" },
     ],
   },
   {
-    title: "Content",
+    title: "Work",
     links: [
-      { name: "About", href: "/about" },
-      { name: "Blog", href: "/blog" },
+      { name: "Work with me", href: "/services" },
+      { name: "Approach", href: "/approach" },
     ],
   },
   {
@@ -53,9 +54,9 @@ const Footer16 = () => {
               <span className="text-2xl font-bold">The Agentic Engineer</span>
             </Link>
             <p className="text-muted-foreground text-sm max-w-md">
-              I help engineering organizations turn AI coding tools into
-              production-grade developer platforms. Vendor-agnostic.
-              Outcome-focused.
+              Essays on agentic developer platforms, MCP, and the agentic
+              SDLC. Available for podcasts, conference talks, and selective
+              engagements.
             </p>
             <Link
               href="/feed.xml"

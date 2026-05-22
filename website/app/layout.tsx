@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Open_Sans } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar8 } from "@/components/navbar8";
 import { Footer16 } from "@/components/footer16";
@@ -7,8 +7,14 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-const openSans = Open_Sans({
-  variable: "--font-open-sans",
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
   subsets: ["latin"],
   display: "swap",
 });
@@ -16,7 +22,7 @@ const openSans = Open_Sans({
 const SITE_URL = "https://agentic-engineer.com";
 const SITE_NAME = "The Agentic Engineer";
 const SITE_DESCRIPTION =
-  "I build agentic developer platforms that make engineering teams measurably faster. Vendor-agnostic platform engineering for private industry and federal agencies.";
+  "Matthew Fontana builds the platforms that make AI coding tools work for engineering teams. Writing about what's working in practice. Staff Engineer at Airbnb.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -64,7 +70,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${openSans.variable} antialiased flex min-h-screen flex-col`}
+        className={`${inter.variable} ${jetbrainsMono.variable} antialiased flex min-h-screen flex-col`}
       >
         <ThemeProvider
           attribute="class"

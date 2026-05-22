@@ -1,11 +1,10 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
 import {
   ArrowRight,
   Mail,
   Rss,
-  CheckCircle2,
-  XCircle,
   MapPin,
   Building2,
   GraduationCap,
@@ -35,7 +34,7 @@ import {
 
 const ABOUT_TITLE = "About Matthew Fontana";
 const ABOUT_DESCRIPTION =
-  "Staff Software Engineer at Airbnb. I build agentic developer platforms inside large engineering orgs, and the consulting work is the same work I'm shipping in production every week.";
+  "Staff Software Engineer at Airbnb. I write at agentic-engineer.com about agentic developer platforms, MCP, and the agentic SDLC, and help a handful of engineering teams a year build theirs.";
 
 export const metadata: Metadata = {
   title: ABOUT_TITLE,
@@ -97,21 +96,6 @@ const PERSON_JSON_LD = {
     "Python",
   ],
 };
-
-// Passport principle: "best fit / not a fit" is the consulting analog to
-// Airbnb's two-sided host/guest reviews. Public honesty about who you don't
-// serve builds more trust than another claim about who you do.
-const BEST_FIT = [
-  "Engineering orgs of 50–500 developers with AI tool licenses already in place and no platform layer around them.",
-  "Platform / DevEx teams that want a senior partner who has shipped agentic tooling in a top-tier consumer-tech codebase.",
-  "Federal agencies under AI adoption mandates with procurement vehicles for specialist consultants.",
-];
-
-const NOT_A_FIT = [
-  "Vendor evaluations that want a deck and a benchmark. I write configs and ship MCP servers; I don't run bake-offs.",
-  "Single-tool point solutions like \"help us roll out Copilot.\" The value is in the platform between the tools, not the tools themselves.",
-  "Engineering orgs under ~50 developers. You don't need the platform layer yet; you need to ship product.",
-];
 
 // Passport principle: experience as scaffolded reputation. Dates do the
 // long-tenure work passively; no "X years of experience" claims.
@@ -255,13 +239,15 @@ export default function AboutPage() {
       */}
       <section className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-10 items-start max-w-5xl mx-auto">
         <div className="space-y-4">
-          {/*
-            Placeholder until a real headshot is added at
-            /public/about/matthew-fontana.webp. Square, warm, friendly.
-            Replace this block with <Image /> once the asset exists.
-          */}
-          <div className="aspect-square w-full rounded-lg border bg-gradient-to-br from-primary/15 via-primary/5 to-muted flex items-center justify-center">
-            <span className="text-6xl font-bold text-primary/70">MF</span>
+          <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-muted">
+            <Image
+              src="/about/matthew-fontana.jpeg"
+              alt="Matthew Fontana"
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 260px"
+              className="object-cover object-center"
+            />
           </div>
           <div className="flex flex-wrap gap-2 text-xs">
             <Badge variant="secondary" className="gap-1.5">
@@ -286,20 +272,13 @@ export default function AboutPage() {
               Hi, I&apos;m Matthew Fontana.
             </h1>
             <p className="text-xl text-muted-foreground">
-              I build agentic developer platforms inside large engineering orgs.
-              I take on a few outside engagements a year.
+              I build agentic developer platforms inside large engineering
+              orgs, write about the work here, and take on a few outside
+              engagements a year.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Button asChild>
-              <a
-                href={`mailto:${CONTACT_EMAIL}?subject=Engagement%20inquiry`}
-              >
-                <Mail className="w-4 h-4 mr-2" />
-                Start a conversation
-              </a>
-            </Button>
             <Button variant="outline" asChild>
               <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
                 <FaGithub className="w-4 h-4 mr-2" />
@@ -315,7 +294,7 @@ export default function AboutPage() {
             <Button variant="outline" asChild>
               <Link href="/feed.xml">
                 <Rss className="w-4 h-4 mr-2" />
-                Blog RSS
+                RSS
               </Link>
             </Button>
           </div>
@@ -385,11 +364,11 @@ export default function AboutPage() {
         <Card className="border-primary/30 bg-primary/5">
           <CardContent className="p-8 md:p-10 text-center space-y-3">
             <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-              Why this works
+              The work behind the writing
             </p>
             <p className="text-2xl md:text-3xl font-semibold leading-snug text-balance">
-              The platform I&apos;m selling is the platform I&apos;m shipping
-              in production every week.
+              The platform I write about here is the platform I&apos;m
+              shipping in production every week.
             </p>
           </CardContent>
         </Card>
@@ -403,8 +382,8 @@ export default function AboutPage() {
       <section className="mt-24 max-w-5xl mx-auto">
         <h2 className="text-3xl font-bold mb-4">What I work on</h2>
         <p className="text-lg text-muted-foreground mb-10">
-          Four areas the consulting work tends to land in. They overlap more
-          than they don&apos;t.
+          Four areas the work tends to land in. They overlap more than they
+          don&apos;t.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {WORK_AREAS.map((area) => {
@@ -427,53 +406,6 @@ export default function AboutPage() {
               </Card>
             );
           })}
-        </div>
-      </section>
-
-      {/*
-        BEST FIT / NOT A FIT — Passport "two-sided review" analog.
-        Public honesty about who I don't serve is a stronger trust signal
-        than another claim about who I do.
-      */}
-      <section className="mt-24 max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold mb-4">Who I&apos;m a fit for</h2>
-        <p className="text-lg text-muted-foreground mb-10">
-          The honest version. I&apos;d rather not be hired by the wrong org than
-          be hired by all of them.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-primary/30">
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-semibold">Good fit</h3>
-              </div>
-              <ul className="space-y-3">
-                {BEST_FIT.map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-          <Card className="border-muted">
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-2">
-                <XCircle className="w-5 h-5 text-muted-foreground" />
-                <h3 className="text-lg font-semibold">Not a fit</h3>
-              </div>
-              <ul className="space-y-3">
-                {NOT_A_FIT.map((item) => (
-                  <li key={item} className="flex items-start gap-2 text-sm">
-                    <XCircle className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
-                    <span className="text-muted-foreground">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
         </div>
       </section>
 
@@ -600,24 +532,21 @@ export default function AboutPage() {
 
       {/* FINAL CTA */}
       <section className="mt-24 max-w-3xl mx-auto text-center space-y-6">
-        <h2 className="text-3xl md:text-4xl font-bold">Let&apos;s talk</h2>
+        <h2 className="text-3xl md:text-4xl font-bold">Get in touch</h2>
         <p className="text-lg text-muted-foreground">
-          Drop me an email. Tell me about your tools, your team size, and
-          where adoption stalled. If we&apos;re a fit, the next step is a
-          discovery sprint. If not, I&apos;ll usually know someone.
+          Email is the fastest way to reach me. Glad to hear from anyone
+          building in this space.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
           <Button size="lg" asChild>
-            <a
-              href={`mailto:${CONTACT_EMAIL}?subject=Engagement%20inquiry`}
-            >
+            <a href={`mailto:${CONTACT_EMAIL}`}>
               <Mail className="w-4 h-4 mr-2" />
               {CONTACT_EMAIL}
             </a>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link href="/services">
-              See the offer
+            <Link href="/speaking">
+              Invite me to speak
               <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </Button>

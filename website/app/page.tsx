@@ -1,121 +1,145 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
-import { getRecentPosts } from "@/lib/posts";
-import { CATEGORY_LABELS } from "@/lib/categories";
+import { getCorpusStats, getRecentPosts } from "@/lib/posts";
 import { formatReadingTime } from "@/lib/reading-time";
-import { AUTHOR_NAME, CREDENTIAL_LINE } from "@/lib/bio";
+import { CATEGORY_LABELS } from "@/lib/categories";
+import { AUTHOR_NAME, CURRENT_ROLE, GITHUB_URL, TAC_URL } from "@/lib/bio";
+import { PostCard } from "@/components/post-card";
 
 // Revalidate every hour to show new posts as they're published
 export const revalidate = 3600;
 
 export default function Home() {
   const recentPosts = getRecentPosts(3);
+  const { postCount, wordCount } = getCorpusStats();
 
   return (
     <div className="container py-12 md:py-24">
       {/* Hero Section */}
       <section className="flex flex-col items-center text-center space-y-6 max-w-4xl mx-auto">
-        <Badge variant="outline">Agentic Developer Platform Engineering</Badge>
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-          I build agentic developer platforms that make engineering teams measurably faster.
+        <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-balance">
+          Hi, I&apos;m {AUTHOR_NAME}.
         </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl">
-          Vendor-agnostic. Production-grade. Outcome-focused. I help engineering
-          organizations turn AI coding tools into developer platforms their teams
-          actually use.
+        <p className="text-xl text-muted-foreground max-w-3xl">
+          I build the platforms that make AI coding tools actually work for
+          engineering teams. I write here about what I&apos;m learning
+          along the way.
         </p>
         <p className="text-sm text-muted-foreground">
-          By{" "}
-          <Link
-            href="/about"
-            className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
-          >
-            {AUTHOR_NAME}
-          </Link>{" "}
-          · {CREDENTIAL_LINE}
+          Currently {CURRENT_ROLE}. Previously Spotify, UPS.
         </p>
         <div className="flex flex-col sm:flex-row gap-3">
           <Button size="lg" asChild>
-            <Link href="/services">
-              Work with me
+            <Link href="/blog">
+              Read the blog
               <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link href="/approach">How I work</Link>
+            <Link href="/speaking">Speaking</Link>
           </Button>
         </div>
       </section>
 
+      {/* Activity bullets: what I'm up to in the world */}
+      <section className="mt-16 max-w-2xl mx-auto">
+        <ul className="space-y-3 list-disc list-outside ml-6 text-base text-muted-foreground">
+          <li>
+            <Link
+              href="/blog"
+              className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
+            >
+              Write
+            </Link>{" "}
+            here on agentic developer platforms, MCP, evals, and the
+            agentic SDLC.
+          </li>
+          <li>
+            <Link
+              href="/speaking"
+              className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
+            >
+              Speak
+            </Link>{" "}
+            on podcasts, at conferences, and inside engineering orgs.
+          </li>
+          <li>
+            <a
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
+            >
+              Ship
+            </a>{" "}
+            open source on GitHub (aitk, claude-code-toolkit,
+            claude-tmux-manager, and other Claude Code tooling).
+          </li>
+          <li>
+            <a
+              href={TAC_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
+            >
+              Run
+            </a>{" "}
+            TabletopAdventureCreator.com, a generative-AI SaaS in
+            production since 2022.
+          </li>
+          <li>
+            <Link
+              href="/services"
+              className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
+            >
+              Help
+            </Link>{" "}
+            a handful of engineering teams a year build the platform layer
+            underneath their AI tools.
+          </li>
+        </ul>
+      </section>
+
       {/* Recent Posts Section */}
       <section className="mt-24">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-4">
-          <div>
-            <h2 className="text-3xl font-bold">From the blog</h2>
-            <p className="text-muted-foreground mt-2">
-              Field notes on agentic engineering: patterns, tooling, and lessons from real engagements.
-            </p>
-          </div>
-          <Button variant="ghost" asChild>
+        <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <h2 className="text-2xl font-semibold tracking-tight">
+            From the blog
+          </h2>
+          <Button variant="ghost" size="sm" asChild>
             <Link href="/blog">
               All posts
               <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </Button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3">
           {recentPosts.map((post, index) => (
-            <Link key={post.slug} href={`/blog/${post.slug}`} className="block h-full w-full">
-              <Card className="size-full rounded-lg border py-0 hover:border-foreground/50 transition-colors">
-                <CardContent className="p-0">
-                  <div className="text-muted-foreground border-b p-2.5 text-sm font-medium leading-[1.2]">
-                    {CATEGORY_LABELS[post.category as keyof typeof CATEGORY_LABELS] || post.category}
-                  </div>
-                  <AspectRatio ratio={1.520833333} className="overflow-hidden bg-muted">
-                    {post.heroImage ? (
-                      <Image
-                        src={post.heroImage}
-                        alt={post.title}
-                        fill
-                        className="object-cover object-center"
-                        priority={index === 0}
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center size-full bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-950 dark:to-purple-950">
-                        <span className="text-muted-foreground">Coming Soon</span>
-                      </div>
-                    )}
-                  </AspectRatio>
-                  <div className="flex w-full flex-col gap-5 p-5">
-                    <h2 className="text-lg font-medium leading-tight md:text-xl">
-                      {post.title}
-                    </h2>
-                    <div className="w-full max-w-[20rem]">
-                      <p className="text-muted-foreground text-sm font-medium leading-[1.4] line-clamp-3">
-                        {post.description}
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Button size="sm" variant="outline">
-                        Read More
-                        <ArrowRight className="w-4 h-4 ml-2" />
-                      </Button>
-                      <span className="text-xs text-muted-foreground">
-                        {formatReadingTime(post.readingTime)}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
+            <PostCard
+              key={post.slug}
+              slug={post.slug}
+              title={post.title}
+              description={post.description}
+              date={post.date}
+              categoryLabel={
+                CATEGORY_LABELS[post.category as keyof typeof CATEGORY_LABELS] ??
+                post.category
+              }
+              readingTime={formatReadingTime(post.readingTime)}
+              heroImage={post.heroImage}
+              priority={index === 0}
+            />
           ))}
         </div>
+      </section>
+
+      {/* Numbers-as-narrative: credibility without bragging */}
+      <section className="mt-24 text-center">
+        <p className="text-sm text-muted-foreground">
+          {postCount} posts · {wordCount.toLocaleString()} words · since
+          October 2025. More always in the queue.
+        </p>
       </section>
     </div>
   );

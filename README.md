@@ -609,6 +609,10 @@ The About page (`website/app/about/page.tsx`) currently renders an initials plac
 
 This is the single highest-leverage conversion improvement on the site. Faceless consulting About pages underperform significantly; the Airbnb Passport pattern that informed the page's design is grounded in research that says trust requires a face. Environmental shots (at a desk, in a coffee shop) tend to outperform studio headshots for solo-consultant credibility.
 
+### Past appearances on `/speaking`
+
+The Speaking page (`website/app/speaking/page.tsx`) currently offers podcast guest spots, CFP collaborations, and internal talks, but no completed appearances are listed. Once real appearances exist, add a "Past appearances" list under the Podcasts section (linked episodes, dates) and a "Past abstracts" reference under Conferences (links to talk decks or recordings). Until those exist, do not include placeholder lines like "Past appearances will be listed here as they happen" — they signal absence rather than offer.
+
 ## Project History
 
 Migrated from Blogger + Cloudinary to Next.js + Vercel (October 2025). See `docs/architecture.md` for full system details.
