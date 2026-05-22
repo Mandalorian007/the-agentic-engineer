@@ -118,6 +118,23 @@ export function getRecentPosts(limit: number = 3): Post[] {
 }
 
 /**
+ * Aggregate corpus stats for credibility-strip rendering on the homepage.
+ * Counts only published posts. Word count is a rough whitespace split of
+ * post body content (no frontmatter).
+ */
+export function getCorpusStats(): {
+  postCount: number;
+  wordCount: number;
+} {
+  const posts = getPublishedPosts();
+  const wordCount = posts.reduce((acc, post) => {
+    const words = post.content.trim().split(/\s+/).filter(Boolean).length;
+    return acc + words;
+  }, 0);
+  return { postCount: posts.length, wordCount };
+}
+
+/**
  * Get all unique slugs for static generation
  */
 export function getAllPostSlugs(): string[] {

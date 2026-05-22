@@ -197,10 +197,10 @@ export default function ServicesPage() {
           I build agentic developer platforms that make engineering teams measurably faster.
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-          Most of my work is writing, building, and shipping inside Airbnb. I
-          take on a small number of selective engagements per year when
-          there&apos;s strong fit on agentic platform strategy, MCP
-          architecture, or developer productivity transformation.
+          Most of my work is writing, building, and shipping inside Airbnb. A
+          few times a year I work with engineering teams on agentic platform
+          strategy, MCP architecture, or developer productivity, when
+          there&apos;s real fit on both sides.
         </p>
         <p className="text-sm text-muted-foreground">
           By{" "}

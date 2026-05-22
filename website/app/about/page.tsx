@@ -33,7 +33,7 @@ import {
 
 const ABOUT_TITLE = "About Matthew Fontana";
 const ABOUT_DESCRIPTION =
-  "Staff Software Engineer at Airbnb. I write at agentic-engineer.com about agentic developer platforms, MCP, and the agentic SDLC — and take on a few selective engagements a year.";
+  "Staff Software Engineer at Airbnb. I write at agentic-engineer.com about agentic developer platforms, MCP, and the agentic SDLC, and help a handful of engineering teams a year build theirs.";
 
 export const metadata: Metadata = {
   title: ABOUT_TITLE,

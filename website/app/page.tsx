@@ -4,16 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { ArrowRight } from "lucide-react";
-import { getRecentPosts } from "@/lib/posts";
+import { getCorpusStats, getRecentPosts } from "@/lib/posts";
 import { CATEGORY_LABELS } from "@/lib/categories";
 import { formatReadingTime } from "@/lib/reading-time";
-import { AUTHOR_NAME, CURRENT_ROLE } from "@/lib/bio";
+import { AUTHOR_NAME, CURRENT_ROLE, GITHUB_URL, TAC_URL } from "@/lib/bio";
 
 // Revalidate every hour to show new posts as they're published
 export const revalidate = 3600;
 
 export default function Home() {
   const recentPosts = getRecentPosts(3);
+  const { postCount, wordCount } = getCorpusStats();
 
   return (
     <div className="container py-12 md:py-24">
@@ -43,13 +44,73 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Activity bullets: what I'm up to in the world */}
+      <section className="mt-16 max-w-2xl mx-auto">
+        <ul className="space-y-3 list-disc list-outside ml-6 text-base text-muted-foreground">
+          <li>
+            <Link
+              href="/blog"
+              className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
+            >
+              Write
+            </Link>{" "}
+            here on agentic developer platforms, MCP, evals, and the
+            agentic SDLC.
+          </li>
+          <li>
+            <Link
+              href="/speaking"
+              className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
+            >
+              Speak
+            </Link>{" "}
+            on podcasts, at conferences, and inside engineering orgs.
+          </li>
+          <li>
+            <a
+              href={GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
+            >
+              Ship
+            </a>{" "}
+            open source on GitHub (aitk, claude-code-toolkit,
+            claude-tmux-manager, and other Claude Code tooling).
+          </li>
+          <li>
+            <a
+              href={TAC_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
+            >
+              Run
+            </a>{" "}
+            TabletopAdventureCreator.com, a generative-AI SaaS in
+            production since 2022.
+          </li>
+          <li>
+            <Link
+              href="/services"
+              className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
+            >
+              Help
+            </Link>{" "}
+            a handful of engineering teams a year build the platform layer
+            underneath their AI tools.
+          </li>
+        </ul>
+      </section>
+
       {/* Recent Posts Section */}
       <section className="mt-24">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-8 gap-4">
           <div>
             <h2 className="text-3xl font-bold">From the blog</h2>
             <p className="text-muted-foreground mt-2">
-              Field notes on agentic engineering: patterns, tooling, and lessons from real engagements.
+              Notes on agentic developer platforms, MCP, evals, and what
+              ships inside large engineering orgs.
             </p>
           </div>
           <Button variant="ghost" asChild>
@@ -107,6 +168,14 @@ export default function Home() {
             </Link>
           ))}
         </div>
+      </section>
+
+      {/* Numbers-as-narrative: credibility without bragging */}
+      <section className="mt-24 text-center">
+        <p className="text-sm text-muted-foreground">
+          {postCount} posts · {wordCount.toLocaleString()} words · since
+          October 2025. More always in the queue.
+        </p>
       </section>
     </div>
   );
