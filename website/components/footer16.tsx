@@ -20,10 +20,7 @@ const NAVIGATION = [
   },
   {
     title: "Work",
-    links: [
-      { name: "Work with me", href: "/services" },
-      { name: "Approach", href: "/approach" },
-    ],
+    links: [{ name: "Work with me", href: "/services" }],
   },
   {
     title: "Legal",
@@ -55,8 +52,8 @@ const Footer16 = () => {
             </Link>
             <p className="text-muted-foreground text-sm max-w-md">
               Essays on agentic developer platforms, MCP, and the agentic
-              SDLC. Available for podcasts, conference talks, and selective
-              engagements.
+              SDLC. Available for podcasts, conference talks, and a handful of
+              engineering engagements a year.
             </p>
             <Link
               href="/feed.xml"

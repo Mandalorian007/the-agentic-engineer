@@ -2,25 +2,24 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import {
   ArrowRight,
-  CheckCircle2,
-  Compass,
-  Cpu,
-  GraduationCap,
-  Building2,
-  Landmark,
   Mail,
+  Target,
+  Layers,
+  GaugeCircle,
+  Search,
+  ShieldCheck,
+  Users,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CREDENTIAL_LINE, TENURE_YEARS } from "@/lib/bio";
+import { CREDENTIAL_LINE } from "@/lib/bio";
 
 const CONTACT_EMAIL = "matthew.fontana@agentic-engineer.com";
 
 const SERVICES_TITLE = "Work With Me";
 const SERVICES_DESCRIPTION =
-  "I help engineering organizations turn AI coding tools into production-grade developer platforms. Vendor-agnostic. Outcome-focused. Fixed-scope, fixed-fee engagements.";
+  "Most of my work is building agentic developer platforms inside Airbnb. A handful of times a year I work with engineering teams on the platform layer underneath their AI tools. No fixed packages. Start a conversation.";
 
 export const metadata: Metadata = {
   title: SERVICES_TITLE,
@@ -41,91 +40,6 @@ export const metadata: Metadata = {
   },
 };
 
-const PHASES = [
-  {
-    icon: Compass,
-    label: "Phase 1",
-    title: "Discovery & strategy",
-    duration: "2–3 weeks",
-    body: "I audit how your teams actually use AI coding tools today (Codex, Copilot, Claude Code, Cursor, Windsurf, whatever you've licensed) and map adoption gaps, friction points, and security blockers. We agree on the metrics that prove the platform is working: cycle time, PR throughput, eval quality, developer satisfaction.",
-    deliverables: [
-      "Tool usage audit across teams",
-      "Adoption + friction analysis",
-      "Security and compliance review",
-      "Success metrics and instrumentation plan",
-    ],
-  },
-  {
-    icon: Cpu,
-    label: "Phase 2",
-    title: "Platform implementation",
-    duration: "8–12 weeks",
-    body: "I build the platform layer around your tools: standardized configurations, a shared skill library, internal MCP servers exposing org-specific context, subagent orchestration patterns tailored to your workflows, and the codebase-specific evaluation harnesses that catch regressions before they ship.",
-    deliverables: [
-      "Standardized configs + skill libraries",
-      "Internal MCP servers for shared context",
-      "Subagent and orchestration patterns",
-      "Evaluation + regression harnesses",
-      "Guardrails, secrets handling, audit logging",
-    ],
-  },
-  {
-    icon: GraduationCap,
-    label: "Phase 3",
-    title: "Enablement",
-    duration: "Overlaps phase 2",
-    body: "A platform nobody uses is a sunk cost. I leave behind onboarding docs, in-house workshops, and runbooks so your team owns the system on day one. Adoption is part of the deliverable, not a hopeful side effect.",
-    deliverables: [
-      "Team onboarding documentation",
-      "Live workshops (recorded for replay)",
-      "Operating runbooks for ongoing evolution",
-      "Internal champion enablement",
-    ],
-  },
-];
-
-const AUDIENCE = [
-  {
-    title: "Series B–D startups",
-    body: "Scaling engineering fast, rolled out three AI tools, can't tell which are working.",
-  },
-  {
-    title: "Mid-market enterprise",
-    body: "50–500 developers across FinServ, healthcare, or SaaS. AI mandate from the top, chaos on the ground.",
-  },
-  {
-    title: "Platform / DevEx teams",
-    body: "Already own developer tooling. Need a senior partner who has shipped this before, not a deck.",
-  },
-  {
-    title: "Federal agencies",
-    body: "AI adoption mandate, existing tool licenses, no easy path to hire the internal expertise.",
-  },
-];
-
-const ALTERNATIVES = [
-  {
-    option: "Internal eng team builds it",
-    tradeoff:
-      "Slow, opportunity cost, no benchmark for what good looks like.",
-  },
-  {
-    option: "Big consultancy",
-    tradeoff:
-      "10× the price, generic frameworks, no hands-on platform depth.",
-  },
-  {
-    option: "Tool vendor solution engineer",
-    tradeoff:
-      "Biased to one product, won't build the cross-tool platform you actually need.",
-  },
-  {
-    option: "Hire a staff agentic engineer",
-    tradeoff:
-      "$400K+/year fully loaded, six-month ramp, hard to find.",
-  },
-];
-
 const SERVICES_JSON_LD = {
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
@@ -144,42 +58,60 @@ const SERVICES_JSON_LD = {
     name: "Matthew Fontana",
     email: CONTACT_EMAIL,
     url: "https://agentic-engineer.com",
-    jobTitle: "Agentic developer platform engineer",
-  },
-  hasOfferCatalog: {
-    "@type": "OfferCatalog",
-    name: "Engagements",
-    itemListElement: [
-      {
-        "@type": "Offer",
-        itemOffered: {
-          "@type": "Service",
-          name: "Discovery sprint",
-          description:
-            "Two- to three-week audit, gap analysis, success metrics, and written platform blueprint.",
-        },
-      },
-      {
-        "@type": "Offer",
-        itemOffered: {
-          "@type": "Service",
-          name: "Platform build",
-          description:
-            "Ten- to fourteen-week implementation across discovery, platform, and enablement. Fixed-scope, fixed-fee.",
-        },
-      },
-      {
-        "@type": "Offer",
-        itemOffered: {
-          "@type": "Service",
-          name: "Retainer",
-          description:
-            "Ongoing platform evolution: new tools, new patterns, eval maintenance, quarterly adoption reviews.",
-        },
-      },
-    ],
+    jobTitle: "Staff Software Engineer",
   },
 };
+
+// Open-ended list of the problems I'm useful on — described as activities,
+// not packaged deliverables. No timelines, no pricing, no qualification gate.
+const HELP_WITH = [
+  "Agentic platform strategy: turning a pile of AI tool licenses into a platform your teams actually use.",
+  "MCP architecture: exposing your codebase, data, and internal services to agents under existing auth.",
+  "Evaluations: codebase-specific harnesses so you can tell when an agent is helping and when it's drifting.",
+  "Developer productivity: measuring the platform in terms leadership can defend to the business.",
+];
+
+// How I tend to work — principles that shape the work, not a fixed process.
+const PRINCIPLES = [
+  {
+    icon: Target,
+    title: "Outcomes over outputs",
+    body: "The deliverable isn't a deck or a Notion page. It's measurable adoption and a velocity number that moves. We agree on the metric early and instrument for it.",
+  },
+  {
+    icon: Layers,
+    title: "Vendor-agnostic by design",
+    body: "Codex, Copilot, Claude Code, Cursor, Windsurf are tactical. The platform layer is strategic. I build to the meta-layer so the system survives the next tool launch.",
+  },
+  {
+    icon: GaugeCircle,
+    title: "Evaluations are the missing layer",
+    body: "Most rollouts skip evals because they're hard. That's why adoption stalls. Codebase-specific evaluation harnesses are non-negotiable in the work I do.",
+  },
+  {
+    icon: Search,
+    title: "Your codebase is the context",
+    body: "Generic agents are weak. The moat is org-specific context: internal MCP servers, packaged skills, and subagent patterns shaped to how your teams actually ship.",
+  },
+];
+
+const DIFFERENTIATORS = [
+  {
+    icon: ShieldCheck,
+    title: "Hands on keyboard",
+    body: "I write the configs, ship the MCP servers, and run the evals. No subcontractors, no junior associates billing my rate.",
+  },
+  {
+    icon: Users,
+    title: "Single senior point of contact",
+    body: "You work directly with me. No account team layer, no handoffs between phases.",
+  },
+  {
+    icon: Target,
+    title: "Production codebases, not pilots",
+    body: "The work lands in your real repos with real teams. Pilots that never ship don't move metrics.",
+  },
+];
 
 export default function ServicesPage() {
   return (
@@ -188,19 +120,17 @@ export default function ServicesPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(SERVICES_JSON_LD) }}
       />
-      {/* Hero */}
-      <section className="max-w-4xl mx-auto text-center space-y-6">
-        <Badge variant="outline" className="mx-auto">
-          Agentic Developer Platform Engineering
-        </Badge>
+
+      {/* Hero — open invitation, not a packaged offer */}
+      <section className="max-w-3xl mx-auto text-center space-y-6">
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-          I build agentic developer platforms that make engineering teams measurably faster.
+          Work with me
         </h1>
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+        <p className="text-xl text-muted-foreground">
           Most of my work is writing, building, and shipping inside Airbnb. A
-          few times a year I work with engineering teams on agentic platform
-          strategy, MCP architecture, or developer productivity, when
-          there&apos;s real fit on both sides.
+          handful of times a year I work with engineering teams on the platform
+          layer underneath their AI tools, when there&apos;s real fit on both
+          sides.
         </p>
         <p className="text-sm text-muted-foreground">
           By{" "}
@@ -212,83 +142,56 @@ export default function ServicesPage() {
           </Link>{" "}
           · {CREDENTIAL_LINE}
         </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+        <div className="flex justify-center pt-2">
           <Button size="lg" asChild>
             <a href={`mailto:${CONTACT_EMAIL}?subject=Platform%20engagement%20inquiry`}>
               <Mail className="w-4 h-4 mr-2" />
               Start a conversation
             </a>
           </Button>
-          <Button size="lg" variant="outline" asChild>
-            <Link href="/approach">
-              See how I work
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
-          </Button>
         </div>
       </section>
 
-      {/* The problem */}
-      <section className="mt-24 max-w-3xl mx-auto">
-        <h2 className="text-3xl font-bold mb-6">The problem you actually have</h2>
-        <div className="space-y-4 text-lg text-muted-foreground leading-relaxed">
-          <p>
-            Your team has Codex, Copilot, Claude Code, Cursor, and three internal
-            AI hackathon winners. Adoption sits at 15%. There&apos;s no
-            measurement, security is anxious, and velocity hasn&apos;t moved.
-          </p>
-          <p>
-            The tools work. What&apos;s missing is the platform around them:
-            shared configurations, org-specific context, evaluations, guardrails,
-            and the enablement that turns a license bill into a force
-            multiplier.
-          </p>
-          <p className="text-foreground font-medium">
-            That platform is what I build.
-          </p>
-        </div>
+      {/* What I tend to help with — activities, not deliverables */}
+      <section className="mt-24 max-w-2xl mx-auto">
+        <h2 className="text-3xl font-bold mb-4">What I tend to help with</h2>
+        <p className="text-lg text-muted-foreground mb-8">
+          Every team&apos;s situation is different, so I don&apos;t sell fixed
+          packages. These are the kinds of problems I&apos;m useful on:
+        </p>
+        <ul className="space-y-4 text-lg text-muted-foreground">
+          {HELP_WITH.map((item) => (
+            <li key={item} className="flex items-start gap-3">
+              <ArrowRight className="w-5 h-5 text-primary mt-1 shrink-0" />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
       </section>
 
-      {/* What I deliver */}
-      <section className="mt-24">
-        <div className="max-w-3xl mx-auto mb-12">
-          <h2 className="text-3xl font-bold mb-4">What I deliver</h2>
-          <p className="text-lg text-muted-foreground">
-            A typical engagement runs in three phases over 10–14 weeks. Scope
-            and sequence flex to what your org needs.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {PHASES.map((phase) => {
-            const Icon = phase.icon;
+      {/* How I tend to work — folded in from the former /approach page */}
+      <section className="mt-24 max-w-5xl mx-auto">
+        <h2 className="text-3xl font-bold mb-4">How I tend to work</h2>
+        <p className="text-lg text-muted-foreground mb-10">
+          No two engagements look the same, so this isn&apos;t a fixed process.
+          It&apos;s the handful of principles that shape every piece of platform
+          work I take on.
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {PRINCIPLES.map((p) => {
+            const Icon = p.icon;
             return (
-              <Card key={phase.title} className="h-full">
-                <CardContent className="p-6 space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div className="rounded-md bg-primary/10 p-2.5">
+              <Card key={p.title}>
+                <CardContent className="p-6 space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-md bg-primary/10 p-2">
                       <Icon className="w-5 h-5 text-primary" />
                     </div>
-                    <Badge variant="secondary" className="text-xs">
-                      {phase.duration}
-                    </Badge>
-                  </div>
-                  <div>
-                    <div className="text-xs font-semibold uppercase text-muted-foreground tracking-wide">
-                      {phase.label}
-                    </div>
-                    <h3 className="text-xl font-semibold mt-1">{phase.title}</h3>
+                    <h3 className="text-lg font-semibold">{p.title}</h3>
                   </div>
                   <p className="text-muted-foreground leading-relaxed">
-                    {phase.body}
+                    {p.body}
                   </p>
-                  <ul className="space-y-2 pt-2">
-                    {phase.deliverables.map((d) => (
-                      <li key={d} className="flex items-start gap-2 text-sm">
-                        <CheckCircle2 className="w-4 h-4 text-primary mt-0.5 shrink-0" />
-                        <span>{d}</span>
-                      </li>
-                    ))}
-                  </ul>
                 </CardContent>
               </Card>
             );
@@ -296,164 +199,47 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Who it's for */}
+      {/* What's different */}
       <section className="mt-24 max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold mb-12 text-center">Who this is for</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {AUDIENCE.map((aud) => (
-            <Card key={aud.title}>
-              <CardContent className="p-6">
-                <div className="flex items-start gap-3">
-                  <Building2 className="w-5 h-5 text-primary mt-1 shrink-0" />
-                  <div>
-                    <h3 className="font-semibold text-lg">{aud.title}</h3>
-                    <p className="text-muted-foreground mt-1">{aud.body}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        <p className="text-center text-muted-foreground mt-8 max-w-2xl mx-auto">
-          Best fit: engineering orgs of <strong className="text-foreground">50–500 developers</strong>. Big enough to need the platform, small enough to act on it.
-        </p>
-      </section>
-
-      {/* Why me */}
-      <section className="mt-24 max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold mb-4">Why me</h2>
-        <p className="text-lg text-muted-foreground mb-8">
-          You have alternatives. Here&apos;s the honest tradeoff against each.
-        </p>
-        <div className="border rounded-lg overflow-hidden">
-          <div className="grid grid-cols-1 md:grid-cols-2 bg-muted/50 border-b text-sm font-semibold uppercase tracking-wide">
-            <div className="p-4">What you could buy instead</div>
-            <div className="p-4 border-t md:border-t-0 md:border-l">The tradeoff</div>
-          </div>
-          {ALTERNATIVES.map((alt, i) => (
-            <div
-              key={alt.option}
-              className={`grid grid-cols-1 md:grid-cols-2 ${
-                i < ALTERNATIVES.length - 1 ? "border-b" : ""
-              }`}
-            >
-              <div className="p-4 font-medium">{alt.option}</div>
-              <div className="p-4 text-muted-foreground border-t md:border-t-0 md:border-l">
-                {alt.tradeoff}
-              </div>
-            </div>
-          ))}
-        </div>
-        <p className="text-muted-foreground mt-6">
-          I&apos;m the fast, deep, neutral option: Staff Engineer at Airbnb
-          today, ex-Staff at Spotify, ex-UPS — {TENURE_YEARS} years inside the
-          kind of engineering org you&apos;re trying to move — working directly
-          with your team for the weeks it takes to land it.
-        </p>
-      </section>
-
-      {/* Federal */}
-      <section className="mt-24 max-w-4xl mx-auto">
-        <Card className="border-primary/30">
-          <CardContent className="p-8 space-y-4">
-            <div className="flex items-center gap-3">
-              <Landmark className="w-6 h-6 text-primary" />
-              <h2 className="text-2xl font-bold">Federal engagements</h2>
-            </div>
-            <p className="text-muted-foreground leading-relaxed">
-              Federal agencies have AI adoption mandates, existing tool licenses,
-              and procurement rules that favor specialist consultants over
-              full-time hires. I work with civilian and defense agencies on
-              short-form pilots and platform builds that fit within standard
-              vehicles.
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-              <div>
-                <div className="text-xs font-semibold uppercase text-muted-foreground tracking-wide mb-1">
-                  NAICS codes
-                </div>
-                <div className="font-mono text-sm">541511 · 541512 · 541519 · 541715</div>
-              </div>
-              <div>
-                <div className="text-xs font-semibold uppercase text-muted-foreground tracking-wide mb-1">
-                  Sources Sought keywords
-                </div>
-                <div className="text-sm">
-                  AI developer productivity, generative AI tooling, agent platform,
-                  agentic, LLM, multi-model coding assistants, Copilot enterprise,
-                  vendor-neutral AI tooling
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* Pricing & engagement */}
-      <section className="mt-24 max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold mb-4">Engagement model</h2>
-        <p className="text-lg text-muted-foreground mb-8">
-          Fixed-scope, fixed-fee. Scoped after a 30-minute conversation, agreed
-          in writing before kickoff.
+        <h2 className="text-3xl font-bold mb-4">What&apos;s different</h2>
+        <p className="text-lg text-muted-foreground mb-10">
+          A few things that show up whenever I work with a team, and are easy to
+          miss when comparing on a website.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardContent className="p-6 space-y-3">
-              <Badge variant="secondary">Discovery sprint</Badge>
-              <div className="text-3xl font-bold">2–3 weeks</div>
-              <p className="text-muted-foreground text-sm">
-                Audit, gap analysis, success metrics, and a written platform
-                blueprint. Sometimes runs standalone for orgs that want a
-                second opinion before committing.
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="border-primary/40">
-            <CardContent className="p-6 space-y-3">
-              <Badge>Platform build</Badge>
-              <div className="text-3xl font-bold">10–14 weeks</div>
-              <p className="text-muted-foreground text-sm">
-                Full implementation across discovery, platform, and enablement.
-                Scope and fee shaped to org size, tool footprint, and
-                compliance needs.
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6 space-y-3">
-              <Badge variant="secondary">Retainer</Badge>
-              <div className="text-3xl font-bold">Ongoing</div>
-              <p className="text-muted-foreground text-sm">
-                Optional follow-on for ongoing platform evolution: new tools,
-                new patterns, eval maintenance, and quarterly adoption
-                reviews.
-              </p>
-            </CardContent>
-          </Card>
+          {DIFFERENTIATORS.map((d) => {
+            const Icon = d.icon;
+            return (
+              <Card key={d.title}>
+                <CardContent className="p-6 space-y-3">
+                  <div className="rounded-md bg-primary/10 p-2 w-fit">
+                    <Icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-semibold">{d.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed text-sm">
+                    {d.body}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </section>
 
-      {/* Final CTA */}
-      <section className="mt-24 max-w-3xl mx-auto text-center space-y-6">
-        <h2 className="text-3xl md:text-4xl font-bold">Ready to talk?</h2>
+      {/* Final CTA — open-ended inquiry */}
+      <section className="mt-24 max-w-2xl mx-auto text-center space-y-6">
+        <h2 className="text-3xl md:text-4xl font-bold">Get in touch</h2>
         <p className="text-lg text-muted-foreground">
-          A first conversation is 30 minutes. I want to understand what
-          tools you&apos;ve rolled out, where adoption stalled, and what
-          shipping faster would unlock. If we&apos;re a fit, the next step is
-          a discovery sprint.
+          No pitch deck, no qualification form. Email me what you&apos;re
+          wrestling with: where adoption stalled, what shipping faster would
+          unlock. We&apos;ll figure out together whether there&apos;s a fit.
         </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+        <div className="flex justify-center pt-2">
           <Button size="lg" asChild>
             <a href={`mailto:${CONTACT_EMAIL}?subject=Platform%20engagement%20inquiry`}>
               <Mail className="w-4 h-4 mr-2" />
               {CONTACT_EMAIL}
             </a>
-          </Button>
-          <Button size="lg" variant="outline" asChild>
-            <Link href="/approach">
-              Read the methodology
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
           </Button>
         </div>
       </section>
