@@ -59,17 +59,6 @@
   "enableAllProjectMcpServers": true,
   "includeCoAuthoredBy": false,
   "hooks": {
-    "PreToolUse": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "uv run $CLAUDE_PROJECT_DIR/.claude/hooks/pre_tool_use.py"
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "",
