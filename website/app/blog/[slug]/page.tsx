@@ -123,7 +123,7 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
       "name": "The Agentic Engineer",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://agentic-engineer.com/logo.png"
+        "url": "https://agentic-engineer.com/the-agentic-engineer-logo.webp"
       }
     },
     "url": `https://agentic-engineer.com/blog/${params.slug}`,

@@ -28,17 +28,17 @@ export function AuthorBio() {
             <p className="text-sm text-muted-foreground">{CREDENTIAL_LINE}</p>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            I build agentic developer platforms inside large engineering orgs,
-            and I&apos;m available to build them inside yours.
+            I build agentic developer platforms inside large engineering orgs
+            and write here about the work.
           </p>
           <div className="flex flex-wrap gap-2 pt-1">
-            <Button size="sm" variant="outline" asChild>
+            <Button size="sm" asChild>
               <Link href="/about">
                 More about me
                 <ArrowRight className="w-3 h-3 ml-1.5" />
               </Link>
             </Button>
-            <Button size="sm" asChild>
+            <Button size="sm" variant="outline" asChild>
               <Link href="/services">
                 Work with me
                 <ArrowRight className="w-3 h-3 ml-1.5" />

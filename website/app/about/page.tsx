@@ -111,9 +111,9 @@ type ExperienceEntry = {
 const EXPERIENCE: ExperienceEntry[] = [
   {
     org: "Airbnb",
-    role: "Staff Software Engineer, Data Management",
+    role: "Staff Software Engineer",
     period: "2024 – present",
-    note: "Productionized an internal AI agent for natural-language search and discovery across the data warehouse. Claude Code Marketplace plugin combining skills, subagents, hooks, and commands. CLI + API MCP servers with internal AuthN/AuthZ. Evaluation framework that scores business outcomes, not unit pass rates.",
+    note: "Core member of the taskforce taking Airbnb's data warehouse agent-native. Integrated the metadata systems with MCP under device-derived, user-scoped access. Shipped a vendor-agnostic marketplace plugin (skills, subagents, commands) bringing natural-language search, discovery, and analytics into Claude Code, Codex, and Gemini CLI. Hardened lineage into column-level extraction for governance and GDPR visibility.",
     type: "employer",
   },
   {
@@ -128,28 +128,28 @@ const EXPERIENCE: ExperienceEntry[] = [
     org: "Spotify",
     role: "Staff Software Engineer, Productivity Engineering",
     period: "2022 – 2024",
-    note: "Chairman of the Productivity Engineering Technical Steering Group. Led six teams across developer tooling, IAM, and employee lifecycle. Reduced non-business-focused dev cycles by 30%.",
+    note: "Chair of the Technical Steering Group. Led technical direction across six teams spanning device endpoint management, vendor integrations, access and identity, and employee lifecycle. Extended Spotify's quality framework to cover the tribe's systems and mentored six engineers into tech-leadership roles, all promoted.",
     type: "employer",
   },
   {
     org: "Spotify",
     role: "Senior Software Engineer, Spotify for Artists",
     period: "2020 – 2022",
-    note: "Two-sided marketplace work: GDPR audit system for artists, labels, and distributors. Payment provider scaling. Instructor for the internal data-science bootcamp.",
+    note: "Two-sided marketplace work: GDPR-compliant audit system for shared artist accounts across labels and distributors; technical owner of the team-management layer; internal payments wrapped as an enterprise payment provider with tax collection. Taught the internal data-science bootcamp.",
     type: "employer",
   },
   {
     org: "Spotify",
     role: "Data Engineer",
     period: "2017 – 2020",
-    note: "Introduced Spring Boot to Spotify's backend. GDPR compliance on GCP BigQuery. Co-founded a Google + Spotify Special Interest Group.",
+    note: "Drove the working group evolving Spotify's Apollo framework toward Spring Boot. Brought GDPR compliance to data engineering on GCP BigQuery. Co-founded a Google + Spotify Special Interest Group. Built an automated regional ad-generation system that lifted acquisition 15%.",
     type: "employer",
   },
   {
     org: "UPS",
     role: "Associate → Senior Application Developer",
     period: "2013 – 2017",
-    note: "JVM platform work. Introduced OpenShift to enable microservices. Spring Cloud, AXON event sourcing, lambda-architecture streaming on Cassandra/Solr/Spark, JBoss Fuse / Camel / ActiveMQ.",
+    note: "JVM platform work across four years. Introduced OpenShift to enable microservices. Spring Cloud Data Flow, AXON event sourcing, lambda-architecture streaming on Cassandra/Solr/Spark, JBoss Fuse / Camel / ActiveMQ.",
     type: "employer",
   },
   {
@@ -217,7 +217,7 @@ const PUBLIC_WORK: PublicWorkEntry[] = [
   {
     icon: BookOpen,
     title: "The Agentic Engineer blog",
-    body: "Field notes from the consulting work and from inside production engineering. Patterns, tooling, lessons learned. Published weekly.",
+    body: "Field notes from inside production engineering. Patterns, tooling, lessons learned. Published weekly.",
     href: "/blog",
     cta: "Read the blog",
     external: false,
@@ -310,27 +310,31 @@ export default function AboutPage() {
       */}
       <section className="mt-20 max-w-3xl mx-auto space-y-5 text-lg leading-relaxed">
         <p>
-          I&apos;m a Staff Software Engineer at Airbnb on the Data Management
-          team. Most recently I shipped an internal AI agent for
-          natural-language search and discovery across the data warehouse.
-          It&apos;s a Claude Code Marketplace plugin with skills, subagents,
-          hooks, and commands. CLI and API MCP servers behind it handle
-          internal authentication and authorization. An evaluation framework
-          scores business outcomes, not unit pass rates. Earlier on the team
-          I built batch and real-time ingestion for column-level data lineage
-          across the warehouse and designed the Lineage API behind
-          multi-step traversal queries.
+          I&apos;m a Staff Software Engineer at Airbnb, on the taskforce taking
+          our data warehouse agent-native. That&apos;s the platform layer that
+          makes warehouse metadata addressable by coding agents, not just
+          humans. I integrated the metadata systems with MCP so agents get
+          structured access to discovery, querying, and administration, with
+          device-derived access tokens injected into every request so the agent
+          inherits the user&apos;s existing permissions. That alignment is what
+          unblocked agent access to sensitive data. On top of it I shipped a
+          vendor-agnostic marketplace plugin of skills, subagents, and commands
+          that brings natural-language search, discovery, and analytics into
+          Claude Code, Codex, and Gemini CLI. I also hardened the lineage
+          infrastructure into column-level extraction for governance and GDPR
+          visibility into personal-data flows.
         </p>
         <p>
           Before Airbnb I spent seven years at Spotify. I left as Staff in
-          Productivity Engineering and Chairman of the Technical Steering
-          Group. Six teams under me covered developer tooling, identity, and
-          employee lifecycle. We cut non-business-focused dev cycles by 30%,
-          and the six engineers I mentored into tech-leadership roles all got
-          promoted within two years. Earlier in that run I introduced Spring
-          Boot to Spotify&apos;s backend, ran GDPR work inside the data
-          engineering org, and built the GDPR-compliant audit system for the
-          Spotify-for-Artists two-sided marketplace.
+          Productivity Engineering and Chair of the Technical Steering Group.
+          Six teams under me spanned device endpoint management, vendor
+          integrations, access and identity, and employee lifecycle. As TSG
+          Chair I extended Spotify&apos;s quality framework to cover the
+          hundreds of systems the tribe owned, and the six engineers I mentored
+          into tech-leadership roles were all promoted. Earlier in that run I
+          introduced Spring Boot to Spotify&apos;s backend, ran GDPR work inside
+          the data engineering org, and built the GDPR-compliant audit system
+          for the Spotify-for-Artists two-sided marketplace.
         </p>
         <p>
           Before Spotify, four years at UPS shipping Spring Cloud, OpenShift,
@@ -377,7 +381,7 @@ export default function AboutPage() {
       {/*
         WHAT I WORK ON — concrete domains. Replaces vague claims with named
         practice areas a reader can match against their actual problem.
-        Icons added for visual congruence with /services and /approach.
+        Icons added for visual congruence with /services.
       */}
       <section className="mt-24 max-w-5xl mx-auto">
         <h2 className="text-3xl font-bold mb-4">What I work on</h2>
