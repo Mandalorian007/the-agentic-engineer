@@ -241,7 +241,7 @@ export default function AboutPage() {
         <div className="space-y-4">
           <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-muted">
             <Image
-              src="/about/matthew-fontana.jpeg"
+              src="/about/matthew-fontana.webp"
               alt="Matthew Fontana"
               fill
               priority

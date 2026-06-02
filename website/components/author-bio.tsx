@@ -11,7 +11,7 @@ export function AuthorBio() {
       <CardContent className="p-6 flex flex-col sm:flex-row gap-5 items-start">
         <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-full border bg-muted">
           <Image
-            src="/about/matthew-fontana.jpeg"
+            src="/about/matthew-fontana.webp"
             alt={AUTHOR_NAME}
             fill
             sizes="56px"
