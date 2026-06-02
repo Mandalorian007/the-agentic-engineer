@@ -217,7 +217,7 @@ const PUBLIC_WORK: PublicWorkEntry[] = [
   {
     icon: BookOpen,
     title: "The Agentic Engineer blog",
-    body: "Field notes from inside production engineering. Patterns, tooling, lessons learned. Published weekly.",
+    body: "Field notes from inside production engineering. Patterns, tooling, lessons learned. Published twice a month.",
     href: "/blog",
     cta: "Read the blog",
     external: false,

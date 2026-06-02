@@ -147,22 +147,48 @@ For engineering/technical content, also include:
 
 ## Category Selection
 
-**CRITICAL**: Every post must be assigned to ONE primary category. Analyze the content and choose the best-fit category:
+**CRITICAL**: Every post must be assigned to ONE primary category. (Source of truth for the category list and this rule: `website/lib/categories.ts`.)
 
-- **tutorials** - Step-by-step how-to guides teaching skills and processes
+### Classify by READER INTENT, not by wordcount
+
+Do **not** pick the category that occupies the most words. A strong thesis wrapped
+around a how-to, a comparison, or an explainer will always win on wordcount and
+wrongly collapse everything into `opinions`. Instead, decide by intent:
+
+1. **Ask: "What would a reader search or filter to FIND this post?"** Classify to that.
+2. **Honor the title's promise** when the post delivers on it. A post titled
+   "X vs Y" that genuinely compares X and Y is a `comparison` — even if its thesis
+   is "it doesn't matter." A "Build your own Z" post is a `tutorial` even if it
+   opens with an argument for why Z matters.
+3. **`opinions` is the last resort, not the default.** Use it ONLY when the
+   argument itself is the deliverable (pure perspective / myth-debunking) and the
+   post does not primarily teach, compare, explain a concept, or solve a stated
+   problem. If you're reaching for `opinions` because nothing else fits, re-check
+   1 and 2 first.
+
+**Tie-breakers (most → least specific; pick the most specific that fits):**
+`comparisons` (an "X vs Y" decision) > `tutorials` (reproducible build/steps) >
+`problem-solution` (named pain point + fix) > `case-studies` (a real project you
+shipped, with results) > `lists` (a curated collection) > `guides` (explains/
+introduces a concept: "what is X / how to think about X") > `opinions` (the
+argument is the point).
+
+### The categories
+
+- **tutorials** - Step-by-step guides teaching skills and processes
 - **case-studies** - Real-world project showcases with results and analysis
-- **guides** - Beginner-friendly introductions to complex topics
+- **guides** - Explainers and introductions that make a complex topic make sense
 - **lists** - Curated collections of tips, tools, and strategies
-- **comparisons** - Side-by-side comparisons and product reviews
+- **comparisons** - Side-by-side "X vs Y" decisions and product reviews
 - **problem-solution** - Addressing pain points with practical solutions
-- **opinions** - Perspectives, analysis, and myth-busting content
+- **opinions** - Posts where the argument itself is the takeaway
 
-**Alignment with formats:**
+**Alignment with formats (a starting point — still apply the reader-intent rule above):**
 - How-To Guide → `tutorials`
 - Classic Listicle → `lists`
 - Detailed Case Study → `case-studies`
 - Comparison Post → `comparisons`
-- Beginner's Guide → `guides`
+- Beginner's Guide / concept explainer → `guides`
 - Problem-Solution → `problem-solution`
 - Opinion/Myth Debunker → `opinions`
 
