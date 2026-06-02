@@ -3,6 +3,14 @@ import { Post, getPublishedPosts } from './posts';
 /**
  * Hardcoded category definitions
  * Aligned with /create-post command blog formats
+ *
+ * SELECTION RULE — classify by READER INTENT, not dominant wordcount.
+ * Ask "what would a reader search or filter to FIND this post?" and honor the
+ * title's promise when the post delivers on it. A how-to with a strong opinion
+ * is still a `tutorial`. An "X vs Y" post is a `comparison` even if its thesis
+ * is "it doesn't matter." An explainer answering "what is X" is a `guide`.
+ * `opinions` is the bucket where the ARGUMENT is the deliverable — reach for it
+ * last, never as a fallback for any post that merely carries a point of view.
  */
 export const CATEGORIES = {
   'tutorials': {
@@ -15,7 +23,7 @@ export const CATEGORIES = {
   },
   'guides': {
     name: 'Guides & Fundamentals',
-    description: 'Beginner-friendly introductions to complex topics'
+    description: 'Explainers and introductions that make a complex topic make sense'
   },
   'lists': {
     name: 'Lists & Tips',
@@ -23,7 +31,7 @@ export const CATEGORIES = {
   },
   'comparisons': {
     name: 'Comparisons & Reviews',
-    description: 'Side-by-side comparisons and product reviews'
+    description: 'Side-by-side "X vs Y" decisions and product reviews'
   },
   'problem-solution': {
     name: 'Problem & Solution',
@@ -31,7 +39,7 @@ export const CATEGORIES = {
   },
   'opinions': {
     name: 'Opinions & Analysis',
-    description: 'Perspectives, analysis, and myth debunking'
+    description: 'Posts where the argument itself is the takeaway — perspective, analysis, myth-debunking'
   }
 } as const;
 
