@@ -1,0 +1,121 @@
+---
+title: "Measure AI Cost Per Feature, Not Per Pull Request"
+description: "Usage-based AI pricing breaks fixed-cost tool budgeting. Measure agent spend against the business feature you shipped, not the seat, the token, or the PR."
+date: "2026-09-07T11:00:00Z"
+category: "problem-solution"
+hashtags: ["ai-roi", "engineering-management", "usage-based-pricing", "monorepo", "platform-engineering", "ai-adoption"]
+social:
+  twitter:
+    text: "The tool-cost question I actually answer: did three days of agent spend cost less than the two engineer-days it gave back? If yes, stop arguing about per-seat pricing and go ship the next thing."
+  linkedin:
+    text: "Almost nobody I talk to can say what one feature costs to ship. That is why the AI invoice is unanswerable.\n\nFixed-cost tooling trained us badly. A JetBrains seat, a CI plan, a design license: pay once a year, forecast by headcount, never think about it again. Usage-based agent pricing scales with effort instead, so the line moves every month and nobody can explain why.\n\nAt Spotify I chaired the Productivity Engineering Technical Steering Group across six teams, and the thing that finally moved the number (30% fewer non-business-focused dev cycles) was not a better dashboard. It was picking a unit of work the business recognized and measuring the whole window around it.\n\nSeats, tokens, and PR counts all fail as denominators. Seats measure adoption. Tokens measure consumption. PR count goes up while shipped scope stays flat, because agents change how engineers package work, not how much of it lands.\n\nTry one feature instead. An optional date-of-birth field on the user profile: requirements, the 18+ rule, a migration, API validation, frontend, rollout.\n\n→ Baseline: 5 engineer-days, roughly $4,000 fully loaded\n→ With agents: 3 engineer-days, roughly $2,400\n→ Break-even agent spend: $1,600 across three days\n\nAlmost nobody hits $1,600 in three days of focused feature work. And even at break-even you still shipped two days earlier with two engineer-days back in the queue.\n\nTwo things that break the math. Agents running overnight decouple elapsed days from engineer hours, so track net hours or you will credit the tool for an extended work week. And an engineer running three tickets at once has genuinely expanded capacity, but you can no longer divide their day cleanly across features.\n\nNobody asks the JetBrains license to prove ROI. Usage-based pricing did not invent the expense, it just made it visible and variable at the same time.\n\nCurious how other engineering leaders are attributing this. Per-feature, per-team, or still defending a per-seat line item?\n\nFull breakdown:"
+---
+
+![Hero image showing an engineering cost dashboard measuring spend against a shipped feature](../../public/blog/2026-09-07-measure-ai-cost-per-feature-not-per-pr/hero-cost-per-feature.webp)
+
+The invoice comes in and nobody in the room can say whether it was worth it.
+
+That's the conversation I keep having with engineering leaders at smaller companies. The agents are doing something. Engineers like them. But when the finance conversation starts, there's no honest answer to "what did we get for this," so the answer becomes a vibe, and vibes lose budget fights.
+
+The instinct is to cap the spend. The better move is to fix the unit you're measuring.
+
+## Fixed-cost tooling trained you badly
+
+Engineering tools used to be predictable. A JetBrains license, a design suite seat, a CI plan. You paid per engineer per year, procurement approved it once, and finance forecast it by headcount. The cost of your tooling had nothing to do with how hard anyone worked.
+
+AI tooling broke that. Spend now scales with usage, which means it scales with effort, which means your tooling line moves every month for reasons no spreadsheet predicted. Every organization adopting agents right now is hitting this. That's not a sign you're doing it wrong.
+
+There's also a learning curve, and it's real. These tools have only been good enough for serious work for a couple of years, and only recently has using them well become an expectation rather than a novelty. Some of your bill in month one is tuition. That's fine. What isn't fine is having no way to tell tuition apart from waste.
+
+## You're measuring a unit the business doesn't buy
+
+Most attempts at this measure one of three things: seats, tokens, or pull requests. All three are the wrong denominator.
+
+Seats tell you adoption, not value. Tokens tell you consumption, not outcome. And pull requests are the most misleading of the three, because agents change how engineers package work. PR count goes up while shipped scope stays flat, and you end up congratulating yourself for chopping the same work into smaller pieces. I've written before about [why per-PR and per-individual metrics fall apart in a leadership readout](/blog/2026-06-01-leadership-readout-ai-productivity-gap), and this is the same failure showing up on a finance slide instead of an engineering one.
+
+The business doesn't buy pull requests. It buys features. Measure a feature.
+
+## Measure the feature window
+
+Pick a business capability and measure the whole window it consumes:
+
+- Research and investigation before the ticket exists
+- Ticket creation and requirements
+- The coding window, from assignment to merge
+- Deploy to production
+- Early support and bug fixes traced back to it
+
+Everything inside that window has a labor cost and, now, an AI cost. Attribute both and you can answer the question finance is really asking: what did this feature cost us, and how fast did we get it?
+
+Some codebases make this nearly free. If you're in a monorepo and your team already works in a one-PR-per-release pattern, a single pull request is already a business feature. Attribution is a tagging exercise. Point your agent spend at a PR number, roll it up, and you have a per-feature cost with no new process.
+
+If a feature spans five PRs across three repos, you don't get it for free. You need an epic key or a shared label that every PR and every agent session carries. That's a reporting decision to make deliberately, before you start collecting numbers you can't roll up.
+
+## A worked example
+
+Say the ask is an optional date-of-birth field on the user profile.
+
+It sounds trivial and isn't. Somebody has to decide the requirements: reject future dates, enforce the 18+ rule the platform's terms already claim, decide what happens to existing accounts. Then a migration, a validated API field, frontend form handling, and a rollout.
+
+One full-stack engineer, ticket to production. Two versions of the same job.
+
+| | Baseline | With agents |
+|---|---|---|
+| Elapsed time | 5 days | 3 days |
+| Engineer-days spent | 5 | 3 |
+| Loaded cost at $100/hr | $4,000 | $2,400 |
+| AI spend | $0 | ? |
+| Break-even AI spend | n/a | $1,600 |
+
+The $100/hr is a round number for the arithmetic. Use your own fully loaded rate.
+
+Now the question is narrow enough to answer: did that engineer burn more than $1,600 in agent spend across three days? Almost certainly not. You'd have to be running large fan-outs continuously to get there, and most engineers doing focused feature work land an order of magnitude below it.
+
+That's the whole calculation. "Are agents worth it" is unanswerable. "Did the tool cost less than the two engineer-days it gave back" is a number your finance lead can check.
+
+![Diagram comparing baseline feature delivery cost against agent-assisted delivery cost over the same feature window](../../public/blog/2026-09-07-measure-ai-cost-per-feature-not-per-pr/diagram-feature-cost-window.webp)
+
+## Break-even is still a win
+
+Here's the part leaders miss. Suppose the AI spend does land near $1,600 and the cost comes out flat. You didn't break even.
+
+You got the feature into production two days earlier, and you got two engineer-days of capacity back for the next thing in the queue. Same money, more throughput, faster time to market. Cost parity with a shorter delivery window is a good trade in almost every business I've worked in.
+
+## Two things that break the arithmetic
+
+**Off-hours work.** Some engineers run agents overnight. Work lands while they sleep, and elapsed days stop matching engineer hours. If you don't track net engineer hours separately from calendar time, you'll credit the tool with a speedup that was partly an extended work week. That's worth knowing for two reasons: your capacity model changes if work can progress around the clock, and you should decide on purpose whether a longer week is something you want to be buying.
+
+**Parallel tickets.** The more experienced the engineer, the lower their cost per task tends to run, and the more they run at once. An engineer with three tickets in flight has genuinely expanded your capacity, but you can no longer divide their day cleanly across features. Attribute spend at the feature level, accept that labor attribution gets fuzzy, and compare across five features instead of one.
+
+Elapsed time is the number that lies in both cases. Track net engineer hours alongside it and the picture stops flattering you.
+
+## Every job comes with tools
+
+Nobody asks the JetBrains license to prove ROI. Nobody builds a dashboard for CI minutes. Those costs are small, fixed, and invisible, so they never triggered the question.
+
+Usage-based pricing didn't create a new category of expense. It made an old one visible and variable at the same time, and visible plus variable is what makes a CFO ask questions. The answer isn't to defend the tool. It's to run the comparison: the same class of work, done two ways, by engineers who know the tooling well enough to get value out of it. Does the experienced engineer with these tools deliver the same value in less time or at lower cost?
+
+If yes, you have your answer, and it's an answer with receipts. If no, you've found something more useful than a budget cap: you've found out that your bottleneck is somewhere agents don't reach.
+
+## What belongs on the dashboard
+
+Five numbers, per feature, never per individual:
+
+- Total delivered cost: labor plus AI
+- Elapsed time from ticket creation to production
+- Net engineer hours consumed
+- AI spend attributed to the feature
+- Rework in the first 30 days: incidents and bug PRs traced back to it
+
+That last one is the accuracy knob, and it's the one teams skip. Speed that generates rework isn't speed, it's deferred cost, and it shows up in the support column two sprints later.
+
+## Where to start on Monday
+
+1. **Pick one feature class you ship repeatedly.** A CRUD field, an API endpoint, a new report. Something with enough history that a baseline exists.
+2. **Get the baseline from git before you instrument anything.** Ticket-created to merged, from the last six months of similar work. If you wait until the tooling is ready, you'll never have a control group.
+3. **Tag agent spend to the feature, not the person.** PR number if you're one-PR-per-release, epic key if you're not.
+4. **Compare after five features, not one.** Single features are noise. The pattern is what earns the budget.
+
+Every business wants the same three knobs: how fast can we ship, how accurately, and what does it cost inside that window. Cost per feature is the only measurement I've found that lets you turn all three at once and see what moved.
+
+If your team is running agents and can't yet answer what a feature costs to deliver, [that instrumentation is the kind of work I help with](/services). It's usually a couple of weeks of plumbing that turns an unexplainable invoice into a number you can defend, and it tends to pay for itself the first time someone asks.
