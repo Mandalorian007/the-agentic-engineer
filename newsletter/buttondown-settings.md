@@ -131,18 +131,66 @@ it.
 
 ## Authenticating the apex
 
-Independent of Buttondown, and still unfinished. The apex carries Google
-Workspace MX and publishes no SPF and no DMARC, so anyone can send mail claiming
-to be from it and most receivers will take it.
+**Done.** Published September 4, 2026. Verified authoritative at Vercel and on
+8.8.8.8 and 1.1.1.1, with no literal quote characters stored.
 
 ```
 agentic-engineer.com.        TXT   "v=spf1 include:_spf.google.com ~all"
 _dmarc.agentic-engineer.com. TXT   "v=DMARC1; p=none; rua=mailto:matthew.fontana@agentic-engineer.com"
 ```
 
-Start DMARC at `p=none`. It changes no delivery and starts the reports flowing,
-which is the only honest way to find out what is already sending as this domain
-before tightening to `quarantine`.
+Before this the apex published neither, so anyone could send mail claiming to be
+from it and most receivers would take it.
+
+`p=none` requests no action on failure. It is not "reporting mode" as such:
+reports come from the `rua` tag, and the two are independent. The record is safe
+to publish immediately because nothing enforces on it.
+
+The SPF record is the half that touches delivery. Apex mail moves from an SPF
+result of "none" to softfail for any sender outside Google's ranges. Only Google
+Workspace sends from the apex today, so nothing changes in practice.
+
+Neither record reaches the newsletter. `mail.agentic-engineer.com` publishes its
+own DMARC record, and RFC 7489 discovery stops at the first one it finds rather
+than walking up to the apex.
+
+### Before `p` is ever raised
+
+Three things are true today that make enforcement unsafe. None of them matter at
+`p=none`. All of them matter the moment it changes.
+
+**1. Google Workspace DKIM is not enabled.** No `_domainkey` node exists at the
+apex at all, so Workspace signs human mail with a `*.gappssmtp.com` fallback
+domain that does not align. Apex DMARC alignment currently rests entirely on
+SPF, and SPF does not survive forwarding. Turn it on in Admin console → Apps →
+Google Workspace → Gmail → Authenticate email. This is also what covers calendar
+invites, where the envelope sender is a Google bounce address and DKIM is the
+only identifier that can align.
+
+**2. `sp=` is absent, and defaults to whatever `p` is.** Raising `p` silently
+enforces on every subdomain that lacks its own DMARC record, in the same edit.
+Set `sp=` explicitly at that point rather than letting it ride.
+
+**3. The newsletter's DMARC record belongs to Buttondown, not to us.** If they
+remove `_dmarc.mail.agentic-engineer.com`, apex `sp` starts governing newsletter
+mail. Harmless while `p=none`.
+
+### If the newsletter From ever moves to the apex
+
+Do not do this without changing the SPF record first. `include:_spf.google.com`
+does not cover Postmark. Moving the From address to `@agentic-engineer.com`
+drops the newsletter out from under the `mail.` subdomain's DMARC record, puts it
+under the apex record, and softfails apex SPF. Invisible at `p=none` and fatal
+under enforcement. The record would need `include:spf.mtasv.net` added.
+
+### Report volume
+
+Apex `rua` collects reports for apex mail only: personal correspondence and
+spoofing attempts. The newsletter's reports go to Postmark. Expect roughly 5-20
+gzipped XML attachments a day from Google, Microsoft, Yahoo and others, none of
+them readable by hand. Currently pointed at the primary inbox so the reports are
+guaranteed to arrive. Move `rua` to a dedicated alias or a parser once one
+exists.
 
 ### Dead Clerk records still authorized on this domain
 
