@@ -159,13 +159,20 @@ than walking up to the apex.
 Three things are true today that make enforcement unsafe. None of them matter at
 `p=none`. All of them matter the moment it changes.
 
-**1. Google Workspace DKIM is not enabled.** No `_domainkey` node exists at the
-apex at all, so Workspace signs human mail with a `*.gappssmtp.com` fallback
-domain that does not align. Apex DMARC alignment currently rests entirely on
-SPF, and SPF does not survive forwarding. Turn it on in Admin console → Apps →
-Google Workspace → Gmail → Authenticate email. This is also what covers calendar
-invites, where the envelope sender is a Google bounce address and DKIM is the
-only identifier that can align.
+**1. Google Workspace DKIM: key published, awaiting activation.** The record is
+live at `google._domainkey.agentic-engineer.com` (2048-bit, published September
+4, 2026). Vercel stored it as two DNS strings because the value is 410
+characters and a single TXT string caps at 255; verified that the two reassemble
+byte-identically to what the admin console issued.
+
+Publishing the key is not the same as signing with it. Google signs nothing
+until **Start authentication** is clicked in Admin console → Apps → Google
+Workspace → Gmail → Authenticate email. Until then Workspace still signs with
+the unaligned `*.gappssmtp.com` fallback.
+
+Confirm by sending one message to an outside address and reading the raw
+headers. `dkim=pass` alone only proves somebody signed it; the header must also
+show `header.d=agentic-engineer.com`, which is what makes it aligned.
 
 **2. `sp=` is absent, and defaults to whatever `p` is.** Raising `p` silently
 enforces on every subdomain that lacks its own DMARC record, in the same edit.
