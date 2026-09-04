@@ -22,9 +22,6 @@ Agentic Engineer Journey
 Matthew Fontana
 ```
 
-> Currently set to `Matt Fontana` on the live account. Every other surface says
-> Matthew. Pick one and make them match.
-
 A person's name, not a brand. It is what the recipient sees before they see the
 subject line, and a human name meaningfully outperforms a publication name on
 both open rate and spam placement for a list this size.
@@ -155,3 +152,24 @@ _dmarc.agentic-engineer.com. TXT   "v=DMARC1; p=none; rua=mailto:matthew.fontana
 Start DMARC at `p=none`. It changes no delivery and starts the reports flowing,
 which is the only honest way to find out what is already sending as this domain
 before tightening to `quarantine`.
+
+### Dead Clerk records still authorized on this domain
+
+DNS is hosted at Vercel (`ns1.vercel-dns.com`), so all of this is editable with
+`vercel dns` from the repo. Listing it turned up five records left over from
+Clerk, which was cut in `688a420`:
+
+```
+clk._domainkey    CNAME  dkim1.l402x9fqenpx.clerk.services.
+clk2._domainkey   CNAME  dkim2.l402x9fqenpx.clerk.services.
+clkmail           CNAME  mail.l402x9fqenpx.clerk.services.
+accounts          CNAME  accounts.clerk.services.
+clerk             CNAME  frontend-api.clerk.services.
+```
+
+The first three matter more than the look of dead config suggests. Two of them
+are DKIM selectors, which means this domain currently delegates mail-signing
+authority to a tenant on a service the site no longer uses. If that tenant id is
+ever released and reclaimed, whoever holds it can sign mail as
+`agentic-engineer.com` and it will validate. Remove them before publishing a
+DMARC record, so the policy is written against the senders that actually exist.
