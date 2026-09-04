@@ -13,7 +13,7 @@ import { getAllCategoryIds } from '@/lib/categories';
  *     -H "Authorization: Bearer YOUR_SECRET" \
  *     -H "Content-Type: application/json" \
  *     -d '{"slug":"2026-09-07-example"}' \
- *     https://agentic-engineer.com/api/revalidate
+ *     https://www.agentic-engineer.com/api/revalidate
  */
 export async function POST(request: NextRequest) {
   try {

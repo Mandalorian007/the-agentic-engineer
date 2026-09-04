@@ -302,7 +302,7 @@ def main() -> int:
         print("ℹ️  No `newsletter:` block in blog-config.yaml, nothing to send")
         return 0
 
-    domain = config.get("domain", "agentic-engineer.com")
+    domain = config.get("domain", "www.agentic-engineer.com")
     status = SEND_STATUS
 
     if args.date:

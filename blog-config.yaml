@@ -1,6 +1,6 @@
 # Blog Identity
 blog_name: "The Agentic Engineer"
-domain: "agentic-engineer.com"
+domain: "www.agentic-engineer.com"   # canonical host; the apex redirects here
 
 # Paths
 website_dir: "website"

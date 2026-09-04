@@ -1,6 +1,6 @@
 # The Agentic Engineer
 
-Source for [agentic-engineer.com](https://agentic-engineer.com). The blog, and the
+Source for [agentic-engineer.com](https://www.agentic-engineer.com). The blog, and the
 agent pipeline that writes, lints, and ships it.
 
 ## What you're looking at
@@ -227,7 +227,7 @@ The relative path goes from `website/content/posts/` to `website/public/blog/`. 
 
 ```yaml
 blog_name: "The Agentic Engineer"
-domain: "agentic-engineer.com"
+domain: "www.agentic-engineer.com"
 
 website_dir: "website"
 content_dir: "website/content/posts"

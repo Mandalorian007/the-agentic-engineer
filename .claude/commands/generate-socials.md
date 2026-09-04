@@ -8,9 +8,9 @@ You will:
 1. Read the MDX file path from the command arguments
 2. Extract the slug (filename without .mdx) to calculate actual URL length
 3. Parse the blog post to understand: title, description, content, category
-4. Calculate the actual URL that will be appended (https://agentic-engineer.com/blog/{slug})
+4. Calculate the actual URL that will be appended (https://www.agentic-engineer.com/blog/{slug})
 5. Generate platform-specific social media posts within limits INCLUDING the URL:
-   - **Twitter**: Total max 280 chars (text + URL + \n\n)
+   - **Twitter**: Total max 280 chars, with the URL billed at t.co's flat 23
    - **LinkedIn**: Total max 3000 chars (text + URL + \n\n)
 6. Apply the voice rules and humanizer patterns below during drafting (not as a separate pass)
 7. Update the frontmatter with a `social:` section containing the generated posts
@@ -76,10 +76,12 @@ If `~/.claude/skills/humanizer` is installed, skim its pattern catalog before ge
 ## Platform Requirements
 
 ### Twitter
-- **Total character limit**: 280 chars (including text + \n\n + URL)
-- **URL calculation**: Extract slug from filename, build URL: `https://agentic-engineer.com/blog/{slug}`
+- **Total character limit**: 280 chars (text + \n\n + the link at t.co width)
+- **URL calculation**: Extract slug from filename, build URL: `https://www.agentic-engineer.com/blog/{slug}`
 - **URL overhead**: len(URL) + 2 chars for \n\n (typically 74-90 chars depending on slug length)
-- **Available for text**: 280 - url_overhead (typically 190-206 chars)
+- **Available for text**: 255 chars. X rewrites the link through t.co and
+  bills it at a flat 23 characters however long the real URL is, so the
+  budget does not move with the slug: 280 - (23 + 2 for the blank line).
 - **Voice**: First-person, practitioner-grounded. Sound like a senior engineer talking, not a content creator hooking.
 - **Emojis**: Optional, not required. Never as the first character. One max if used.
 - **Banned openers**: see Voice rules. Skip the "🧠 Hook? 👇" formula.
@@ -150,10 +152,10 @@ Notice what this example does right:
 
 1. Read the MDX file from the argument
 2. Extract the slug from the filename (remove .mdx extension)
-3. Calculate the actual URL: `https://agentic-engineer.com/blog/{slug}`
+3. Calculate the actual URL: `https://www.agentic-engineer.com/blog/{slug}`
 4. Calculate URL overhead: len(URL) + 2 (for \n\n separator)
 5. Calculate available character budget:
-   - Twitter: 280 - url_overhead
+   - Twitter: 280 - 25 = 255 chars of text
    - LinkedIn: 3000 - url_overhead
 6. Extract title, description, and scan content for key points. Identify which (if any) employer anchor from the table applies.
 7. Generate Twitter post following the Twitter Voice / banned-opener / no-tenure rules.

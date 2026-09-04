@@ -115,10 +115,15 @@ async function subscribeWithProvider(
 /**
  * Reject cross-site form posts. Absent Origin (curl, older clients) passes.
  *
- * The apex domain is not the only host that serves this site: preview
- * deployments run on *.vercel.app, and www redirects to the apex. Comparing
- * against SITE_URL alone 403s the smoke test you run before launch.
+ * More than one host serves this site: the canonical www host, the apex that
+ * redirects to it, and *.vercel.app for preview deployments. The apex and www
+ * are compared with the `www.` prefix stripped from both sides, so this keeps
+ * working whichever of the two SITE_URL names.
  */
+function bareHost(hostname: string): string {
+  return hostname.replace(/^www\./, '');
+}
+
 function isForeignOrigin(request: NextRequest): boolean {
   const origin = request.headers.get('origin');
   if (!origin) return false;
@@ -134,8 +139,7 @@ function isForeignOrigin(request: NextRequest): boolean {
   const site = new URL(SITE_URL).hostname;
 
   return !(
-    hostname === site ||
-    hostname === `www.${site}` ||
+    bareHost(hostname) === bareHost(site) ||
     hostname.endsWith('.vercel.app')
   );
 }

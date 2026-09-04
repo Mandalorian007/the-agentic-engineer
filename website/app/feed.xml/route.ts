@@ -3,7 +3,7 @@ import { getPublishedPosts } from '@/lib/posts';
 import { remark } from 'remark';
 import remarkGfm from 'remark-gfm';
 import remarkHtml from 'remark-html';
-import { SITE_URL, SITE_NAME, SITE_TAGLINE, AUTHOR } from '@/lib/site';
+import { SITE_URL, SITE_NAME, SITE_TAGLINE, AUTHOR, FEED_ID_ORIGIN } from '@/lib/site';
 
 // Limit RSS feed to most recent posts (standard practice: 10-20 posts)
 const RSS_FEED_LIMIT = 20;
@@ -98,7 +98,8 @@ export async function GET() {
   const feed = new Feed({
     title: SITE_NAME,
     description: SITE_TAGLINE,
-    id: SITE_URL,
+    // Identifier is frozen; link follows the canonical host.
+    id: FEED_ID_ORIGIN,
     link: SITE_URL,
     language: 'en',
     // The square logo, not the 1200x630 share card. RSS 2.0 caps channel
@@ -123,7 +124,8 @@ export async function GET() {
 
     feed.addItem({
       title: post.title,
-      id: postUrl,
+      // Stable across host changes. See FEED_ID_ORIGIN.
+      id: `${FEED_ID_ORIGIN}/blog/${post.slug}`,
       link: postUrl,
       description: post.description,
       content: htmlContent,

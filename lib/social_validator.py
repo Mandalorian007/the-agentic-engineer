@@ -10,6 +10,15 @@ from typing import Any
 TWITTER_TOTAL_MAX = 280  # Twitter's hard limit
 LINKEDIN_TOTAL_MAX = 3000  # LinkedIn's hard limit
 
+# X rewrites every link through t.co and counts it as a fixed width, whatever
+# the real URL is. Counting the literal URL instead makes the budget depend on
+# the length of the domain and the slug, which is both wrong and needlessly
+# strict: moving the canonical host from the apex to www put six already-good
+# tweets "over" a limit they were never near. Published as
+# `short_url_length_https` in the API's help/configuration response; it has
+# been 23 for years.
+TCO_URL_LENGTH = 23
+
 
 class ValidationIssue:
     """Represents a validation issue."""
@@ -27,7 +36,7 @@ class ValidationIssue:
         return f"ValidationIssue({self.platform!r}, {self.severity!r}, {self.message!r})"
 
 
-def build_url(slug: str, domain: str = "agentic-engineer.com") -> str:
+def build_url(slug: str, domain: str = "www.agentic-engineer.com") -> str:
     """Build full blog URL from slug.
 
     Args:
@@ -41,7 +50,7 @@ def build_url(slug: str, domain: str = "agentic-engineer.com") -> str:
 
 
 def validate_social_posts(
-    frontmatter: dict[str, Any], slug: str, domain: str = "agentic-engineer.com"
+    frontmatter: dict[str, Any], slug: str, domain: str = "www.agentic-engineer.com"
 ) -> list[ValidationIssue]:
     """Validate social media posts in frontmatter.
 
@@ -57,7 +66,10 @@ def validate_social_posts(
 
     # Build the actual URL that will be appended
     url = build_url(slug, domain)
+    # LinkedIn posts the URL as written, so it costs what it measures.
     url_overhead = len(url) + 2  # \n\n before URL
+    # X shortens it first, so only the t.co width is charged.
+    tco_overhead = TCO_URL_LENGTH + 2
 
     # Check if social field exists
     if "social" not in frontmatter:
@@ -105,14 +117,14 @@ def validate_social_posts(
         else:
             # Calculate total length with actual URL
             text_length = len(twitter["text"])
-            total_length = text_length + url_overhead
+            total_length = text_length + tco_overhead
 
             if total_length > TWITTER_TOTAL_MAX:
                 issues.append(
                     ValidationIssue(
                         "twitter",
                         "error",
-                        f"Total tweet length is {total_length} chars (text: {text_length}, URL: {url_overhead}), max is {TWITTER_TOTAL_MAX}",
+                        f"Total tweet length is {total_length} chars (text: {text_length}, t.co URL: {tco_overhead}), max is {TWITTER_TOTAL_MAX}",
                     )
                 )
 

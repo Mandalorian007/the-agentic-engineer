@@ -89,7 +89,7 @@ def validate_config(config: Dict[str, Any]) -> None:
             f"❌ Missing required fields in blog-config.yaml: {', '.join(missing)}\n"
             f"Example:\n"
             f"  blog_name: \"The Agentic Engineer\"\n"
-            f"  domain: \"agentic-engineer.com\""
+            f"  domain: \"www.agentic-engineer.com\""
         )
 
     # Validate categories list
