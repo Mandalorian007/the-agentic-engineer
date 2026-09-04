@@ -84,65 +84,56 @@ built yet. Build it before setting the field, or confirming subscribers get a
 
 ## Sending domain
 
-**Not set up.** Checked September 4, 2026, against the live account and live
-DNS. This is the one item on this page that affects whether mail arrives at all.
+**Delegated, provisioning.** Checked September 4, 2026, against the live account
+and live DNS.
 
 ```
-sending_domain_status    "none"
-email_domain             ""
-email_address            "matthew.fontana@agentic-engineer.com"
+email_domain             "mail.agentic-engineer.com"
+email_address            "matthew.fontana@mail.agentic-engineer.com"
+sending_domain_status    "awaiting_ssl"
+reply_to_address         "matthew.fontana@agentic-engineer.com"
 ```
 
-And on the domain itself:
+`mail.agentic-engineer.com` is delegated to `ns1.onbuttondown.com` and
+`ns2.onbuttondown.com`, and Buttondown is already answering for that zone: it
+publishes `MX 10 inbound.postmarkapp.com` and its own DMARC record there at
+`p=quarantine`. `awaiting_ssl` is the certificate step, not a DNS problem.
 
-| Record | State |
-|---|---|
-| MX | `smtp.google.com` (Google Workspace, receiving works) |
-| SPF | none |
-| DKIM | none at any common selector |
-| DMARC | none |
+Two things about this shape are worth understanding, because they change what
+the apex still needs.
 
-So the From address claims `agentic-engineer.com` while the mail is signed by
-Buttondown. Nothing enforces a failure today, because a domain with no DMARC
-record publishes no policy to enforce, but the message earns no alignment
-credit either. It is the profile of a domain a filter has no reason to trust.
+**The newsletter sends from a subdomain, and the apex is now Google's alone.**
+Buttondown signs and bounces inside `mail.agentic-engineer.com`. Nothing about
+the newsletter depends on an apex SPF record, which means the apex record only
+has to describe Google Workspace. That was the open question before the
+delegation existed, and it is now closed.
 
-Two separate problems live in that table, and only one of them is about the
-newsletter:
+**The subdomain publishes its own DMARC, so an apex policy will not reach it.**
+A receiver evaluating mail from `mail.agentic-engineer.com` looks for
+`_dmarc.mail.agentic-engineer.com` first and stops when it finds one. Buttondown
+put one there. So tightening the apex later, even to `p=reject`, cannot
+quarantine your own newsletter. The two policies are independent on purpose.
 
-1. **Nothing authenticates mail from this domain.** The apex has Google
-   Workspace MX and no SPF, which means anyone can send mail claiming to be
-   from it and most receivers will take it. That is worth fixing whether or not
-   the newsletter ever sends.
-2. **The newsletter is not sending from a verified domain.**
+The visible From address now reads `matthew.fontana@mail.agentic-engineer.com`.
+That `mail.` prefix is the standard trade for reputation isolation: the
+newsletter builds its own sending history without a bad month there touching
+whatever Google Workspace sends from the apex. Replies still land in the real
+inbox, because `reply_to_address` is the apex address and every client honors
+it.
 
-### Fixing the second one
+### Remaining
 
-Custom sending domains are free on Buttondown; deliverability features are not
-paywalled. Their recommended path is the *managed* setup: dedicate a subdomain
-to Buttondown and add two `NS` records delegating it, after which they manage
-SPF and DKIM inside that subdomain themselves.
+1. Wait for `sending_domain_status` to reach `verified`. `tools/send_issue.py`
+   prints a warning on every send until it does, so this cannot pass unnoticed.
+2. Send one issue to yourself and read the raw headers. You want `dkim=pass`
+   **and** `header.d=mail.agentic-engineer.com`. `dkim=pass` alone only proves
+   somebody signed it.
 
-Use a subdomain, not the apex. The apex is disqualified from managed setup, and
-it already carries Google Workspace MX and the site's Vercel records. A
-delegation there is a bad trade for a newsletter.
+## Authenticating the apex
 
-Suggested: `mail.agentic-engineer.com`. Note the domain currently answers with
-a wildcard pointing everything at Vercel; an explicit `NS` delegation for one
-label takes precedence over that wildcard, so no other subdomain is affected.
-
-1. Buttondown → Settings → Custom domains → add `mail.agentic-engineer.com` as
-   a sending domain.
-2. Add the two `NS` records it shows you at the registrar.
-3. Wait for `sending_domain_status` to leave `"none"`:
-   `GET /v1/newsletters` (see [`buttondown-api.md`](buttondown-api.md)).
-4. Send one issue to yourself and read the raw headers. You want
-   `dkim=pass` **and** `header.d=` matching the sending domain. `dkim=pass` on
-   its own only proves someone signed it.
-
-### Fixing the first one
-
-Independent of Buttondown, and worth doing regardless:
+Independent of Buttondown, and still unfinished. The apex carries Google
+Workspace MX and publishes no SPF and no DMARC, so anyone can send mail claiming
+to be from it and most receivers will take it.
 
 ```
 agentic-engineer.com.        TXT   "v=spf1 include:_spf.google.com ~all"
@@ -171,5 +162,6 @@ The first three matter more than the look of dead config suggests. Two of them
 are DKIM selectors, which means this domain currently delegates mail-signing
 authority to a tenant on a service the site no longer uses. If that tenant id is
 ever released and reclaimed, whoever holds it can sign mail as
-`agentic-engineer.com` and it will validate. Remove them before publishing a
-DMARC record, so the policy is written against the senders that actually exist.
+`agentic-engineer.com` and it will validate. Remove them before publishing the
+DMARC record above, so the policy is written against the senders that actually
+exist.
