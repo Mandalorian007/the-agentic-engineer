@@ -159,20 +159,25 @@ than walking up to the apex.
 Three things are true today that make enforcement unsafe. None of them matter at
 `p=none`. All of them matter the moment it changes.
 
-**1. Google Workspace DKIM: key published, awaiting activation.** The record is
-live at `google._domainkey.agentic-engineer.com` (2048-bit, published September
-4, 2026). Vercel stored it as two DNS strings because the value is 410
-characters and a single TXT string caps at 255; verified that the two reassemble
-byte-identically to what the admin console issued.
+**1. Google Workspace DKIM: active and verified.** Key published and
+authentication started September 4, 2026. Confirmed end to end by sending from
+the Workspace account to an outside mailbox and reading the received headers:
 
-Publishing the key is not the same as signing with it. Google signs nothing
-until **Start authentication** is clicked in Admin console → Apps → Google
-Workspace → Gmail → Authenticate email. Until then Workspace still signs with
-the unaligned `*.gappssmtp.com` fallback.
+```
+DKIM-Signature: d=agentic-engineer.com; s=google
+Authentication-Results: mx.google.com;
+  dkim=pass  header.i=@agentic-engineer.com header.s=google
+  spf=pass   smtp.mailfrom=matthew.fontana@agentic-engineer.com
+  dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=agentic-engineer.com
+```
 
-Confirm by sending one message to an outside address and reading the raw
-headers. `dkim=pass` alone only proves somebody signed it; the header must also
-show `header.d=agentic-engineer.com`, which is what makes it aligned.
+`d=agentic-engineer.com` is the part that matters. The signature is our domain's
+rather than the `*.gappssmtp.com` fallback, so apex mail is now DKIM-aligned and
+no longer depends on SPF alone. That is what makes alignment survive forwarding.
+
+The record is 410 characters, over the 255-character cap on a single TXT string,
+so Vercel stores it as two. Verified the two reassemble byte-identically to what
+the admin console issued.
 
 **2. `sp=` is absent, and defaults to whatever `p` is.** Raising `p` silently
 enforces on every subdomain that lacks its own DMARC record, in the same edit.
