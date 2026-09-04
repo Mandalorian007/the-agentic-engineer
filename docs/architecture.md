@@ -400,7 +400,7 @@ social:
 ```
 {social.twitter.text}
 
-https://www.agentic-engineer.com/blog/{slug}
+https://agentic-engineer.com/blog/{slug}
 ```
 
 **Key Features:**
@@ -608,7 +608,7 @@ Professional layouts from [shadcnblocks.com](https://www.shadcnblocks.com/) (Pro
 
 ```yaml
 blog_name: "The Agentic Engineer"
-domain: "www.agentic-engineer.com"
+domain: "agentic-engineer.com"
 
 website_dir: "website"
 content_dir: "website/content/posts"
@@ -958,8 +958,8 @@ cd website && pnpm run build
 
 2. **Configure domain:**
    - Add both `agentic-engineer.com` and `www.agentic-engineer.com`.
-     `www` is the canonical host that `SITE_URL` names; the apex must
-     redirect to it, not the other way round.
+     The apex is the canonical host that `SITE_URL` names, so it must be set
+     as the primary domain and `www` must redirect to it, not the reverse.
    - Vercel handles SSL automatically
 
 3. **Environment variables:**

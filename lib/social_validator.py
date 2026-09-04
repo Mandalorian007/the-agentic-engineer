@@ -36,7 +36,7 @@ class ValidationIssue:
         return f"ValidationIssue({self.platform!r}, {self.severity!r}, {self.message!r})"
 
 
-def build_url(slug: str, domain: str = "www.agentic-engineer.com") -> str:
+def build_url(slug: str, domain: str = "agentic-engineer.com") -> str:
     """Build full blog URL from slug.
 
     Args:
@@ -50,7 +50,7 @@ def build_url(slug: str, domain: str = "www.agentic-engineer.com") -> str:
 
 
 def validate_social_posts(
-    frontmatter: dict[str, Any], slug: str, domain: str = "www.agentic-engineer.com"
+    frontmatter: dict[str, Any], slug: str, domain: str = "agentic-engineer.com"
 ) -> list[ValidationIssue]:
     """Validate social media posts in frontmatter.
 

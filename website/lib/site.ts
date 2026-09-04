@@ -7,14 +7,13 @@
  */
 
 /**
- * The canonical origin, including the www host.
+ * The canonical origin. No www.
  *
- * Vercel serves the site on www and 307s the apex to it, so www is what a
- * reader's address bar actually shows. Canonicals, OG urls, JSON-LD, the feed,
- * and the sitemap all derive from this, and pointing them at the apex would
- * point every one of them at a redirect.
+ * Canonicals, OG urls, JSON-LD, the feed, and the sitemap all derive from
+ * this, so it has to be the host Vercel actually serves as primary. If www is
+ * ever made primary again, every one of those starts pointing at a redirect.
  */
-export const SITE_URL = "https://www.agentic-engineer.com";
+export const SITE_URL = "https://agentic-engineer.com";
 
 /**
  * The origin used to mint permanent feed identifiers. Frozen on purpose.
@@ -22,10 +21,11 @@ export const SITE_URL = "https://www.agentic-engineer.com";
  * RSS GUIDs are opaque keys, not addresses (ours carry isPermaLink="false").
  * A reader that sees a new GUID shows the item as new, so deriving them from
  * SITE_URL means any future host change silently republishes the whole archive
- * to every subscriber. Items already in the wild were minted against the apex,
- * so the apex is what this stays, whatever SITE_URL becomes.
+ * to every subscriber. Items already in the wild were minted against the apex.
  *
- * Never change this value. Change SITE_URL instead.
+ * It currently matches SITE_URL. That is a coincidence, not a rule, and the
+ * two must stay separate constants: SITE_URL is where the site is today, this
+ * is what every already-delivered feed item was keyed on. Never change it.
  */
 export const FEED_ID_ORIGIN = "https://agentic-engineer.com";
 export const SITE_NAME = "The Agentic Engineer";
