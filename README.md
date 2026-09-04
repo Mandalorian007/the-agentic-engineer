@@ -1,6 +1,30 @@
 # The Agentic Engineer
 
-Next.js blog with automated content generation and AI-powered image creation.
+Source for [agentic-engineer.com](https://agentic-engineer.com). The blog, and the
+agent pipeline that writes, lints, and ships it.
+
+## What you're looking at
+
+If you got here from the site: this repo is the argument. The posts about encoding
+your own workflow into agents were themselves produced by an encoded workflow, and
+it's all here.
+
+Worth reading first:
+
+| Where | What's in it |
+|---|---|
+| [`.claude/`](.claude/) | Slash commands and hooks. This is the encoded workflow. |
+| [`tools/`](tools/) | Scheduling, SEO checks, social validation, image conversion. |
+| [`lib/`](lib/) | Frontmatter parsing, publish-date math, post validators. |
+| [`.vale.ini`](.vale.ini) | Prose linting. Posts fail if the writing is sloppy. |
+| [`.github/workflows/`](.github/workflows/) | Scheduled social posting and content-buffer checks. |
+| [`website/content/posts/`](website/content/posts/) | Every post, as source. |
+| [`newsletter/`](newsletter/) | The newsletter's copy, and notes on the Buttondown API. |
+
+The commands in `.claude/commands/` are the interesting part. They encode the
+whole path from an idea to a shipped post: draft, humanize against a voice
+anchor, SEO and prose lint, social copy, commit. Nothing in this repo is
+written by hand from a blank file.
 
 ## Features
 
@@ -215,9 +239,9 @@ image_generation:
   quality: 85
 
 publishing:
-  frequency: "monthly"
+  frequency: "biweekly"
   day: "monday"              # Publish on Mondays
-  week_of_month: 2           # 2nd occurrence each month
+  anchor: "2026-09-07"       # any date already on the cadence
   time: "11:00:00"           # Publish time (UTC) - 6am EST
 
 categories:
@@ -239,6 +263,15 @@ OPENAI_API_KEY=your-key-here
 
 # Optional: Discord webhook for low content buffer notifications
 LOW_CONTENT_WEBHOOK=https://discord.com/api/webhooks/...
+
+# Newsletter. These are two different Buttondown keys and they are not
+# interchangeable — see newsletter/buttondown-api.md.
+#   Account key: subscribers and emails. Also set in website/.env.local,
+#   Vercel, and GitHub Actions.
+BUTTONDOWN_API_KEY=...
+#   Newsletter key: newsletter settings. Found in the `api_key` field of
+#   GET /v1/newsletters. Local tooling only. Do not deploy it anywhere.
+BUTTONDOWN_NEWSLETTER_KEY=...
 ```
 
 ## Quality Checks
@@ -363,12 +396,19 @@ Run `aitk <subcommand> --help` for full flag details on any command.
 The publishing schedule is configurable in `blog-config.yaml`:
 
 ```yaml
-# Monthly (2nd Monday of each month)
+# Biweekly (every other Monday) - what this site uses
+publishing:
+  frequency: "biweekly"
+  day: "monday"
+  anchor: "2026-09-07"   # any date already on the cadence
+  time: "11:00:00"       # Publish time (UTC) - 6am EST
+
+# Monthly (1st and 3rd Monday of each month)
 publishing:
   frequency: "monthly"
   day: "monday"
-  week_of_month: 2
-  time: "11:00:00"  # Publish time (UTC) - 6am EST
+  weeks_of_month: [1, 3]
+  time: "11:00:00"
 
 # Weekly (every Monday)
 publishing:
@@ -376,6 +416,12 @@ publishing:
   days: ["monday"]
   time: "11:00:00"
 ```
+
+`biweekly` and `monthly` are not interchangeable. A `weeks_of_month: [1, 3]`
+schedule skips a week whenever a month's 3rd Monday falls early, so one or two
+gaps a year stretch to 21 days and the year yields 24 slots. `biweekly` strides
+a fixed 14 days from `anchor`, ignoring month boundaries, for 26 slots a year.
+Shift the anchor by any multiple of 14 days and nothing changes.
 
 Get the next available publish date:
 
@@ -413,7 +459,7 @@ uv run tools/move_post_date.py 2025-10-27 2025-10-23
 - ✅ Updates all image references in content
 
 **Use cases:**
-- Adjusting to a new publishing schedule (e.g., weekly → monthly)
+- Adjusting to a new publishing schedule (e.g., weekly → biweekly)
 - Filling gaps in the content calendar
 - Moving posts earlier/later based on priorities
 
@@ -494,15 +540,24 @@ Get a Discord notification every Saturday showing your content pipeline status.
 ### Manual Testing
 
 ```bash
-# Send test notification to Discord (auto-loads .env.local)
-uv run tools/buffer_check.py --force
+# Print the report. Never posts to Discord, even with a webhook configured.
+uv run tools/buffer_check.py
+
+# One stream only
+uv run tools/buffer_check.py --stream newsletter
+
+# Actually post it. Only the Saturday workflow normally does this.
+uv run tools/buffer_check.py --notify
 ```
 
+Posting is opt-in. A bare run prints and exits, so checking your buffer while
+writing never puts a message in the channel.
+
 Each notification shows:
-- 🚨 Status level (color-coded: monthly = red < 1 month / orange < 2 months / green ≥ 2 months; weekly = red < 2 weeks / orange < 4 weeks / green ≥ 4 weeks)
-- 📅 Date of last scheduled post
-- ✍️ When you need new content by
-- 📝 Complete list of scheduled posts
+- 🚨 Status level, rated on how many slots are filled before the first gap (0 = red, 1-2 = orange, 3+ = green), worst stream wins
+- ✍️ One unified "need content by" date, the earliest gap across both streams
+- 📝 A ledger per stream covering the next two months of slots, filled or empty
+- ⚠️ Any scheduled file that does not land on a publish day
 
 ## Local Development
 
@@ -588,19 +643,6 @@ the-agentic-engineer/
     └── lib/                      # TypeScript utilities
 ```
 
-## Positioning & Strategy
-
-**Credentials (surface everywhere — homepage, /about, /services, blog author bio):**
-Matthew Fontana — Staff Engineer at Airbnb, Staff Engineer at Spotify, Senior Engineer at UPS. Enterprise software since 2013.
-
-**Frame:** This is a credential-leverage play, not a cold-start SEO grind. Deploy credibility, don't earn it. ~90-day foundation, not 18 months.
-
-**Implications:**
-- **Site:** Credentials must be visible on the homepage hero, a dedicated `/about` page, the `/services` "Why me" section, and every blog post's author bio. Without this the brand reads as indie content; with it, enterprise buyers self-qualify in.
-- **Content:** Favor fewer, weightier pieces over a high-volume SEO calendar. The blog is a credibility surface, not the primary lever.
-- **Channels:** LinkedIn (2 substantive posts/week from a Staff-Airbnb byline) > SEO. Podcast and conference pitches are accessible now — resume gets the meeting.
-- **Launch posture:** One loud launch (flagship post + LinkedIn announcement + warm-DM to former colleagues), not a 12-month dark-forest phase.
-
 ## Known Gaps (High Leverage)
 
 ### Headshot for `/about`
@@ -608,10 +650,6 @@ Matthew Fontana — Staff Engineer at Airbnb, Staff Engineer at Spotify, Senior 
 The About page (`website/app/about/page.tsx`) currently renders an initials placeholder (`"MF"`) in the hero. Drop a real headshot at `website/public/about/matthew-fontana.webp` and replace the placeholder `<div>` with `<Image src="/about/matthew-fontana.webp" ... />`.
 
 This is the single highest-leverage conversion improvement on the site. Faceless consulting About pages underperform significantly; the Airbnb Passport pattern that informed the page's design is grounded in research that says trust requires a face. Environmental shots (at a desk, in a coffee shop) tend to outperform studio headshots for solo-consultant credibility.
-
-### Past appearances on `/speaking`
-
-The Speaking page (`website/app/speaking/page.tsx`) currently offers podcast guest spots, CFP collaborations, and internal talks, but no completed appearances are listed. Once real appearances exist, add a "Past appearances" list under the Podcasts section (linked episodes, dates) and a "Past abstracts" reference under Conferences (links to talk decks or recordings). Until those exist, do not include placeholder lines like "Past appearances will be listed here as they happen" — they signal absence rather than offer.
 
 ## Project History
 

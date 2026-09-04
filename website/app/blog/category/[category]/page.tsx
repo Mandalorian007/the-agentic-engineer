@@ -8,7 +8,9 @@ import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import type { Metadata } from "next";
 import { getCategoryById, getPostsByCategory, getAllCategoryIds } from "@/lib/categories";
+import { SITE_URL } from "@/lib/site";
 
 // ISR: Revalidate every 1 hour (3600 seconds)
 export const revalidate = 3600;
@@ -26,23 +28,35 @@ export async function generateStaticParams() {
 }
 
 // Generate metadata for SEO
-export async function generateMetadata(props: CategoryPageProps) {
+export async function generateMetadata(
+  props: CategoryPageProps,
+): Promise<Metadata> {
   const params = await props.params;
   const categoryInfo = getCategoryById(params.category);
 
   if (!categoryInfo) {
-    return {
-      title: "Category Not Found",
-    };
+    return { title: "Category Not Found", robots: { index: false, follow: false } };
   }
 
+  const url = `${SITE_URL}/blog/category/${params.category}`;
+
+  // The layout template appends the site name, so it must not be baked in here.
   return {
-    title: `${categoryInfo.name} | The Agentic Engineer`,
+    title: categoryInfo.name,
     description: categoryInfo.description,
+    alternates: { canonical: url },
     openGraph: {
-      title: `${categoryInfo.name} | The Agentic Engineer`,
+      title: categoryInfo.name,
       description: categoryInfo.description,
       type: "website",
+      url,
+      images: [{ url: "/og", width: 1200, height: 630, alt: categoryInfo.name }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: categoryInfo.name,
+      description: categoryInfo.description,
+      images: ["/og"],
     },
   };
 }

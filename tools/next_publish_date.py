@@ -3,9 +3,12 @@
 Get the next publish date based on configured schedule.
 
 Usage:
-    uv run tools/next_publish_date.py
+    uv run tools/next_publish_date.py                       # next blog post slot
+    uv run tools/next_publish_date.py --stream newsletter   # next issue slot
+    uv run tools/next_publish_date.py --count 4             # plan a batch ahead
 """
 
+import argparse
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -13,7 +16,7 @@ from typing import List, Optional
 
 # Add parent directory to path to import lib modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from lib.config import load_config, get_publishing_config
+from lib.config import load_config, get_publishing_config, get_stream_config
 from lib.scheduling import get_next_publish_date, format_schedule_label
 
 
@@ -34,14 +37,14 @@ def extract_date_from_filename(filename: str) -> Optional[datetime]:
         return None
 
 
-def get_all_post_dates(posts_dir: Path) -> List[datetime]:
-    """Get all post dates from MDX filenames."""
+def get_all_post_dates(content_dir: Path) -> List[datetime]:
+    """Get all entry dates from MDX filenames in a content directory."""
     dates = []
 
-    if not posts_dir.exists():
+    if not content_dir.exists():
         return dates
 
-    for item in posts_dir.iterdir():
+    for item in content_dir.iterdir():
         if item.is_file() and item.suffix == '.mdx':
             date = extract_date_from_filename(item.name)
             if date:
@@ -61,20 +64,49 @@ def format_date_for_frontmatter(date: datetime) -> str:
 
 
 def main():
+    parser = argparse.ArgumentParser(
+        description="Get the next available publish date for a content stream"
+    )
+    parser.add_argument(
+        "--stream",
+        choices=["posts", "newsletter"],
+        default="posts",
+        help="Which content stream to schedule into (default: posts)",
+    )
+    parser.add_argument(
+        "--count",
+        type=int,
+        default=1,
+        help="How many upcoming slots to show (default: 1)",
+    )
+    args = parser.parse_args()
+
+    if args.count < 1:
+        print("❌ --count must be at least 1", file=sys.stderr)
+        sys.exit(1)
+
     # Load configuration
     try:
         config = load_config()
-        pub_config = get_publishing_config(config)
+        pub_config = get_publishing_config(config, args.stream)
+        stream_cfg = get_stream_config(config, args.stream)
+        other = "newsletter" if args.stream == "posts" else "posts"
+        other_cfg = get_stream_config(config, other)
     except Exception as e:
         print(f"❌ Error loading configuration: {e}", file=sys.stderr)
         sys.exit(1)
 
-    posts_dir = Path("website/content/posts")
+    content_dir = stream_cfg["content_dir"]
 
-    # Get all existing post dates
-    post_dates = get_all_post_dates(posts_dir)
+    # Get all existing dates in this stream
+    post_dates = get_all_post_dates(content_dir)
 
-    # Determine starting date (latest post or today)
+    # Dates taken in the OTHER stream are not collisions. A post and an issue
+    # sharing a Monday is the intended pairing, so we only look them up to
+    # report on it.
+    paired_dates = {d.date() for d in get_all_post_dates(other_cfg["content_dir"])}
+
+    # Determine starting date (latest entry or today)
     if post_dates:
         after_date = post_dates[-1]
     else:
@@ -83,7 +115,7 @@ def main():
     # Get next publish date based on configuration
     next_date = get_next_publish_date(after_date, pub_config)
 
-    # Existing posts are stored at midnight (filename precision); candidates
+    # Existing entries are stored at midnight (filename precision); candidates
     # carry the publish time. Compare by calendar date so collisions resolve
     # correctly even when the time-of-day differs.
     post_calendar_dates = {d.date() for d in post_dates}
@@ -99,19 +131,37 @@ def main():
 
     # Output the result
     schedule_label = format_schedule_label(pub_config)
-    print(f"Next available publish date ({schedule_label}):")
+    print(f"Next available {stream_cfg['noun']} date ({schedule_label}):")
     print("-" * 40)
     print(f"Directory name: {format_date_for_dirname(next_date)}-your-slug-here")
     print(f"Frontmatter date: {format_date_for_frontmatter(next_date)}")
     print(f"Day: {next_date.strftime('%A, %B %d, %Y')}")
+    # "Same day" rather than "paired": an issue with no post on its own date can
+    # still carry an earlier one, so absence here does not mean it ships alone.
+    print(f"Same-day {other_cfg['noun']}: "
+          f"{'yes' if next_date.date() in paired_dates else 'none'}")
     print("-" * 40)
+
+    # Further slots, for planning a batch before travel
+    if args.count > 1:
+        print(f"\nNext {args.count} slots:")
+        slot = next_date
+        taken = set(post_calendar_dates)
+        for _ in range(args.count):
+            while slot.date() in taken:
+                slot = get_next_publish_date(slot, pub_config)
+            noun = other_cfg["noun"]
+            pair = f"same-day {noun}" if slot.date() in paired_dates else f"no same-day {noun}"
+            print(f"  {format_date_for_dirname(slot)}  {slot.strftime('%A')}  ({pair})")
+            taken.add(slot.date())
 
     # Show context
     if post_dates:
         latest = post_dates[-1]
-        print(f"\nLatest scheduled post: {format_date_for_dirname(latest)} ({latest.strftime('%A')})")
+        print(f"\nLatest scheduled {stream_cfg['noun']}: "
+              f"{format_date_for_dirname(latest)} ({latest.strftime('%A')})")
         days_diff = (next_date - latest).days
-        print(f"Days until next post: {days_diff}")
+        print(f"Days until next {stream_cfg['noun']}: {days_diff}")
 
     return 0
 

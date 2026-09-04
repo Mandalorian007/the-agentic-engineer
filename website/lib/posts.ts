@@ -64,17 +64,22 @@ export function getAllPosts(): Post[] {
 }
 
 /**
+ * Whether a post's publish date has passed.
+ *
+ * The single definition of "live". Every public surface asks this, so a post
+ * cannot be visible in one place and hidden in another.
+ */
+export function isPublished(post: Post, now: Date = new Date()): boolean {
+  return new Date(post.date) <= now;
+}
+
+/**
  * Get only published posts (excludes future-dated posts)
  * Filters out posts with dates in the future
  */
 export function getPublishedPosts(): Post[] {
-  const allPosts = getAllPosts();
   const now = new Date();
-
-  return allPosts.filter((post) => {
-    const postDate = new Date(post.date);
-    return postDate <= now;
-  });
+  return getAllPosts().filter((post) => isPublished(post, now));
 }
 
 /**
@@ -118,24 +123,10 @@ export function getRecentPosts(limit: number = 3): Post[] {
 }
 
 /**
- * Aggregate corpus stats for credibility-strip rendering on the homepage.
- * Counts only published posts. Word count is a rough whitespace split of
- * post body content (no frontmatter).
- */
-export function getCorpusStats(): {
-  postCount: number;
-  wordCount: number;
-} {
-  const posts = getPublishedPosts();
-  const wordCount = posts.reduce((acc, post) => {
-    const words = post.content.trim().split(/\s+/).filter(Boolean).length;
-    return acc + words;
-  }, 0);
-  return { postCount: posts.length, wordCount };
-}
-
-/**
- * Get all unique slugs for static generation
+ * Every slug on disk, including scheduled posts.
+ *
+ * Not for static generation of public pages: use getPublishedPosts() there, or
+ * a future-dated post gets prerendered and served early. Kept for tooling.
  */
 export function getAllPostSlugs(): string[] {
   const fileNames = fs.readdirSync(postsDirectory);

@@ -1,25 +1,15 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-import {
-  ArrowRight,
-  Mail,
-  Target,
-  Layers,
-  GaugeCircle,
-  Search,
-  ShieldCheck,
-  Users,
-} from "lucide-react";
+import { CheckCircle2, XCircle, Mic, Users, Sparkles, Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CREDENTIAL_LINE } from "@/lib/bio";
+import { AUTHOR, SITE_NAME, SITE_URL } from "@/lib/site";
 
-const CONTACT_EMAIL = "matthew.fontana@agentic-engineer.com";
+const CONTACT_EMAIL = AUTHOR.email;
 
-const SERVICES_TITLE = "Work With Me";
+const SERVICES_TITLE = "Hire me for something specific";
 const SERVICES_DESCRIPTION =
-  "Most of my work is building agentic developer platforms inside Airbnb. A handful of times a year I work with engineering teams on the platform layer underneath their AI tools. No fixed packages. Start a conversation.";
+  "Speaking, team training, and one-off advisory on encoding your own expertise into agent workflows. Bounded engagements, not twelve-week transformations.";
 
 export const metadata: Metadata = {
   title: SERVICES_TITLE,
@@ -40,209 +30,156 @@ export const metadata: Metadata = {
   },
 };
 
+const OFFERINGS = [
+  {
+    icon: Mic,
+    title: "Speaking",
+    body: "Conferences, internal tech talks, podcasts. Usually on encoding your expertise into agent workflows.",
+    scope: "Per event",
+  },
+  {
+    icon: Users,
+    title: "Team training",
+    body: "A working session with your team on encoding your own workflows into agents.",
+    scope: "Half day to two",
+  },
+  {
+    icon: Sparkles,
+    title: "Something else",
+    body: "An advisory call, a review of what you've built, a weird problem nobody else wants. Ask.",
+    scope: "Depends",
+  },
+];
+
+const GOOD_FIT = [
+  "Engineers already using agents, no shared idea of how",
+  "You want the team leaving with something they can use Monday",
+  "You can name the thing that's actually slow",
+];
+
+const NOT_A_FIT = [
+  "You want someone to own your AI strategy for a year",
+  "You want a vendor pick and a procurement doc signed",
+  "You're hoping headcount goes down",
+];
+
+// Structured data for the hire-me page. Carried over from the previous
+// /speaking + /services pair, retargeted at the bounded engagements below.
 const SERVICES_JSON_LD = {
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
-  name: "The Agentic Engineer",
-  url: "https://agentic-engineer.com/services",
+  name: SITE_NAME,
+  url: `${SITE_URL}/services`,
   description: SERVICES_DESCRIPTION,
-  image: "https://agentic-engineer.com/the-agentic-engineer-logo.webp",
+  image: `${SITE_URL}/the-agentic-engineer-logo.webp`,
   email: CONTACT_EMAIL,
-  serviceType: "Agentic developer platform engineering",
+  // Explicit rather than derived from OFFERINGS: "Something else" is a fine
+  // heading for a human and useless as a machine-readable service type.
+  serviceType: [
+    "Conference and podcast speaking",
+    "Engineering team training",
+    "Technical advisory",
+  ],
   areaServed: [
     { "@type": "Country", name: "United States" },
     { "@type": "Place", name: "Remote, worldwide" },
   ],
   provider: {
     "@type": "Person",
-    name: "Matthew Fontana",
-    email: CONTACT_EMAIL,
-    url: "https://agentic-engineer.com",
-    jobTitle: "Staff Software Engineer",
+    name: AUTHOR.name,
+    email: AUTHOR.email,
+    url: AUTHOR.url,
+    jobTitle: AUTHOR.role,
+    sameAs: [AUTHOR.linkedin, AUTHOR.github],
   },
 };
-
-// Open-ended list of the problems I'm useful on — described as activities,
-// not packaged deliverables. No timelines, no pricing, no qualification gate.
-const HELP_WITH = [
-  "Agentic platform strategy: turning a pile of AI tool licenses into a platform your teams actually use.",
-  "MCP architecture: exposing your codebase, data, and internal services to agents under existing auth.",
-  "Evaluations: codebase-specific harnesses so you can tell when an agent is helping and when it's drifting.",
-  "Developer productivity: measuring the platform in terms leadership can defend to the business.",
-];
-
-// How I tend to work — principles that shape the work, not a fixed process.
-const PRINCIPLES = [
-  {
-    icon: Target,
-    title: "Outcomes over outputs",
-    body: "The deliverable isn't a deck or a Notion page. It's measurable adoption and a velocity number that moves. We agree on the metric early and instrument for it.",
-  },
-  {
-    icon: Layers,
-    title: "Vendor-agnostic by design",
-    body: "Codex, Copilot, Claude Code, Cursor, Windsurf are tactical. The platform layer is strategic. I build to the meta-layer so the system survives the next tool launch.",
-  },
-  {
-    icon: GaugeCircle,
-    title: "Evaluations are the missing layer",
-    body: "Most rollouts skip evals because they're hard. That's why adoption stalls. Codebase-specific evaluation harnesses are non-negotiable in the work I do.",
-  },
-  {
-    icon: Search,
-    title: "Your codebase is the context",
-    body: "Generic agents are weak. The moat is org-specific context: internal MCP servers, packaged skills, and subagent patterns shaped to how your teams actually ship.",
-  },
-];
-
-const DIFFERENTIATORS = [
-  {
-    icon: ShieldCheck,
-    title: "Hands on keyboard",
-    body: "I write the configs, ship the MCP servers, and run the evals. No subcontractors, no junior associates billing my rate.",
-  },
-  {
-    icon: Users,
-    title: "Single senior point of contact",
-    body: "You work directly with me. No account team layer, no handoffs between phases.",
-  },
-  {
-    icon: Target,
-    title: "Production codebases, not pilots",
-    body: "The work lands in your real repos with real teams. Pilots that never ship don't move metrics.",
-  },
-];
 
 export default function ServicesPage() {
   return (
     <div className="container py-12 md:py-20">
+      {/* Intro */}
+      <section className="max-w-3xl">
+        <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
+          Hire me for something specific
+        </h1>
+        <p className="mt-6 text-xl text-muted-foreground">
+          I have a day job I like. I&rsquo;m not going to run a twelve-week
+          transformation for you. What I will do is show up for something
+          bounded, do it well, and go home.
+        </p>
+      </section>
+
+      {/* Offerings */}
+      <section className="mt-16">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {OFFERINGS.map((offering) => (
+            <Card key={offering.title} className="size-full">
+              <CardContent className="flex h-full flex-col gap-4 p-6">
+                <offering.icon className="h-6 w-6 text-primary" />
+                <h2 className="text-xl font-semibold">{offering.title}</h2>
+                <p className="text-muted-foreground">{offering.body}</p>
+                <p className="mt-auto pt-2 text-sm font-medium text-muted-foreground">
+                  {offering.scope}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* Fit */}
+      <section className="mt-20">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16">
+          <div>
+            <h2 className="text-2xl font-bold">A good fit</h2>
+            <ul className="mt-6 space-y-4">
+              {GOOD_FIT.map((item) => (
+                <li key={item} className="flex gap-3">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold">Not a fit</h2>
+            <ul className="mt-6 space-y-4">
+              {NOT_A_FIT.map((item) => (
+                <li key={item} className="flex gap-3">
+                  <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground" />
+                  <span className="text-muted-foreground">{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section className="mt-20 border-t pt-12">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-2xl font-bold">
+            Email me and describe the problem in a paragraph.
+          </h2>
+          <div className="mt-6">
+            <Button size="lg" asChild>
+              <a href={`mailto:${CONTACT_EMAIL}`}>
+                <Mail className="mr-2 h-4 w-4" />
+                {CONTACT_EMAIL}
+              </a>
+            </Button>
+          </div>
+          <p className="mt-6 text-muted-foreground">
+            I answer everything. If it&rsquo;s not a fit I&rsquo;ll say so and
+            try to point you at someone better.
+          </p>
+        </div>
+      </section>
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(SERVICES_JSON_LD) }}
       />
-
-      {/* Hero — open invitation, not a packaged offer */}
-      <section className="max-w-3xl mx-auto text-center space-y-6">
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight">
-          Work with me
-        </h1>
-        <p className="text-xl text-muted-foreground">
-          Most of my work is writing, building, and shipping inside Airbnb. A
-          handful of times a year I work with engineering teams on the platform
-          layer underneath their AI tools, when there&apos;s real fit on both
-          sides.
-        </p>
-        <p className="text-sm text-muted-foreground">
-          By{" "}
-          <Link
-            href="/about"
-            className="font-medium text-foreground underline underline-offset-4 hover:no-underline"
-          >
-            Matthew Fontana
-          </Link>{" "}
-          · {CREDENTIAL_LINE}
-        </p>
-        <div className="flex justify-center pt-2">
-          <Button size="lg" asChild>
-            <a href={`mailto:${CONTACT_EMAIL}?subject=Platform%20engagement%20inquiry`}>
-              <Mail className="w-4 h-4 mr-2" />
-              Start a conversation
-            </a>
-          </Button>
-        </div>
-      </section>
-
-      {/* What I tend to help with — activities, not deliverables */}
-      <section className="mt-24 max-w-2xl mx-auto">
-        <h2 className="text-3xl font-bold mb-4">What I tend to help with</h2>
-        <p className="text-lg text-muted-foreground mb-8">
-          Every team&apos;s situation is different, so I don&apos;t sell fixed
-          packages. These are the kinds of problems I&apos;m useful on:
-        </p>
-        <ul className="space-y-4 text-lg text-muted-foreground">
-          {HELP_WITH.map((item) => (
-            <li key={item} className="flex items-start gap-3">
-              <ArrowRight className="w-5 h-5 text-primary mt-1 shrink-0" />
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* How I tend to work — folded in from the former /approach page */}
-      <section className="mt-24 max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold mb-4">How I tend to work</h2>
-        <p className="text-lg text-muted-foreground mb-10">
-          No two engagements look the same, so this isn&apos;t a fixed process.
-          It&apos;s the handful of principles that shape every piece of platform
-          work I take on.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {PRINCIPLES.map((p) => {
-            const Icon = p.icon;
-            return (
-              <Card key={p.title}>
-                <CardContent className="p-6 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <div className="rounded-md bg-primary/10 p-2">
-                      <Icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <h3 className="text-lg font-semibold">{p.title}</h3>
-                  </div>
-                  <p className="text-muted-foreground leading-relaxed">
-                    {p.body}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* What's different */}
-      <section className="mt-24 max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold mb-4">What&apos;s different</h2>
-        <p className="text-lg text-muted-foreground mb-10">
-          A few things that show up whenever I work with a team, and are easy to
-          miss when comparing on a website.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {DIFFERENTIATORS.map((d) => {
-            const Icon = d.icon;
-            return (
-              <Card key={d.title}>
-                <CardContent className="p-6 space-y-3">
-                  <div className="rounded-md bg-primary/10 p-2 w-fit">
-                    <Icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold">{d.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed text-sm">
-                    {d.body}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Final CTA — open-ended inquiry */}
-      <section className="mt-24 max-w-2xl mx-auto text-center space-y-6">
-        <h2 className="text-3xl md:text-4xl font-bold">Get in touch</h2>
-        <p className="text-lg text-muted-foreground">
-          No pitch deck, no qualification form. Email me what you&apos;re
-          wrestling with: where adoption stalled, what shipping faster would
-          unlock. We&apos;ll figure out together whether there&apos;s a fit.
-        </p>
-        <div className="flex justify-center pt-2">
-          <Button size="lg" asChild>
-            <a href={`mailto:${CONTACT_EMAIL}?subject=Platform%20engagement%20inquiry`}>
-              <Mail className="w-4 h-4 mr-2" />
-              {CONTACT_EMAIL}
-            </a>
-          </Button>
-        </div>
-      </section>
     </div>
   );
 }

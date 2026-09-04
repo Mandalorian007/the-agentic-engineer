@@ -6,6 +6,7 @@ import { Footer16 } from "@/components/footer16";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, AUTHOR } from "@/lib/site";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -19,10 +20,6 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
-const SITE_URL = "https://agentic-engineer.com";
-const SITE_NAME = "The Agentic Engineer";
-const SITE_DESCRIPTION =
-  "Matthew Fontana builds the platforms that make AI coding tools work for engineering teams. Writing about what's working in practice. Staff Engineer at Airbnb.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -31,10 +28,14 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
+  authors: [{ name: AUTHOR.name, url: AUTHOR.url }],
+  creator: AUTHOR.name,
   openGraph: {
     type: "website",
     siteName: SITE_NAME,
-    url: SITE_URL,
+    // No `url` here on purpose: it is inherited wholesale, and a page without
+    // its own would otherwise advertise itself as the homepage. Next fills
+    // og:url from each page's canonical instead.
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
     images: [
@@ -65,7 +66,7 @@ export default function RootLayout({
         <link
           rel="alternate"
           type="application/rss+xml"
-          title="RSS Feed for The Agentic Engineer"
+          title={`RSS Feed for ${SITE_NAME}`}
           href="/feed.xml"
         />
       </head>

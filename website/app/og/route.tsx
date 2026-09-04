@@ -5,6 +5,17 @@ import { BrandLockup } from "./_lib/brand-lockup";
 
 export const runtime = "nodejs";
 
+// One card, no query params, so there is nothing to render per request. Without
+// this the fonts are re-read from disk on every crawler hit.
+export const dynamic = "force-static";
+
+/**
+ * The share card for every page that has no hero image of its own.
+ *
+ * It is the only version of the pitch most people ever see, because a link
+ * posted to Slack or LinkedIn renders this and nothing else. Keep it saying
+ * what the homepage says.
+ */
 export async function GET() {
   const [fonts, logo] = await Promise.all([
     loadInter([400, 700, 800]),
@@ -28,8 +39,8 @@ export async function GET() {
           style={{
             display: "flex",
             flex: 1,
-            flexDirection: "row",
-            alignItems: "center",
+            flexDirection: "column",
+            justifyContent: "center",
           }}
         >
           <div
@@ -37,48 +48,38 @@ export async function GET() {
               display: "flex",
               flexDirection: "column",
               fontWeight: 800,
-              fontSize: 68,
-              lineHeight: 1.04,
+              fontSize: 66,
+              lineHeight: 1.06,
               letterSpacing: "-0.035em",
               color: "#ffffff",
-              width: 500,
             }}
           >
-            <div style={{ display: "flex" }}>More PRs.</div>
-            <div style={{ display: "flex" }}>Same features.</div>
+            <div style={{ display: "flex" }}>Encode what</div>
+            <div style={{ display: "flex" }}>you&rsquo;re great at.</div>
           </div>
           <div
             style={{
               display: "flex",
-              width: 3,
-              height: 240,
+              width: 120,
+              height: 4,
               background: "#22d3ee",
-              marginLeft: 28,
-              marginRight: 44,
+              marginTop: 30,
+              marginBottom: 30,
             }}
           />
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              fontWeight: 800,
-              fontSize: 44,
-              lineHeight: 1.12,
-              letterSpacing: "-0.025em",
-              flex: 1,
+              fontWeight: 700,
+              fontSize: 40,
+              lineHeight: 1.14,
+              letterSpacing: "-0.02em",
+              color: "#22d3ee",
             }}
           >
-            <div style={{ display: "flex", color: "#ffffff" }}>
-              Use AI to ship
-            </div>
-            <div style={{ display: "flex", color: "#ffffff" }}>
-              the roadmap.
-            </div>
-            <div
-              style={{ display: "flex", color: "#22d3ee", marginTop: 16 }}
-            >
-              Not just merge PRs.
-            </div>
+            <div style={{ display: "flex" }}>Hand it to agents,</div>
+            <div style={{ display: "flex" }}>one step at a time.</div>
           </div>
         </div>
         <div
@@ -90,7 +91,7 @@ export async function GET() {
             letterSpacing: "0.01em",
           }}
         >
-          Field notes on agentic engineering.
+          By a builder, for builders.
         </div>
       </div>
     ),

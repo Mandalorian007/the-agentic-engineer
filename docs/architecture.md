@@ -7,13 +7,13 @@
 
 ## Overview
 
-The Agentic Engineer is a fully automated blogging platform built with Next.js 15. The system handles the complete content lifecycle: AI-generated blog posts with OpenAI-generated images, platform-optimized social media posts, automated quality checks, scheduled publishing, and automated social media distribution via GitHub Actions.
+The Agentic Engineer is a fully automated blogging platform built with Next.js 16. The system handles the complete content lifecycle: AI-generated blog posts with OpenAI-generated images, platform-optimized social media posts, automated quality checks, scheduled publishing, and automated social media distribution via GitHub Actions.
 
 ### Tech Stack
 
 | Layer | Technology | Purpose |
 |-------|------------|---------|
-| **Framework** | Next.js 15 (App Router) | Static site generation with React |
+| **Framework** | Next.js 16 (App Router) | Static site generation with React |
 | **Hosting** | Vercel | Zero-config deployment + global CDN |
 | **Content** | MDX files | Markdown with frontmatter |
 | **Rendering** | react-markdown + remark-gfm | Convert MDX to HTML |
@@ -51,14 +51,14 @@ the-agentic-engineer/
 │
 ├── lib/                          # Python modules for content generation
 │   ├── config.py                 # Blog configuration loader
-│   ├── scheduling.py             # Shared date calculation (weekly/monthly)
+│   ├── scheduling.py             # Shared date calculation (weekly/biweekly/monthly)
 │   ├── frontmatter.py            # YAML frontmatter parser
 │   ├── validator.py              # MDX validation & category checking
 │   └── social_validator.py       # Social media post validation
 │
 ├── tools/                        # Python CLI tools
 │   ├── convert_to_webp.py        # Image format conversion
-│   ├── next_publish_date.py      # Calculate next publish date (weekly/monthly)
+│   ├── next_publish_date.py      # Calculate next publish date (weekly/biweekly/monthly)
 │   ├── seo_check.py              # SEO analysis & validation
 │   ├── post_to_twitter.py        # Twitter posting from frontmatter
 │   ├── buffer_check.py           # Content buffer monitoring
@@ -275,12 +275,19 @@ Use **relative paths** from MDX file location:
 The publishing schedule is configured in `blog-config.yaml`:
 
 ```yaml
-# Monthly (2nd Monday of each month)
+# Biweekly (every other Monday) - what this site uses
+publishing:
+  frequency: "biweekly"
+  day: "monday"
+  anchor: "2026-09-07"   # any date already on the cadence
+  time: "11:00:00"       # Publish time (UTC) - 6am EST
+
+# Monthly (1st and 3rd Monday of each month)
 publishing:
   frequency: "monthly"
   day: "monday"
-  week_of_month: 2
-  time: "11:00:00"  # Publish time (UTC) - 6am EST
+  weeks_of_month: [1, 3]
+  time: "11:00:00"
 
 # Weekly (every Monday)
 publishing:
@@ -289,14 +296,21 @@ publishing:
   time: "11:00:00"
 ```
 
+`biweekly` and `monthly` are not interchangeable. A `weeks_of_month: [1, 3]`
+schedule skips a week whenever a month's 3rd Monday falls early, so one or two
+gaps a year stretch to 21 days and the year yields 24 slots. `biweekly` strides
+a fixed 14 days from `anchor`, ignoring month boundaries, for 26 slots a year.
+Shift the anchor by any multiple of 14 days and nothing changes.
+
 **To change publishing frequency:** Edit `blog-config.yaml`. The entire content pipeline automatically adapts:
-- `scheduling.py` - Shared date calculation for weekly/monthly
+- `scheduling.py` - Shared date calculation for weekly/biweekly/monthly
 - `next_publish_date.py` - Calculates next available publish date
 - `buffer_check.py` - Adjusts buffer calculations (months or weeks)
 - `/create-post` command - Uses configured schedule
 
 **Examples:**
-- Monthly (2nd Monday): `frequency: "monthly"`, `day: "monday"`, `week_of_month: 2`
+- Biweekly: `frequency: "biweekly"`, `day: "monday"`, `anchor: "2026-09-07"`
+- Monthly (1st and 3rd Monday): `frequency: "monthly"`, `day: "monday"`, `weeks_of_month: [1, 3]`
 - Weekly: `frequency: "weekly"`, `days: ["monday"]`
 - Twice weekly: `frequency: "weekly"`, `days: ["monday", "thursday"]`
 
@@ -432,7 +446,7 @@ uv run tools/buffer_check.py --force
 ```
 
 **Discord Notification Format:**
-- 🎨 **Color-coded urgency** (monthly: green ≥2 months, orange 1-2 months, red <1 month; weekly: green ≥4 weeks, orange 2-4 weeks, red <2 weeks)
+- 🎨 **Color-coded urgency** rated on slots filled before the first gap (green ≥3, orange 1-2, red 0), taking the worse of the two streams
 - 📊 **Buffer status** (months or weeks remaining, posts scheduled @ rate)
 - 📅 **Last scheduled post date**
 - ✍️ **When new content is needed**
@@ -606,9 +620,9 @@ image_generation:
   quality: 85
 
 publishing:
-  frequency: "monthly"
+  frequency: "biweekly"
   day: "monday"              # Publish on Mondays
-  week_of_month: 2           # 2nd occurrence each month
+  anchor: "2026-09-07"       # any date already on the cadence
   time: "11:00:00"           # Publish time (UTC) - 6am EST - posts go live for ISR
 
 categories:
@@ -773,7 +787,7 @@ Day: Monday, April 13, 2026
 - Loads publishing schedule from `blog-config.yaml`
 - Scans existing posts in `website/content/posts/`
 - Finds next configured publish date not already used
-- Supports weekly (any weekday combination) and monthly (nth weekday) schedules
+- Supports weekly (any weekday combination), biweekly (14-day stride from an anchor) and monthly (nth weekday) schedules
 - Returns properly formatted date for frontmatter
 
 #### move_post_date.py
@@ -800,7 +814,7 @@ uv run tools/move_post_date.py 2025-10-27 "2025-10-23T14:30:00Z"
 - `-q, --quiet` - Minimal output (only errors)
 
 **Use Cases:**
-- Adjusting content schedule (e.g., weekly to monthly)
+- Adjusting content schedule (e.g., monthly to biweekly)
 - Filling gaps in the content calendar
 - Rescheduling posts based on priorities
 - Fixing accidentally scheduled dates
@@ -872,7 +886,7 @@ uv run tools/buffer_check.py --force
 - GitHub Action runs every Saturday at 8am EST
 - Sends color-coded Discord notification
 - Shows buffer remaining (months or weeks), scheduled posts, and deadlines
-- Automatically adapts to configured publishing frequency (weekly or monthly)
+- Automatically adapts to configured publishing frequency (weekly, biweekly or monthly)
 
 **Manual Testing:**
 ```bash
@@ -971,7 +985,7 @@ Before first deploy:
 
 ## System Evolution
 
-**Current State (v2.0):** Next.js 15 + Vercel with automated social media distribution
+**Current State (v2.0):** Next.js 16 + Vercel with automated social media distribution
 - **Workflow:** MDX → Git → Vercel → GitHub Actions → Social platforms
 - **Tools:** 6 Python CLI tools
 - **Dependencies:** 6 Python packages, standard Next.js stack

@@ -10,8 +10,11 @@ import { getTermsOfService } from "@/lib/legal";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | The Agentic Engineer",
-  description: "Terms of service for The Agentic Engineer blog. Review the terms and conditions for using our website.",
+  title: "Terms of Service",
+  description:
+    "The terms for reading The Agentic Engineer and subscribing to its newsletter.",
+  alternates: { canonical: "/terms" },
+  openGraph: { title: "Terms of Service", url: "/terms" },
 };
 
 export default function TermsPage() {

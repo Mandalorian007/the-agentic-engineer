@@ -1,0 +1,36 @@
+name: Send Newsletter Issue
+
+on:
+  # Run daily at 12:00 UTC (7am EST).
+  # Deliberately after revalidate-cache.yml (11:00) and post-to-twitter.yml
+  # (11:30): the issue links the post that ships that morning, and that post is
+  # only live once ISR has rebuilt. A no-op on days with no issue scheduled.
+  schedule:
+    - cron: '0 12 * * *'
+
+  # Allow manual trigger for testing
+  workflow_dispatch:
+
+jobs:
+  send-issue:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Send today's issue
+        env:
+          BUTTONDOWN_API_KEY: ${{ secrets.BUTTONDOWN_API_KEY }}
+        run: uv run tools/send_issue.py
