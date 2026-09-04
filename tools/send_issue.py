@@ -182,6 +182,42 @@ def email_exists(api_key: str, subject: str) -> bool:
         raise
 
 
+def warn_unverified_sending_domain(api_key: str) -> None:
+    """
+    Warn when the From address is on a domain Buttondown has not verified.
+
+    Not fatal, and not a reason to hold the send: mail still goes out, it just
+    goes out signed by Buttondown while claiming to be from somewhere else. But
+    this is invisible from the sending side and shows up as silence, so it is
+    worth a line in the workflow log every time until it is fixed.
+
+    Best effort. A failure here must never stop an issue going out.
+    """
+    try:
+        response = requests.get(
+            f"{API_BASE}/newsletters",
+            headers={"Authorization": f"Token {api_key}"},
+            timeout=15,
+        )
+        response.raise_for_status()
+        results = response.json().get("results", [])
+        if not results:
+            return
+        newsletter = results[0]
+        if newsletter.get("sending_domain_status") in ("verified", "active"):
+            return
+        sender = newsletter.get("email_address", "")
+        domain = sender.split("@")[-1] if "@" in sender else sender
+        print(
+            f"⚠️  Sending domain not verified (status: "
+            f"{newsletter.get('sending_domain_status')!r}). Mail claims "
+            f"{domain or 'the account address'} but is signed by Buttondown. "
+            f"See newsletter/buttondown-settings.md."
+        )
+    except (requests.exceptions.RequestException, ValueError, KeyError):
+        return
+
+
 def create_email(api_key: str, subject: str, body: str, status: str) -> bool:
     """
     Create the email in Buttondown and confirm what it actually stored.
@@ -348,6 +384,8 @@ def main() -> int:
                 return 0
         except requests.exceptions.RequestException:
             return 1
+
+    warn_unverified_sending_domain(api_key)
 
     print(f"📤 Creating Buttondown email (status: {status})...")
 

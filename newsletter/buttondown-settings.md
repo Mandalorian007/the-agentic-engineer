@@ -82,3 +82,76 @@ The better version of this is to take it off Buttondown entirely.
 page on this site and the confirm click lands there instead. That page is not
 built yet. Build it before setting the field, or confirming subscribers get a
 404 the moment you save.
+
+---
+
+## Sending domain
+
+**Not set up.** Checked September 4, 2026, against the live account and live
+DNS. This is the one item on this page that affects whether mail arrives at all.
+
+```
+sending_domain_status    "none"
+email_domain             ""
+email_address            "matthew.fontana@agentic-engineer.com"
+```
+
+And on the domain itself:
+
+| Record | State |
+|---|---|
+| MX | `smtp.google.com` (Google Workspace, receiving works) |
+| SPF | none |
+| DKIM | none at any common selector |
+| DMARC | none |
+
+So the From address claims `agentic-engineer.com` while the mail is signed by
+Buttondown. Nothing enforces a failure today, because a domain with no DMARC
+record publishes no policy to enforce, but the message earns no alignment
+credit either. It is the profile of a domain a filter has no reason to trust.
+
+Two separate problems live in that table, and only one of them is about the
+newsletter:
+
+1. **Nothing authenticates mail from this domain.** The apex has Google
+   Workspace MX and no SPF, which means anyone can send mail claiming to be
+   from it and most receivers will take it. That is worth fixing whether or not
+   the newsletter ever sends.
+2. **The newsletter is not sending from a verified domain.**
+
+### Fixing the second one
+
+Custom sending domains are free on Buttondown; deliverability features are not
+paywalled. Their recommended path is the *managed* setup: dedicate a subdomain
+to Buttondown and add two `NS` records delegating it, after which they manage
+SPF and DKIM inside that subdomain themselves.
+
+Use a subdomain, not the apex. The apex is disqualified from managed setup, and
+it already carries Google Workspace MX and the site's Vercel records. A
+delegation there is a bad trade for a newsletter.
+
+Suggested: `mail.agentic-engineer.com`. Note the domain currently answers with
+a wildcard pointing everything at Vercel; an explicit `NS` delegation for one
+label takes precedence over that wildcard, so no other subdomain is affected.
+
+1. Buttondown → Settings → Custom domains → add `mail.agentic-engineer.com` as
+   a sending domain.
+2. Add the two `NS` records it shows you at the registrar.
+3. Wait for `sending_domain_status` to leave `"none"`:
+   `GET /v1/newsletters` (see [`buttondown-api.md`](buttondown-api.md)).
+4. Send one issue to yourself and read the raw headers. You want
+   `dkim=pass` **and** `header.d=` matching the sending domain. `dkim=pass` on
+   its own only proves someone signed it.
+
+### Fixing the first one
+
+Independent of Buttondown, and worth doing regardless:
+
+```
+agentic-engineer.com.        TXT   "v=spf1 include:_spf.google.com ~all"
+_dmarc.agentic-engineer.com. TXT   "v=DMARC1; p=none; rua=mailto:matthew.fontana@agentic-engineer.com"
+```
+
+Start DMARC at `p=none`. It changes no delivery and starts the reports flowing,
+which is the only honest way to find out what is already sending as this domain
+before tightening to `quarantine`.

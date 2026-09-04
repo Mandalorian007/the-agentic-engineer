@@ -6,9 +6,14 @@ web UI is the only other place these strings live, and drift between the two
 is invisible until a subscriber gets the wrong email, so this pushes rather
 than compares.
 
-Currently syncs the welcome email (`newsletter/welcome-email.md`), which
-Buttondown calls the "subscription confirmed" transactional email. It fires
-once, after someone clicks the link in the double opt-in confirmation.
+Syncs two things:
+
+- The identity fields from `newsletter/buttondown-settings.md`: newsletter
+  name, from name, reply-to address, description. These are writable on the
+  free plan, and they are what a subscriber actually sees in the inbox.
+- The welcome email (`newsletter/welcome-email.md`), which Buttondown calls the
+  "subscription confirmed" transactional email. It fires once, after someone
+  clicks the link in the double opt-in confirmation.
 
 Requires BUTTONDOWN_NEWSLETTER_KEY, which is *not* the same key the website
 uses. The site's key only needs to create subscribers; writing newsletter
@@ -16,13 +21,13 @@ settings needs the newsletter-scoped key, which the narrower key cannot do
 (it returns 403 on every PATCH). Keeping them separate is deliberate: a leak
 of the public-facing key cannot rewrite your transactional emails.
 
-Note this currently fails on the free plan:
+The welcome email is gated on the free plan:
 
     403 custom_transactional_emails, required_plan: standard
 
-That is a billing gate, not a bug, and the failure is loud on purpose. The
-tool is committed anyway so the copy has a home and one command to ship it if
-the add-on is ever bought.
+That is a billing gate, not a bug. It is reported and skipped rather than
+failing the run, so the identity fields still land. Everything else here is
+free-tier writable.
 
 Usage:
     uv run tools/sync_newsletter_settings.py --dry-run
@@ -40,6 +45,17 @@ from dotenv import load_dotenv
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 WELCOME_PATH = REPO_ROOT / "newsletter" / "welcome-email.md"
+SETTINGS_PATH = REPO_ROOT / "newsletter" / "buttondown-settings.md"
+
+# Buttondown field name -> the `## heading` above its fenced block in
+# buttondown-settings.md. The file is written for a person to read, so the
+# headings carry the explanation and this maps them back to the API.
+SETTINGS_FIELDS = {
+    "name": "Newsletter name",
+    "from_name": 'Author (the "From" name in the inbox)',
+    "reply_to_address": "Reply-to address",
+    "description": "Description",
+}
 API_BASE = "https://api.buttondown.com/v1"
 
 
@@ -71,6 +87,30 @@ def parse_welcome_email(path: Path) -> tuple[str, str]:
     return match.group(1).strip(), body
 
 
+def parse_settings(path: Path) -> dict[str, str]:
+    """Pull the identity fields out of the human-readable settings file.
+
+    Each value lives in the first fenced block under its own `## heading`.
+    Headings are matched exactly: the file also *discusses* these fields in
+    prose, and a looser match picks up the commentary instead of the value.
+    """
+    raw = path.read_text()
+    values: dict[str, str] = {}
+
+    for field, heading in SETTINGS_FIELDS.items():
+        pattern = (
+            r"^## " + re.escape(heading) + r"[ \t]*$"
+            r".*?"
+            r"^```[a-z]*[ \t]*$\n(.*?)^```[ \t]*$"
+        )
+        match = re.search(pattern, raw, re.MULTILINE | re.DOTALL)
+        if not match:
+            raise SystemExit(f"{path.name}: no fenced block under '## {heading}'")
+        values[field] = match.group(1).strip()
+
+    return values
+
+
 def get_newsletter(session: requests.Session) -> dict:
     response = session.get(f"{API_BASE}/newsletters", timeout=15)
     response.raise_for_status()
@@ -87,6 +127,11 @@ def main() -> int:
         action="store_true",
         help="Show what would change without writing",
     )
+    parser.add_argument(
+        "--force-description",
+        action="store_true",
+        help="Also rewrite the description, which cannot be compared remotely",
+    )
     args = parser.parse_args()
 
     load_dotenv(REPO_ROOT / ".env.local")
@@ -99,6 +144,7 @@ def main() -> int:
         )
 
     subject, body = parse_welcome_email(WELCOME_PATH)
+    settings = parse_settings(SETTINGS_PATH)
 
     session = requests.Session()
     session.headers.update(
@@ -106,23 +152,68 @@ def main() -> int:
     )
 
     newsletter = get_newsletter(session)
-    current_subject = newsletter.get("custom_subscription_confirmed_email_subject", "")
-    current_body = newsletter.get("custom_subscription_confirmed_email_text", "")
-
-    unchanged = current_subject == subject and current_body == body
-
     print(f"Newsletter: {newsletter['name']}")
-    print(f"Welcome subject: {subject!r}")
-    print(f"Welcome body:    {len(body)} chars")
-    print(f"Remote state:    {'already in sync' if unchanged else 'differs'}")
+
+    # Identity fields. Buttondown stores `description` as rendered HTML, so it
+    # never round-trips back to the markdown that produced it and is written
+    # unconditionally rather than compared.
+    comparable = {k: v for k, v in settings.items() if k != "description"}
+    drift = {
+        field: (newsletter.get(field, ""), value)
+        for field, value in comparable.items()
+        if newsletter.get(field, "") != value
+    }
+
+    print("\nIdentity fields")
+    for field, value in comparable.items():
+        if field in drift:
+            print(f"  {field:18} {drift[field][0]!r} -> {value!r}")
+        else:
+            print(f"  {field:18} in sync")
+    print(f"  {'description':18} write-only (stored as HTML)")
+
+    print("\nWelcome email")
+    welcome_synced = (
+        newsletter.get("custom_subscription_confirmed_email_subject", "") == subject
+        and newsletter.get("custom_subscription_confirmed_email_text", "") == body
+    )
+    print(f"  subject            {subject!r}")
+    print(f"  body               {len(body)} chars, "
+          f"{'in sync' if welcome_synced else 'differs'}")
 
     if args.dry_run:
         print("\nDry run, nothing written.")
         return 0
 
-    if unchanged:
-        print("\nNothing to do.")
-        return 0
+    exit_code = 0
+
+    if drift or args.force_description:
+        payload = dict(settings) if args.force_description else {
+            field: settings[field] for field in drift
+        }
+        response = session.patch(
+            f"{API_BASE}/newsletters/{newsletter['id']}", json=payload, timeout=15
+        )
+        if not response.ok:
+            print(f"\nIdentity fields failed: {response.status_code} "
+                  f"{response.text[:300]}", file=sys.stderr)
+            exit_code = 1
+        else:
+            # Buttondown normalises some fields on write, so confirm what landed
+            # rather than trusting the 200.
+            stored = response.json()
+            bad = [f for f in payload if f != "description" and stored.get(f) != payload[f]]
+            if bad:
+                print(f"\nWrote, but these came back different: {bad}", file=sys.stderr)
+                exit_code = 1
+            else:
+                print(f"\nIdentity fields written: {sorted(payload)}")
+    else:
+        print("\nIdentity fields already in sync.")
+
+    if welcome_synced:
+        print("Welcome email already in sync.")
+        return exit_code
 
     response = session.patch(
         f"{API_BASE}/newsletters/{newsletter['id']}",
@@ -133,24 +224,27 @@ def main() -> int:
         timeout=15,
     )
 
+    if response.status_code == 403:
+        # Expected on the free plan. Reported, not fatal: the identity fields
+        # above are the part that actually reaches a subscriber today.
+        print("Welcome email skipped: needs the Standard plan "
+              "(403 custom_transactional_emails).")
+        return exit_code
+
     if not response.ok:
-        print(f"\nFailed: {response.status_code} {response.text[:500]}", file=sys.stderr)
+        print(f"Welcome email failed: {response.status_code} "
+              f"{response.text[:300]}", file=sys.stderr)
         return 1
 
     updated = response.json()
-    stored_subject = updated.get("custom_subscription_confirmed_email_subject", "")
-    stored_body = updated.get("custom_subscription_confirmed_email_text", "")
-
-    # Buttondown normalises some fields on write, so confirm what landed rather
-    # than trusting the 200.
-    if stored_subject != subject or stored_body != body:
-        print("\nWrote, but the stored value differs from the file:", file=sys.stderr)
-        print(f"  subject: {stored_subject!r}", file=sys.stderr)
-        print(f"  body:    {len(stored_body)} chars", file=sys.stderr)
+    if (updated.get("custom_subscription_confirmed_email_subject", "") != subject
+            or updated.get("custom_subscription_confirmed_email_text", "") != body):
+        print("Welcome email wrote, but the stored value differs from the file.",
+              file=sys.stderr)
         return 1
 
-    print("\nSynced.")
-    return 0
+    print("Welcome email written.")
+    return exit_code
 
 
 if __name__ == "__main__":
