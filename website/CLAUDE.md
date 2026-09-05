@@ -33,15 +33,16 @@ the-agentic-engineer/
 │   │   └── globals.css           # Tailwind v4 + typography styles
 │   ├── components/               # shadcn/ui + Pro blocks (navbar8, footer16, blog27)
 │   ├── content/posts/            # MDX blog posts
+│   ├── content/issues/           # MDX newsletter issues (archived at /issues)
 │   ├── lib/                      # Post loading, categories
 │   └── public/blog/              # Post images (Vercel CDN)
 │
 ├── tools/                        # Python scripts (build.py, publish.py, seo_check.py, etc.)
-├── lib/                          # Python modules (blogger_client, cloudinary_uploader, etc.)
+├── lib/                          # Python modules (config, scheduling, content, frontmatter)
 ├── specs/                        # Documentation (nextjs-migration-resources.md, etc.)
 ├── .claude/
 │   ├── commands/                 # Slash commands (/create-post, /build, /publish, etc.)
-│   ├── hooks/                    # Safety hooks (pre_tool_use.py)
+│   ├── hooks/                    # Session and notification hooks
 │   └── settings.json             # Claude Code configuration
 └── posts/                        # Source markdown (being migrated to website/content/posts/)
 ```
@@ -55,6 +56,7 @@ the-agentic-engineer/
 - **Components**: shadcn/ui (Clean Slate theme)
 - **Markdown**: react-markdown + remark-gfm
 - **Code Highlighting**: react-syntax-highlighter (oneDark theme)
+- **Newsletter**: Buttondown (subscribe route + scheduled sender)
 - **Hosting**: Vercel (deploy from `website/` subdirectory)
 
 ---

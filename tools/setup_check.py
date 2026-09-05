@@ -66,6 +66,7 @@ class SetupChecker:
             ("Node.js Dependencies", self.check_node_dependencies),
             ("Configuration Files", self.check_config_files),
             ("OpenAI Setup", self.check_openai),
+            ("Newsletter Setup", self.check_newsletter),
             ("Blog Configuration", self.check_blog_config),
             ("Next.js Website", self.check_website),
             ("Build Test", self.test_nextjs_build),
@@ -220,6 +221,56 @@ class SetupChecker:
             print_info("   Image generation will not work without this")
             print_action("Optional: Add OPENAI_API_KEY to .env.local")
             print_info("   Get key from: https://platform.openai.com/api-keys")
+
+    def check_newsletter(self):
+        """Check the newsletter stream and its credentials.
+
+        A missing BUTTONDOWN_API_KEY is otherwise invisible until 12:00 UTC on
+        the morning an issue was due, which is the worst time to find out.
+        """
+        env_path = Path('.env.local')
+        if env_path.exists():
+            load_dotenv(env_path)
+
+        try:
+            from lib.config import load_config, get_newsletter_config
+            newsletter = get_newsletter_config(load_config())
+        except Exception as e:
+            print_error(f"Could not read newsletter config: {e}")
+            self.issues.append("Newsletter config unreadable")
+            return
+
+        if not newsletter['enabled']:
+            print_info("No `newsletter:` block in blog-config.yaml, stream disabled")
+            return
+
+        print_success("Newsletter stream enabled")
+        print_info(f"   Archive delay: {newsletter['archive_delay_days']} days")
+
+        issues_dir = Path(newsletter['content_dir'])
+        if issues_dir.exists():
+            count = len(list(issues_dir.glob('*.mdx')))
+            print_success(f"Issues directory found ({count} issue(s))")
+        else:
+            print_warning(f"Issues directory missing: {issues_dir}")
+            self.warnings.append("Issues directory missing")
+
+        api_key = os.getenv('BUTTONDOWN_API_KEY')
+        if api_key:
+            masked = api_key[:8] + '...' if len(api_key) > 8 else '***'
+            print_success(f"BUTTONDOWN_API_KEY set ({masked})")
+        else:
+            print_warning("BUTTONDOWN_API_KEY not set locally")
+            self.warnings.append("Buttondown API key not configured")
+            print_action("Add BUTTONDOWN_API_KEY to .env.local for local dry runs")
+
+        # These two live outside the repo and nothing here can read them, so say
+        # so plainly rather than implying the local key is sufficient.
+        print_info("   Also required, and not checkable from here:")
+        print_info("     GitHub secret BUTTONDOWN_API_KEY  -> send-issue.yml")
+        print_info("     Vercel env    BUTTONDOWN_API_KEY  -> /api/subscribe")
+        print_info("     Vercel env    REVALIDATE_SECRET   -> /api/revalidate")
+        print_info("   Issues always send. There is no draft step to catch a bad one.")
 
     def check_blog_config(self):
         """Check blog-config.yaml"""

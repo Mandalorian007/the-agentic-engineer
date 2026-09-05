@@ -1,6 +1,6 @@
 # Blog Identity
 blog_name: "The Agentic Engineer"
-domain: "agentic-engineer.com"
+domain: "agentic-engineer.com"   # canonical host; www redirects here
 
 # Paths
 website_dir: "website"
@@ -14,11 +14,28 @@ image_generation:
   quality: 85
 
 # Publishing schedule
+# A true 14-day stride, not "1st and 3rd Monday". The nth-weekday scheme skips a
+# week whenever a month's 3rd Monday falls early, which stretches one gap a year
+# or two out to 21 days. Anchoring to a fixed date keeps every gap at 14 and
+# yields 26 slots a year instead of 24.
 publishing:
-  frequency: "monthly"
+  frequency: "biweekly"
   day: "monday"              # Publish on Mondays
-  weeks_of_month: [1, 3]     # 1st and 3rd Monday of each month (bi-weekly cadence)
+  anchor: "2026-09-07"       # any date already on the cadence; shift by 14s freely
   time: "11:00:00"           # Publish time (UTC) - 6am EST - posts go live for ISR
+
+# Newsletter issues (second content stream)
+# Issues live alongside posts and inherit the publishing schedule above, so each
+# issue ships on the same morning as its post. Uncomment `publishing:` only to
+# decouple the two.
+newsletter:
+  content_dir: "website/content/issues"
+  archive_delay_days: 30       # issue goes public at /issues this long after send
+  # publishing:
+  #   frequency: "biweekly"
+  #   day: "sunday"
+  #   anchor: "2026-09-13"
+  #   time: "12:00:00"
 
 # Categories (validation reference)
 categories:

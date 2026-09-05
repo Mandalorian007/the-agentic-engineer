@@ -24,12 +24,17 @@ Exit codes:
 
 import argparse
 import os
+import re
 import sys
 from datetime import datetime, timezone, date as date_type
 from pathlib import Path
 
 from lib.config import load_config
 from lib.frontmatter import parse_frontmatter
+
+# X rewrites links through t.co at a fixed width. See lib/social_validator.py.
+TCO_URL_LENGTH = 23
+_URL_RE = re.compile(r"https?://\S+")
 
 
 def get_twitter_client(dry_run: bool = False):
@@ -175,6 +180,18 @@ def post_tweet(client, tweet_text: str, dry_run: bool = False) -> bool:
         return False
 
 
+def tweet_length(text: str) -> int:
+    """Length of a tweet as X counts it, with every URL billed at t.co width.
+
+    Mirrors lib/social_validator.py. Kept here rather than imported because the
+    two run at different times against different inputs, and this one has to
+    handle a fully composed tweet rather than a frontmatter field.
+    """
+    without_urls = _URL_RE.sub("", text)
+    url_count = len(_URL_RE.findall(text))
+    return len(without_urls) + url_count * TCO_URL_LENGTH
+
+
 def main():
     """Main entry point."""
     # Parse command-line arguments
@@ -245,10 +262,15 @@ def main():
             print("  ⚠️  No Twitter content found in frontmatter")
             continue
 
-        # Validate length (280 char limit)
-        if len(tweet_text) > 280:
+        # Validate length. X charges a flat t.co width for the link rather than
+        # its literal characters, so measure it the way X will: this is the
+        # same model lib/social_validator.py uses at authoring time, and the
+        # two disagreeing is how a tweet passes review and then fails to send.
+        billed_length = tweet_length(tweet_text)
+        if billed_length > 280:
             print(
-                f"  ❌ Error: Tweet is {len(tweet_text)} chars (max 280). Skipping."
+                f"  ❌ Error: Tweet is {billed_length} chars as X counts it "
+                f"(max 280). Skipping."
             )
             error_count += 1
             continue

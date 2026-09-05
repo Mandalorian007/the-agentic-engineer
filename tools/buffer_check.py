@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """
-Check content buffer and send Discord notification if low.
+Check content buffer across every content stream and report to Discord.
 
 Usage:
-    uv run tools/buffer_check.py [--webhook-url URL] [--threshold-weeks N]
+    uv run tools/buffer_check.py                      # both streams
+    uv run tools/buffer_check.py --stream posts       # just the blog
+    uv run tools/buffer_check.py --webhook-url URL
 
 Environment Variables:
     LOW_CONTENT_WEBHOOK: Discord webhook URL
@@ -22,10 +24,19 @@ from dotenv import load_dotenv
 
 # Add parent directory to path to import lib modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from lib.config import load_config, get_publishing_config, get_publishing_rate
+from lib.config import (
+    load_config,
+    get_publishing_config,
+    get_publishing_rate,
+    get_stream_config,
+    get_newsletter_config,
+)
 from lib.scheduling import get_next_publish_date, format_schedule_label
 
 # Auto-load .env.local if it exists (for local testing)
+# How far ahead the slot ledger looks.
+LOOKAHEAD_MONTHS = 2
+
 project_root = Path(__file__).parent.parent
 env_file = project_root / ".env.local"
 if env_file.exists():
@@ -86,147 +97,184 @@ def get_scheduled_posts(content_dir: Path) -> List[Dict[str, any]]:
     return scheduled_posts
 
 
-def calculate_buffer_stats(scheduled_posts: List[Dict], config: Dict) -> Dict[str, any]:
+def get_upcoming_slots(pub_config: Dict, count: int = 6,
+                       now: datetime = None) -> List[datetime]:
+    """Get the next N publish slots from the schedule."""
+    if now is None:
+        now = datetime.now(timezone.utc)
+
+    slots = []
+    cursor = now.replace(tzinfo=None)
+    for _ in range(count):
+        cursor = get_next_publish_date(cursor, pub_config)
+        slots.append(cursor.replace(tzinfo=timezone.utc))
+    return slots
+
+
+def build_slot_ledger(slots: List[datetime],
+                      items_by_stream: Dict[str, List[Dict]]) -> List[Dict]:
     """
-    Calculate buffer statistics.
+    Pair up what is scheduled against each upcoming slot.
 
-    Args:
-        scheduled_posts: List of scheduled post dicts
-        config: Full configuration dict for publishing schedule
-
-    Returns:
-        Dict with buffer statistics including buffer_amount, buffer_unit,
-        and publishing rate info
+    Both streams share a cadence so a slot can hold a post, an issue, both, or
+    nothing. Reporting them as two independent buffers would hide exactly the
+    thing worth seeing.
     """
-    now = datetime.now(timezone.utc)
-    pub_config = get_publishing_config(config)
-    rate = get_publishing_rate(config)
-    frequency = pub_config.get('frequency', 'weekly')
+    ledger = []
+    for slot in slots:
+        slot_str = slot.strftime("%Y-%m-%d")
+        row = {"date": slot, "date_str": slot_str}
+        for stream, items in items_by_stream.items():
+            row[stream] = next(
+                (i for i in items if i["date_str"] == slot_str), None
+            )
+        ledger.append(row)
+    return ledger
 
-    if not scheduled_posts:
-        # No posts scheduled - need content for the next publish date
-        next_publish = get_next_publish_date(now.replace(tzinfo=None), pub_config)
-        next_publish = next_publish.replace(tzinfo=timezone.utc)
-        return {
-            "buffer_amount": 0,
-            "buffer_unit": "months" if frequency == "monthly" else "weeks",
-            "posts_scheduled": 0,
-            "frequency_label": rate['frequency_label'],
-            "last_post_date": None,
-            "content_runs_out": now,
-            "need_content_by": next_publish
-        }
 
-    last_post = scheduled_posts[-1]
-    last_post_date = last_post["date"]
+def find_off_cadence(slots: List[datetime],
+                     items_by_stream: Dict[str, List[Dict]]) -> List[Dict]:
+    """
+    Scheduled items that do not land on any upcoming slot.
 
-    posts_scheduled = len(scheduled_posts)
-    time_until_last_post = last_post_date - now
-    days_of_buffer = time_until_last_post.days
+    Without this, an entry moved to a Tuesday silently disappears from the
+    report and looks like missing content.
+    """
+    slot_strs = {s.strftime("%Y-%m-%d") for s in slots}
+    horizon = max(slots).strftime("%Y-%m-%d") if slots else ""
 
-    if frequency == 'monthly':
-        buffer_amount = days_of_buffer / 30.44  # average days per month
-        buffer_unit = "months"
-    else:
-        buffer_amount = days_of_buffer / 7.0
-        buffer_unit = "weeks"
+    off = []
+    for stream, items in items_by_stream.items():
+        for item in items:
+            if item["date_str"] not in slot_strs and item["date_str"] <= horizon:
+                off.append({**item, "stream": stream})
+    return sorted(off, key=lambda i: i["date_str"])
 
-    # Calculate when content runs out (the last post date)
-    content_runs_out = last_post_date
 
-    # Need new content by the NEXT publish date after the last scheduled post
-    need_content_by = get_next_publish_date(
-        last_post_date.replace(tzinfo=None), pub_config
-    )
-    need_content_by = need_content_by.replace(tzinfo=timezone.utc)
+# Status is rated on how many upcoming slots are filled before the first gap.
+# Counting slots rather than converting to fractional months keeps the rating
+# readable straight off the ledger, and keeps its meaning if the cadence changes.
+LOW_MAX_RUN = 0      # the very next slot has a gap
+WARN_MAX_RUN = 2     # a gap inside the next two or three slots
+
+
+def slot_status(filled_run: int) -> tuple:
+    """Rate one stream. Returns (label, color, rank); a higher rank is worse."""
+    if filled_run <= LOW_MAX_RUN:
+        return "🚨 LOW", 0xE74C3C, 2
+    if filled_run <= WARN_MAX_RUN:
+        return "⚠️ WARN", 0xF1C40F, 1
+    return "✅ GOOD", 0x2ECC71, 0
+
+
+def stream_view(stream: str, stats: Dict, ledger: List[Dict]) -> Dict:
+    """
+    One stream's slot picture over the lookahead window.
+
+    Single source of truth for both renderers: the terminal report and the
+    Discord embed previously formatted the same numbers independently and had
+    drifted on labels, precision and the empty case.
+    """
+    rows = [(row["date"], row.get(stream)) for row in ledger]
+
+    filled_run = 0
+    for _, item in rows:
+        if not item:
+            break
+        filled_run += 1
+
+    status, color, rank = slot_status(filled_run)
 
     return {
-        "buffer_amount": buffer_amount,
-        "buffer_unit": buffer_unit,
-        "posts_scheduled": posts_scheduled,
-        "frequency_label": rate['frequency_label'],
-        "last_post_date": last_post_date,
-        "content_runs_out": content_runs_out,
-        "need_content_by": need_content_by
-    }
-
-
-def create_discord_message(stats: Dict[str, any], scheduled_posts: List[Dict]) -> Dict:
-    """Create Discord webhook payload with embed."""
-    buffer_amount = stats["buffer_amount"]
-    buffer_unit = stats["buffer_unit"]
-    posts_count = stats["posts_scheduled"]
-    freq_label = stats["frequency_label"]
-
-    # Determine color and urgency based on buffer unit
-    if buffer_unit == "months":
-        # Monthly thresholds: red < 1, orange < 2, green >= 2
-        if buffer_amount < 1:
-            color = 0xFF0000  # Red - urgent/low
-            urgency = "🚨 LOW"
-        elif buffer_amount < 2:
-            color = 0xFFA500  # Orange - moderate
-            urgency = "⚠️ MODERATE"
-        else:
-            color = 0x00FF00  # Green - good
-            urgency = "✅ GOOD"
-    else:
-        # Weekly thresholds: red < 2, orange < 4, green >= 4
-        if buffer_amount < 2:
-            color = 0xFF0000  # Red - urgent/low
-            urgency = "🚨 LOW"
-        elif buffer_amount < 4:
-            color = 0xFFA500  # Orange - moderate
-            urgency = "⚠️ MODERATE"
-        else:
-            color = 0x00FF00  # Green - good
-            urgency = "✅ GOOD"
-
-    # Format dates
-    if stats["last_post_date"]:
-        runs_out_str = stats["content_runs_out"].strftime("%A, %B %d, %Y")
-        need_by_str = stats["need_content_by"].strftime("%A, %B %d, %Y")
-    else:
-        runs_out_str = "No posts scheduled!"
-        need_by_str = "ASAP"
-
-    # Build post list
-    post_list = []
-    for post in scheduled_posts:
-        post_list.append(f"• **{post['date_str']}** - {post['title']}")
-    post_list_str = "\n".join(post_list) if post_list else "No posts scheduled"
-
-    # Create embed
-    embed = {
-        "title": f"{urgency} - Content Buffer Check",
-        "description": f"You have **{buffer_amount:.1f} {buffer_unit}** of scheduled content ({posts_count} posts @ {freq_label})",
+        "stream": stream,
+        "emoji": stats["emoji"],
+        "label": stats["label"],
+        "rows": rows,
+        "filled": sum(1 for _, item in rows if item),
+        "total": len(rows),
+        "first_gap": next((d for d, item in rows if not item), None),
+        "status": status,
         "color": color,
-        "fields": [
-            {
-                "name": "📅 Last Scheduled Post",
-                "value": runs_out_str,
-                "inline": True
-            },
-            {
-                "name": "✍️ Need New Content By",
-                "value": need_by_str,
-                "inline": True
-            },
-            {
-                "name": "📝 Scheduled Posts",
-                "value": post_list_str[:1024],  # Discord field limit
-                "inline": False
-            }
-        ],
-        "footer": {
-            "text": "The Agentic Engineer - Buffer Check"
-        },
-        "timestamp": datetime.now(timezone.utc).isoformat()
+        "rank": rank,
     }
 
-    return {
-        "embeds": [embed]
+
+def format_view_header(view: Dict) -> str:
+    """`📝 Posts  ⚠️ WARN · 2 of 4 · next gap Oct 05`"""
+    parts = [view["status"], f"{view['filled']} of {view['total']}"]
+    if view["first_gap"]:
+        parts.append(f"next gap {view['first_gap'].strftime('%b %d')}")
+    else:
+        parts.append("no gaps")
+    return f"{view['emoji']} {view['label']}  " + " · ".join(parts)
+
+
+def format_view_rows(view: Dict, max_chars: int = 1024) -> str:
+    """The slot list for one stream. An unfilled slot renders as a dash."""
+    lines = [
+        f"{date.strftime('%a %b %d')}   {item['title'] if item else '—'}"
+        for date, item in view["rows"]
+    ]
+    return "\n".join(lines)[:max_chars] or "No upcoming slots"
+
+
+def overall_status(views: List[Dict]) -> tuple:
+    """
+    Worst of any stream, so a healthy blog buffer cannot mask an empty
+    newsletter buffer. A post scheduled without an issue needs no special rule
+    any more: it simply shows up as a gap in the issues stream.
+    """
+    worst = max(views, key=lambda v: v["rank"])
+    return worst["status"], worst["color"]
+
+
+def unified_need_by(views: List[Dict]) -> Optional[datetime]:
+    """The earliest slot missing anything, across every stream."""
+    gaps = [v["first_gap"] for v in views if v["first_gap"]]
+    return min(gaps) if gaps else None
+
+
+def create_discord_message(stream_stats: Dict[str, Dict], ledger: List[Dict],
+                           off_cadence: List[Dict], schedule_label: str) -> Dict:
+    """Create the Discord webhook payload: one embed covering every stream."""
+    views = [stream_view(s, st, ledger) for s, st in stream_stats.items()]
+    status, color = overall_status(views)
+    need_by = unified_need_by(views)
+
+    if need_by:
+        days = (need_by - datetime.now(timezone.utc)).days
+        deadline = f"**Need content by {need_by.strftime('%a %b %d')}** · {days} days"
+    else:
+        deadline = f"**No gaps in the next {len(ledger)} slots**"
+
+    fields = [
+        {
+            "name": format_view_header(view),
+            "value": format_view_rows(view),
+            "inline": False,
+        }
+        for view in views
+    ]
+
+    if off_cadence:
+        fields.append({
+            "name": "⚠️ Off-cadence (not on a publish day)",
+            "value": "\n".join(
+                f"{i['date_str']}   {i['title']}" for i in off_cadence
+            )[:1024],
+            "inline": False,
+        })
+
+    embed = {
+        "title": f"{status} · Content Buffer",
+        "description": f"{deadline}\n{schedule_label}",
+        "color": color,
+        "fields": fields,
+        "footer": {"text": "The Agentic Engineer · Buffer Check"},
+        "timestamp": datetime.now(timezone.utc).isoformat(),
     }
+
+    return {"embeds": [embed]}
 
 
 def send_discord_notification(webhook_url: str, message: Dict) -> bool:
@@ -246,15 +294,26 @@ def send_discord_notification(webhook_url: str, message: Dict) -> bool:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Check content buffer and notify if low")
+    parser = argparse.ArgumentParser(
+        description="Check content buffer across streams and notify if low"
+    )
     parser.add_argument(
         "--webhook-url",
         help="Discord webhook URL (or set LOW_CONTENT_WEBHOOK env var)"
     )
     parser.add_argument(
+        "--stream",
+        choices=["posts", "newsletter", "both"],
+        default="both",
+        help="Which stream(s) to report on (default: both)"
+    )
+    parser.add_argument(
+        "--notify",
         "--force",
+        dest="notify",
         action="store_true",
-        help="Send notification (default behavior for weekly updates)"
+        help="Actually post to Discord. Without it the report only prints, so a "
+             "local run never touches the channel."
     )
     args = parser.parse_args()
 
@@ -268,47 +327,95 @@ def main():
     # Get webhook URL (optional for dry-run)
     webhook_url = args.webhook_url or os.environ.get("LOW_CONTENT_WEBHOOK")
 
-    # Find content directory
-    project_root = Path(__file__).parent.parent
-    content_dir = project_root / "website" / "content" / "posts"
+    # Decide which streams to report on
+    if args.stream == "both":
+        streams = ["posts"]
+        if get_newsletter_config(config)["enabled"]:
+            streams.append("newsletter")
+    else:
+        streams = [args.stream]
 
-    if not content_dir.exists():
-        print(f"❌ Error: Content directory not found: {content_dir}", file=sys.stderr)
+    project_root = Path(__file__).parent.parent
+
+    stream_stats = {}
+    items_by_stream = {}
+
+    for stream in streams:
+        content_dir = project_root / get_stream_config(config, stream)["content_dir"]
+
+        if not content_dir.exists():
+            if stream == "posts":
+                print(f"❌ Error: Content directory not found: {content_dir}",
+                      file=sys.stderr)
+                sys.exit(1)
+            # A stream that has not been started yet is a warning, not a failure
+            print(f"⚠️  {stream} directory not found: {content_dir}")
+            items_by_stream[stream] = []
+        else:
+            items_by_stream[stream] = get_scheduled_posts(content_dir)
+
+        # Only display metadata is needed now; the ledger carries the rest.
+        stream_stats[stream] = get_stream_config(config, stream)
+
+    # Both streams share the top-level schedule unless one overrides it, so the
+    # ledger is built from the posts cadence.
+    pub_config = get_publishing_config(config, streams[0])
+    schedule_label = format_schedule_label(pub_config)
+    # Two months of lookahead. Derived from the cadence rather than hardcoded so
+    # the horizon stays two months if the schedule ever changes: at 1st-and-3rd
+    # Monday that is 4 slots, weekly would be ~9.
+    rate = get_publishing_rate(config, streams[0])
+    slot_count = max(2, round(LOOKAHEAD_MONTHS * rate["posts_per_month"]))
+    slots = get_upcoming_slots(pub_config, count=slot_count)
+    ledger = build_slot_ledger(slots, items_by_stream)
+    off_cadence = find_off_cadence(slots, items_by_stream)
+
+    # Terminal report. Same headline, same labels, same values as the embed:
+    # both render from stream_view() and overall_status().
+    views = [stream_view(st, stream_stats[st], ledger) for st in streams]
+    status, _color = overall_status(views)
+    need_by = unified_need_by(views)
+    rule = "─" * 54
+
+    print(f"\n{status} · Content Buffer")
+    if need_by:
+        days = (need_by - datetime.now(timezone.utc)).days
+        print(f"Need content by  {need_by.strftime('%a %b %d')}  ·  {days} days")
+    else:
+        print(f"No gaps in the next {len(ledger)} slots")
+    print(schedule_label)
+    print(rule)
+
+    for view in views:
+        print(format_view_header(view))
+        for line in format_view_rows(view).splitlines():
+            print(f"   {line}")
+        print()
+
+    if off_cadence:
+        print("⚠️ Off-cadence (not on a publish day)")
+        for item in off_cadence:
+            print(f"   {item['date_str']}   {item['title']}")
+        print()
+
+    # Posting is opt-in. The webhook lives in .env.local so local runs can send
+    # deliberately, but a bare `buffer_check.py` while writing must never put a
+    # message in the channel. Only the scheduled workflow passes --notify.
+    if not args.notify:
+        print("📋 Report only. Pass --notify to post this to Discord.")
+        sys.exit(0)
+
+    if not webhook_url:
+        print(f"❌ --notify given but no webhook configured "
+              f"(set LOW_CONTENT_WEBHOOK or pass --webhook-url)", file=sys.stderr)
         sys.exit(1)
 
-    # Get scheduled posts
-    scheduled_posts = get_scheduled_posts(content_dir)
-
-    # Calculate stats
-    stats = calculate_buffer_stats(scheduled_posts, config)
-
-    pub_config = get_publishing_config(config)
-    schedule_label = format_schedule_label(pub_config)
-
-    # Print summary
-    print(f"\n📊 Content Buffer Status")
-    print(f"{'='*50}")
-    print(f"Posts scheduled: {stats['posts_scheduled']}")
-    print(f"Publishing rate: {stats['frequency_label']}")
-    print(f"Schedule: {schedule_label}")
-    print(f"Buffer: {stats['buffer_amount']:.1f} {stats['buffer_unit']}")
-
-    if stats['last_post_date']:
-        print(f"Last post date: {stats['last_post_date'].strftime('%Y-%m-%d')}")
-        print(f"Content runs out: {stats['content_runs_out'].strftime('%A, %B %d, %Y')}")
-        print(f"Need content by: {stats['need_content_by'].strftime('%A, %B %d, %Y')}")
-    else:
-        print("⚠️ No posts scheduled!")
-
-    # Send notification
-    if webhook_url:
-        print(f"\nSending Discord notification...")
-        message = create_discord_message(stats, scheduled_posts)
-        success = send_discord_notification(webhook_url, message)
-        sys.exit(0 if success else 1)
-    else:
-        print(f"\n⚠️ No webhook URL configured (set LOW_CONTENT_WEBHOOK to enable notifications)")
-        sys.exit(0)
+    print("Sending Discord notification...")
+    message = create_discord_message(
+        stream_stats, ledger, off_cadence, schedule_label
+    )
+    success = send_discord_notification(webhook_url, message)
+    sys.exit(0 if success else 1)
 
 
 if __name__ == "__main__":

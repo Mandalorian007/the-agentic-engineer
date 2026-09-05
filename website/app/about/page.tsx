@@ -3,38 +3,34 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import {
   ArrowRight,
-  Mail,
-  Rss,
   MapPin,
   Building2,
   GraduationCap,
   Rocket,
-  Bot,
-  Network,
-  GaugeCircle,
-  Layers,
   Sparkles,
   BookOpen,
+  GitBranch,
   ExternalLink,
 } from "lucide-react";
 // Brand icons live outside lucide-react v1 (removed for trademark reasons);
-// react-icons/fa6 is the project's established pattern (see share-buttons.tsx).
+// react-icons still ships them.
 import { FaGithub, FaLinkedinIn } from "react-icons/fa6";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import {
-  CONTACT_EMAIL,
-  GITHUB_URL,
-  LINKEDIN_URL,
-  TAC_URL,
-  TENURE_YEARS,
-} from "@/lib/bio";
+import { NewsletterCta } from "@/components/newsletter-cta";
+import { AUTHOR, SITE_URL } from "@/lib/site";
+
+const CONTACT_EMAIL = AUTHOR.email;
+const GITHUB_URL = AUTHOR.github;
+const LINKEDIN_URL = "https://www.linkedin.com/in/matthew-fontana/";
+const TAC_URL = "https://tabletopadventurecreator.com";
+const REPO_URL = "https://github.com/Mandalorian007/the-agentic-engineer";
 
 const ABOUT_TITLE = "About Matthew Fontana";
 const ABOUT_DESCRIPTION =
-  "Staff Software Engineer at Airbnb. I write at agentic-engineer.com about agentic developer platforms, MCP, and the agentic SDLC, and help a handful of engineering teams a year build theirs.";
+  "Staff Software Engineer at Airbnb. I encode my own workflows into agents inside a large engineering org, and everything I write here is something I actually run.";
 
 export const metadata: Metadata = {
   title: ABOUT_TITLE,
@@ -55,13 +51,12 @@ export const metadata: Metadata = {
   },
 };
 
-// If you edit EXPERIENCE below, update worksFor / alumniOf / knowsAbout here too.
 const PERSON_JSON_LD = {
   "@context": "https://schema.org",
   "@type": "Person",
-  name: "Matthew Fontana",
-  url: "https://agentic-engineer.com/about",
-  image: "https://agentic-engineer.com/the-agentic-engineer-logo.webp",
+  name: AUTHOR.name,
+  url: AUTHOR.url,
+  image: `${SITE_URL}${AUTHOR.avatar}`,
   email: CONTACT_EMAIL,
   jobTitle: "Staff Software Engineer",
   homeLocation: {
@@ -82,9 +77,9 @@ const PERSON_JSON_LD = {
       name: "New Jersey Institute of Technology",
     },
   ],
-  sameAs: [GITHUB_URL, LINKEDIN_URL, TAC_URL],
+  sameAs: [GITHUB_URL, LINKEDIN_URL, TAC_URL, REPO_URL],
   knowsAbout: [
-    "Agentic developer platforms",
+    "Agentic engineering",
     "Claude Code",
     "Model Context Protocol",
     "LiteLLM",
@@ -111,9 +106,9 @@ type ExperienceEntry = {
 const EXPERIENCE: ExperienceEntry[] = [
   {
     org: "Airbnb",
-    role: "Staff Software Engineer",
+    role: "Staff Software Engineer, Data Management",
     period: "2024 – present",
-    note: "Core member of the taskforce taking Airbnb's data warehouse agent-native. Integrated the metadata systems with MCP under device-derived, user-scoped access. Shipped a vendor-agnostic marketplace plugin (skills, subagents, commands) bringing natural-language search, discovery, and analytics into Claude Code, Codex, and Gemini CLI. Hardened lineage into column-level extraction for governance and GDPR visibility.",
+    note: "Productionized an internal AI agent for natural-language search and discovery across the data warehouse. Claude Code Marketplace plugin combining skills, subagents, hooks, and commands. CLI + API MCP servers with internal AuthN/AuthZ. Evaluation framework that scores business outcomes, not unit pass rates.",
     type: "employer",
   },
   {
@@ -128,28 +123,28 @@ const EXPERIENCE: ExperienceEntry[] = [
     org: "Spotify",
     role: "Staff Software Engineer, Productivity Engineering",
     period: "2022 – 2024",
-    note: "Chair of the Technical Steering Group. Led technical direction across six teams spanning device endpoint management, vendor integrations, access and identity, and employee lifecycle. Extended Spotify's quality framework to cover the tribe's systems and mentored six engineers into tech-leadership roles, all promoted.",
+    note: "Chairman of the Productivity Engineering Technical Steering Group. Led six teams across developer tooling, IAM, and employee lifecycle. Reduced non-business-focused dev cycles by 30%.",
     type: "employer",
   },
   {
     org: "Spotify",
     role: "Senior Software Engineer, Spotify for Artists",
     period: "2020 – 2022",
-    note: "Two-sided marketplace work: GDPR-compliant audit system for shared artist accounts across labels and distributors; technical owner of the team-management layer; internal payments wrapped as an enterprise payment provider with tax collection. Taught the internal data-science bootcamp.",
+    note: "Two-sided marketplace work: GDPR audit system for artists, labels, and distributors. Payment provider scaling. Instructor for the internal data-science bootcamp.",
     type: "employer",
   },
   {
     org: "Spotify",
     role: "Data Engineer",
     period: "2017 – 2020",
-    note: "Drove the working group evolving Spotify's Apollo framework toward Spring Boot. Brought GDPR compliance to data engineering on GCP BigQuery. Co-founded a Google + Spotify Special Interest Group. Built an automated regional ad-generation system that lifted acquisition 15%.",
+    note: "Introduced Spring Boot to Spotify's backend. GDPR compliance on GCP BigQuery. Co-founded a Google + Spotify Special Interest Group.",
     type: "employer",
   },
   {
     org: "UPS",
     role: "Associate → Senior Application Developer",
-    period: "2013 – 2017",
-    note: "JVM platform work across four years. Introduced OpenShift to enable microservices. Spring Cloud Data Flow, AXON event sourcing, lambda-architecture streaming on Cassandra/Solr/Spark, JBoss Fuse / Camel / ActiveMQ.",
+    period: "2014 – 2017",
+    note: "JVM platform work. Introduced OpenShift to enable microservices. Spring Cloud, AXON event sourcing, lambda-architecture streaming on Cassandra/Solr/Spark, JBoss Fuse / Camel / ActiveMQ.",
     type: "employer",
   },
   {
@@ -161,34 +156,9 @@ const EXPERIENCE: ExperienceEntry[] = [
   },
 ];
 
-const WORK_AREAS = [
-  {
-    icon: Bot,
-    title: "Agentic developer platforms",
-    body: "Skills, subagents, hooks, slash commands, and the eval harnesses that keep them honest in production. Your team adopts the platform without having to own every primitive.",
-  },
-  {
-    icon: Network,
-    title: "MCP servers and provider-portable routing",
-    body: "CLI and API MCP servers that expose your codebase, data, and internal services to AI agents under existing AuthN/AuthZ. LiteLLM-style routing keeps the platform portable across Anthropic, OpenAI, Google, and self-hosted models, so the work survives the next provider launch.",
-  },
-  {
-    icon: GaugeCircle,
-    title: "Developer productivity at org scale",
-    body: "As chair of Spotify's Productivity Engineering steering group, I turned scattered tooling into a measurable platform that engineering leaders can defend to the business.",
-  },
-  {
-    icon: Layers,
-    title: "The standard everyone ends up adopting",
-    body: "Pattern across three employers: I introduce the platform layer (Spring Boot at Spotify, OpenShift at UPS, Claude Code plugin at Airbnb) and it propagates because it earns adoption, not because it's mandated.",
-  },
-];
-
-// Selected public work: the show-don't-tell layer. Concrete artifacts a
-// reader can click into and verify the claims on the rest of the page.
-// Icon type accepts both lucide-react and react-icons components — both
-// expose a className prop, which is all we use at render time.
 type PublicWorkEntry = {
+  // Accepts both lucide-react and react-icons components. Both expose a
+  // className prop, which is all we use at render time.
   icon: React.ComponentType<{ className?: string }>;
   title: string;
   body: string;
@@ -198,6 +168,14 @@ type PublicWorkEntry = {
 };
 
 const PUBLIC_WORK: PublicWorkEntry[] = [
+  {
+    icon: GitBranch,
+    title: "This site, as source",
+    body: "The blog and the pipeline that publishes it. Commands, safety hooks, prose linting, scheduling, and every post as raw MDX.",
+    href: REPO_URL,
+    cta: "Read the repo",
+    external: true,
+  },
   {
     icon: Sparkles,
     title: "Tabletop Adventure Creator",
@@ -217,7 +195,7 @@ const PUBLIC_WORK: PublicWorkEntry[] = [
   {
     icon: BookOpen,
     title: "The Agentic Engineer blog",
-    body: "Field notes from inside production engineering. Patterns, tooling, lessons learned. Published twice a month.",
+    body: "Field notes on handing real work to agents without losing control of your codebase. Patterns, tooling, things that broke.",
     href: "/blog",
     cta: "Read the blog",
     external: false,
@@ -237,7 +215,7 @@ export default function AboutPage() {
         Photo + identity block side-by-side. Visible verifications (employer,
         GitHub, LinkedIn) make the page feel like a profile, not a brochure.
       */}
-      <section className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-10 items-start max-w-5xl mx-auto">
+      <section className="mx-auto grid max-w-5xl grid-cols-1 items-start gap-10 md:grid-cols-[260px_1fr]">
         <div className="space-y-4">
           <div className="relative aspect-square w-full overflow-hidden rounded-lg border bg-muted">
             <Image
@@ -245,21 +223,17 @@ export default function AboutPage() {
               alt="Matthew Fontana"
               fill
               priority
-              sizes="(max-width: 768px) 100vw, 260px"
               className="object-cover object-center"
+              sizes="(max-width: 768px) 100vw, 260px"
             />
           </div>
           <div className="flex flex-wrap gap-2 text-xs">
             <Badge variant="secondary" className="gap-1.5">
-              <Building2 className="w-3 h-3" />
+              <Building2 className="h-3 w-3" />
               Staff Engineer · Airbnb
             </Badge>
             <Badge variant="secondary" className="gap-1.5">
-              <GraduationCap className="w-3 h-3" />
-              {TENURE_YEARS} yrs in enterprise software
-            </Badge>
-            <Badge variant="secondary" className="gap-1.5">
-              <MapPin className="w-3 h-3" />
+              <MapPin className="h-3 w-3" />
               Hoboken, NJ
             </Badge>
           </div>
@@ -268,162 +242,78 @@ export default function AboutPage() {
         <div className="space-y-6">
           <div className="space-y-3">
             <Badge variant="outline">About</Badge>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+            <h1 className="text-4xl font-bold tracking-tight md:text-5xl">
               Hi, I&apos;m Matthew Fontana.
             </h1>
             <p className="text-xl text-muted-foreground">
-              I build agentic developer platforms inside large engineering
-              orgs, write about the work here, and take on a few outside
-              engagements a year.
+              Staff engineer at Airbnb. Before that Spotify, before that UPS.
+              I&apos;ve spent that whole time inside big engineering orgs
+              working out how to hand real work to machines without it going
+              badly.
+            </p>
+            <p className="text-xl text-muted-foreground">
+              Everything I write here is something I actually run.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
             <Button variant="outline" asChild>
               <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer">
-                <FaGithub className="w-4 h-4 mr-2" />
+                <FaGithub className="mr-2 h-4 w-4" />
                 GitHub
               </a>
             </Button>
             <Button variant="outline" asChild>
               <a href={LINKEDIN_URL} target="_blank" rel="noopener noreferrer">
-                <FaLinkedinIn className="w-4 h-4 mr-2" />
+                <FaLinkedinIn className="mr-2 h-4 w-4" />
                 LinkedIn
               </a>
-            </Button>
-            <Button variant="outline" asChild>
-              <Link href="/feed.xml">
-                <Rss className="w-4 h-4 mr-2" />
-                RSS
-              </Link>
             </Button>
           </div>
         </div>
       </section>
 
       {/*
-        NARRATIVE BIO — Passport "humanize aggressively" principle.
-        First-person, warm, concrete. Walks the career arc without bragging.
-        Tenure is shown, not announced. Specific metrics are woven into the
-        prose rather than broken out as standalone cards; numbers feel earned
-        when they sit inside the role that produced them.
+        PROOF — the strongest credibility artifact is the site itself, which
+        is produced by the workflow the site describes. Show, don't claim.
       */}
-      <section className="mt-20 max-w-3xl mx-auto space-y-5 text-lg leading-relaxed">
-        <p>
-          I&apos;m a Staff Software Engineer at Airbnb, on the taskforce taking
-          our data warehouse agent-native. That&apos;s the platform layer that
-          makes warehouse metadata addressable by coding agents, not just
-          humans. I integrated the metadata systems with MCP so agents get
-          structured access to discovery, querying, and administration, with
-          device-derived access tokens injected into every request so the agent
-          inherits the user&apos;s existing permissions. That alignment is what
-          unblocked agent access to sensitive data. On top of it I shipped a
-          vendor-agnostic marketplace plugin of skills, subagents, and commands
-          that brings natural-language search, discovery, and analytics into
-          Claude Code, Codex, and Gemini CLI. I also hardened the lineage
-          infrastructure into column-level extraction for governance and GDPR
-          visibility into personal-data flows.
+      <section className="mx-auto mt-24 max-w-3xl">
+        <h2 className="text-3xl font-bold">This site is the argument</h2>
+        <p className="mt-4 text-lg text-muted-foreground">
+          You&apos;re reading the output of the method. Posts come out of a
+          voice pipeline I built. Images are generated. Prose gets linted before
+          it ships. Publishing is scheduled and automated. A safety hook blocks
+          agent commands I don&apos;t want run, and it has stopped me more than
+          once.
         </p>
-        <p>
-          Before Airbnb I spent seven years at Spotify. I left as Staff in
-          Productivity Engineering and Chair of the Technical Steering Group.
-          Six teams under me spanned device endpoint management, vendor
-          integrations, access and identity, and employee lifecycle. As TSG
-          Chair I extended Spotify&apos;s quality framework to cover the
-          hundreds of systems the tribe owned, and the six engineers I mentored
-          into tech-leadership roles were all promoted. Earlier in that run I
-          introduced Spring Boot to Spotify&apos;s backend, ran GDPR work inside
-          the data engineering org, and built the GDPR-compliant audit system
-          for the Spotify-for-Artists two-sided marketplace.
+        <p className="mt-4 text-lg">
+          It&apos;s all one public repo. The method is the repo.
         </p>
-        <p>
-          Before Spotify, four years at UPS shipping Spring Cloud, OpenShift,
-          and lambda-architecture streaming systems on top of the JVM.
-          That&apos;s where the platform-engineering instinct started: the
-          work that pays off is rarely the work in the ticket. It&apos;s the
-          layer underneath.
-        </p>
-        <p>
-          I&apos;ve also run{" "}
-          <a
-            href={TAC_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-primary underline underline-offset-4 hover:no-underline"
-          >
-            TabletopAdventureCreator.com
-          </a>{" "}
-          since 2022. It&apos;s a generative-AI SaaS I built and still ship
-          solo. Evidence that I was building production AI products before the
-          current AI wave.
-        </p>
-      </section>
-
-      {/*
-        KILL LINE — pulled out of the bio so the page's strongest sentence
-        gets its own visual moment. Acts as the punctuation between the
-        narrative and the practice-area cards that follow.
-      */}
-      <section className="mt-16 max-w-3xl mx-auto">
-        <Card className="border-primary/30 bg-primary/5">
-          <CardContent className="p-8 md:p-10 text-center space-y-3">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
-              The work behind the writing
-            </p>
-            <p className="text-2xl md:text-3xl font-semibold leading-snug text-balance">
-              The platform I write about here is the platform I&apos;m
-              shipping in production every week.
-            </p>
-          </CardContent>
-        </Card>
-      </section>
-
-      {/*
-        WHAT I WORK ON — concrete domains. Replaces vague claims with named
-        practice areas a reader can match against their actual problem.
-        Icons added for visual congruence with /services.
-      */}
-      <section className="mt-24 max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold mb-4">What I work on</h2>
-        <p className="text-lg text-muted-foreground mb-10">
-          Four areas the work tends to land in. They overlap more than they
-          don&apos;t.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {WORK_AREAS.map((area) => {
-            const Icon = area.icon;
-            return (
-              <Card key={area.title}>
-                <CardContent className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-md bg-primary/10 p-2 shrink-0">
-                      <Icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <h3 className="text-lg font-semibold leading-tight min-w-0 break-words">
-                      {area.title}
-                    </h3>
-                  </div>
-                  <p className="text-muted-foreground leading-relaxed text-sm">
-                    {area.body}
-                  </p>
-                </CardContent>
-              </Card>
-            );
-          })}
+        <div className="mt-6">
+          <Button asChild>
+            <a href={REPO_URL} target="_blank" rel="noopener noreferrer">
+              <GitBranch className="mr-2 h-4 w-4" />
+              See how this site is built
+            </a>
+          </Button>
         </div>
       </section>
 
+      {/* Newsletter */}
+      <section className="mx-auto mt-20 max-w-3xl">
+        <NewsletterCta source="about" />
+      </section>
+
       {/*
-        EXPERIENCE TIMELINE — long-tenure signal delivered passively.
-        Founder-track entry (TAC) gets its own icon (Rocket) and accent
-        color so the parallel founder/employee tracks read clearly.
+        EXPERIENCE — Passport principle: dates do the long-tenure work
+        passively. No "X years of experience" claims.
       */}
-      <section className="mt-24 max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold mb-4">Experience</h2>
-        <p className="text-lg text-muted-foreground mb-10">
+      <section className="mx-auto mt-24 max-w-4xl">
+        <h2 className="mb-4 text-3xl font-bold">Experience</h2>
+        <p className="mb-10 text-lg text-muted-foreground">
           Roles, employers, years. The rest is in the bio above.
         </p>
-        <ol className="relative border-l border-border ml-4 space-y-8">
+        <ol className="relative ml-4 space-y-8 border-l border-border">
           {EXPERIENCE.map((e) => {
             const Icon =
               e.type === "school"
@@ -440,11 +330,11 @@ export default function AboutPage() {
             return (
               <li key={`${e.org}-${e.period}`} className="ml-6">
                 <span
-                  className={`absolute -left-3 flex items-center justify-center w-6 h-6 rounded-full border ${dotClass}`}
+                  className={`absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full border ${dotClass}`}
                 >
-                  <Icon className={`w-3 h-3 ${iconClass}`} />
+                  <Icon className={`h-3 w-3 ${iconClass}`} />
                 </span>
-                <div className="flex flex-wrap items-baseline justify-between gap-2 mb-1">
+                <div className="mb-1 flex flex-wrap items-baseline justify-between gap-2">
                   <h3 className="text-lg font-semibold">
                     {e.role}{" "}
                     <span className={`font-normal ${orgClass}`}>
@@ -465,17 +355,17 @@ export default function AboutPage() {
                     {isFounder && (
                       <Badge
                         variant="outline"
-                        className="ml-2 border-primary/40 text-primary text-[10px] uppercase tracking-wide"
+                        className="ml-2 border-primary/40 text-[10px] uppercase tracking-wide text-primary"
                       >
                         Founder track
                       </Badge>
                     )}
                   </h3>
-                  <span className="text-sm text-muted-foreground font-mono">
+                  <span className="font-mono text-sm text-muted-foreground">
                     {e.period}
                   </span>
                 </div>
-                <p className="text-muted-foreground leading-relaxed">{e.note}</p>
+                <p className="leading-relaxed text-muted-foreground">{e.note}</p>
               </li>
             );
           })}
@@ -485,75 +375,59 @@ export default function AboutPage() {
       {/*
         SELECTED PUBLIC WORK — Passport "show, don't tell" principle.
         Concrete artifacts a reader can click into and verify the claims
-        on the rest of the page. Replaces the previous standalone blog
-        pointer; blog is included as one of the cards.
+        on the rest of the page.
       */}
-      <section className="mt-24 max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold mb-4">Selected public work</h2>
-        <p className="text-lg text-muted-foreground mb-10">
-          Don&apos;t take the resume on faith. Click in.
+      <section className="mx-auto mt-24 max-w-5xl">
+        <h2 className="mb-4 text-3xl font-bold">Selected public work</h2>
+        <p className="mb-10 text-lg text-muted-foreground">
+          Things you can open and check for yourself.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {PUBLIC_WORK.map((work) => {
-            const Icon = work.icon;
-            return (
-              <Card key={work.title} className="flex flex-col">
-                <CardContent className="space-y-3 flex flex-col grow">
-                  <div className="flex items-start gap-3">
-                    <div className="rounded-md bg-primary/10 p-2 shrink-0">
-                      <Icon className="w-5 h-5 text-primary" />
-                    </div>
-                    <h3 className="text-lg font-semibold leading-tight min-w-0 break-words">
-                      {work.title}
-                    </h3>
-                  </div>
-                  <p className="text-muted-foreground leading-relaxed text-sm grow">
-                    {work.body}
-                  </p>
-                  <Button variant="outline" size="sm" asChild className="w-fit mt-2">
-                    {work.external ? (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {PUBLIC_WORK.map((entry) => (
+            <Card key={entry.title} className="size-full">
+              <CardContent className="flex h-full flex-col gap-3 p-6">
+                <entry.icon className="h-5 w-5 text-primary" />
+                <h3 className="min-w-0 break-words text-lg font-semibold leading-tight">
+                  {entry.title}
+                </h3>
+                <p className="text-muted-foreground">{entry.body}</p>
+                <div className="mt-auto pt-2">
+                  {entry.external ? (
+                    <Button variant="outline" size="sm" asChild>
                       <a
-                        href={work.href}
+                        href={entry.href}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        {work.cta}
-                        <ExternalLink className="w-3 h-3 ml-2" />
+                        {entry.cta}
+                        <ExternalLink className="ml-2 h-3.5 w-3.5" />
                       </a>
-                    ) : (
-                      <Link href={work.href}>
-                        {work.cta}
-                        <ArrowRight className="w-3 h-3 ml-2" />
+                    </Button>
+                  ) : (
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={entry.href}>
+                        {entry.cta}
+                        <ArrowRight className="ml-2 h-3.5 w-3.5" />
                       </Link>
-                    )}
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </section>
 
-      {/* FINAL CTA */}
-      <section className="mt-24 max-w-3xl mx-auto text-center space-y-6">
-        <h2 className="text-3xl md:text-4xl font-bold">Get in touch</h2>
-        <p className="text-lg text-muted-foreground">
-          Email is the fastest way to reach me. Glad to hear from anyone
-          building in this space.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
-          <Button size="lg" asChild>
-            <a href={`mailto:${CONTACT_EMAIL}`}>
-              <Mail className="w-4 h-4 mr-2" />
-              {CONTACT_EMAIL}
-            </a>
-          </Button>
-          <Button size="lg" variant="outline" asChild>
-            <Link href="/speaking">
-              Invite me to speak
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
-          </Button>
+      {/* Hire me, demoted to match the homepage */}
+      <section className="mx-auto mt-24 max-w-5xl border-t pt-8">
+        <div className="flex flex-col items-start justify-between gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center">
+          <p>Want me to come talk to your team?</p>
+          <Link
+            href="/services"
+            className="font-medium text-foreground underline underline-offset-4"
+          >
+            Hire me
+          </Link>
         </div>
       </section>
     </div>

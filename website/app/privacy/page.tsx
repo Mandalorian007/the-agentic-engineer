@@ -10,8 +10,11 @@ import { getPrivacyPolicy } from "@/lib/legal";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | The Agentic Engineer",
-  description: "Privacy policy for The Agentic Engineer blog. Learn how we collect, use, and protect your information.",
+  title: "Privacy Policy",
+  description:
+    "What The Agentic Engineer collects, why, and how to have it deleted. The short version: an email address, only if you subscribe.",
+  alternates: { canonical: "/privacy" },
+  openGraph: { title: "Privacy Policy", url: "/privacy" },
 };
 
 export default function PrivacyPage() {

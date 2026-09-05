@@ -9,7 +9,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { getPostBySlug, getAllPostSlugs } from "@/lib/posts";
+import { getPostBySlug, getPublishedPosts, isPublished } from "@/lib/posts";
 import { getCategoryById } from "@/lib/categories";
 import Image from "next/image";
 import { CodeBlock } from "@/components/code-block";
@@ -17,11 +17,14 @@ import { ShareButtons } from "@/components/share-buttons";
 import { TableOfContents } from "@/components/table-of-contents";
 import { ReadingProgress } from "@/components/reading-progress";
 import { HeadingWithAnchor } from "@/components/heading-with-anchor";
-import { AuthorBio } from "@/components/author-bio";
+import { NewsletterCta } from "@/components/newsletter-cta";
+import { AuthorSignature } from "@/components/author-signature";
+import { UnpublishedBanner } from "@/components/unpublished-banner";
+import { previewUnpublished } from "@/lib/preview";
+import { SITE_URL, SITE_NAME, AUTHOR } from "@/lib/site";
 import { extractHeadings, generateHeadingId } from "@/lib/toc";
 import { formatReadingTime } from "@/lib/reading-time";
 import { getHeroImagePath } from "@/lib/og-image";
-import { AUTHOR_NAME, LINKEDIN_URL } from "@/lib/bio";
 
 // ISR: Revalidate every 1 hour (3600 seconds)
 export const revalidate = 3600;
@@ -32,10 +35,11 @@ interface BlogPostPageProps {
   }>;
 }
 
-// Generate static params for all posts
+// Only published posts are prerendered. A scheduled post is still reachable
+// on demand (dynamicParams defaults to true), which is what the gate below and
+// preview mode are for.
 export async function generateStaticParams() {
-  const slugs = getAllPostSlugs();
-  return slugs.map((slug) => ({ slug }));
+  return getPublishedPosts().map((post) => ({ slug: post.slug }));
 }
 
 // Generate metadata for SEO
@@ -46,16 +50,30 @@ export async function generateMetadata(props: BlogPostPageProps) {
   if (!post) {
     return {
       title: "Post Not Found",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  // A scheduled post must not leak its title and description into a card, and
+  // must never be indexed, even while preview mode keeps it readable.
+  if (!isPublished(post)) {
+    if (!previewUnpublished()) {
+      return { title: "Post Not Found", robots: { index: false, follow: false } };
+    }
+    return {
+      title: `${post.title} (preview)`,
+      robots: { index: false, follow: false },
     };
   }
 
   // Get hero image for Open Graph and Twitter Card
   const heroImageUrl = getHeroImagePath(params.slug);
-  const postUrl = `https://agentic-engineer.com/blog/${params.slug}`;
+  const postUrl = `${SITE_URL}/blog/${params.slug}`;
 
   return {
     title: post.title,
     description: post.description,
+    alternates: { canonical: postUrl },
     openGraph: {
       title: post.title,
       description: post.description,
@@ -92,6 +110,14 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
     notFound();
   }
 
+  // Scheduled posts stay readable in development and on preview deployments so
+  // they can be proofread as pages, and 404 in production.
+  const published = isPublished(post);
+
+  if (!published && !previewUnpublished()) {
+    notFound();
+  }
+
   const category = getCategoryById(post.category);
 
   // Extract headings for Table of Contents
@@ -108,40 +134,45 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
     "description": post.description,
     "image": post.content.match(/!\[.*?\]\(\.\.\/\.\.\/public\/(.*?)\)/g)?.map(img => {
       const match = img.match(/!\[.*?\]\(\.\.\/\.\.\/public\/(.*?)\)/);
-      return match ? `https://agentic-engineer.com/${match[1]}` : null;
+      return match ? `${SITE_URL}/${match[1]}` : null;
     }).filter(Boolean) || [],
     "datePublished": post.date,
     "dateModified": post.date,
     "author": {
       "@type": "Person",
-      "name": AUTHOR_NAME,
-      "url": "https://agentic-engineer.com/about",
-      "sameAs": [LINKEDIN_URL]
+      "name": AUTHOR.name,
+      "url": AUTHOR.url,
+      // Entity disambiguation for search engines: ties the byline to a real,
+      // verifiable profile rather than a name string.
+      "sameAs": [AUTHOR.linkedin, AUTHOR.github]
     },
     "publisher": {
       "@type": "Organization",
-      "name": "The Agentic Engineer",
+      "name": SITE_NAME,
       "logo": {
         "@type": "ImageObject",
-        "url": "https://agentic-engineer.com/the-agentic-engineer-logo.webp"
+        "url": `${SITE_URL}/the-agentic-engineer-logo.webp`
       }
     },
-    "url": `https://agentic-engineer.com/blog/${params.slug}`,
+    "url": `${SITE_URL}/blog/${params.slug}`,
     "keywords": post.hashtags?.join(", ") || "",
     "articleSection": category?.name || post.category,
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://agentic-engineer.com/blog/${params.slug}`
+      "@id": `${SITE_URL}/blog/${params.slug}`
     }
   };
 
   return (
     <>
-      {/* JSON-LD Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      {/* JSON-LD Structured Data. Withheld on an unpublished preview so a
+          scheduled post cannot be picked up as a real article. */}
+      {published && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
 
       {/* Reading Progress Bar */}
       <ReadingProgress />
@@ -163,6 +194,10 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-12">
         {/* Main Content */}
         <article>
+          {!published && (
+            <UnpublishedBanner label="Scheduled to publish on" date={post.date} />
+          )}
+
           {/* Category Badge */}
           <div className="mb-4">
             <Link href={`/blog/category/${post.category}`}>
@@ -178,7 +213,11 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
           </h1>
 
           {/* Meta */}
-          <div className="flex items-center gap-4 text-sm text-muted-foreground mb-8">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mb-8">
+            <Link href="/about" className="font-medium text-foreground hover:underline">
+              {AUTHOR.name}
+            </Link>
+            <span>•</span>
             <time dateTime={post.date}>
               {new Date(post.date).toLocaleDateString("en-US", {
                 year: "numeric",
@@ -284,9 +323,15 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
             </div>
           )}
 
-          {/* Author bio — credential surface on every post */}
+          {/* Sign-off: put a name and a face on the argument. */}
+          <div className="mt-10">
+            <AuthorSignature />
+          </div>
+
+          {/* Newsletter: the highest-intent moment on the site is right here,
+              when someone has just finished the whole post. */}
           <div className="mt-12">
-            <AuthorBio />
+            <NewsletterCta source={`post:${params.slug}`} />
           </div>
         </article>
 
@@ -294,7 +339,7 @@ export default async function BlogPostPage(props: BlogPostPageProps) {
         <aside className="lg:sticky lg:top-24 h-fit space-y-6">
           {/* Share This Article */}
           <ShareButtons
-            url={`https://agentic-engineer.com/blog/${params.slug}`}
+            url={`${SITE_URL}/blog/${params.slug}`}
             title={post.title}
           />
 

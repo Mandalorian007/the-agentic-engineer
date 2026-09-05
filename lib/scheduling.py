@@ -1,7 +1,7 @@
 """Shared date calculation for publishing schedule."""
 
 import calendar
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Dict, Any
 
 # Map day names to weekday numbers (Python's datetime convention)
@@ -57,15 +57,16 @@ def get_next_publish_date(after_date: datetime, pub_config: Dict[str, Any]) -> d
     """
     Get the next publish date after a given date.
 
-    Supports both weekly and monthly frequencies.
+    Supports weekly, biweekly and monthly frequencies.
 
     Args:
         after_date: Find next publish date after this date
         pub_config: Publishing config dict with keys:
-            - frequency: "weekly" or "monthly"
+            - frequency: "weekly", "biweekly" or "monthly"
             - time: publish time in HH:MM:SS format
             For weekly: days (list of day names)
-            For monthly: day (single day name), week_of_month (int)
+            For biweekly: day (single day name), anchor (YYYY-MM-DD)
+            For monthly: day (single day name), weeks_of_month (list of ints)
 
     Returns:
         Next available publish date as datetime
@@ -76,6 +77,8 @@ def get_next_publish_date(after_date: datetime, pub_config: Dict[str, Any]) -> d
 
     if frequency == 'monthly':
         return _next_monthly_date(after_date, pub_config, hour, minute, second)
+    elif frequency == 'biweekly':
+        return _next_biweekly_date(after_date, pub_config, hour, minute, second)
     else:
         return _next_weekly_date(after_date, pub_config, hour, minute, second)
 
@@ -97,6 +100,56 @@ def _next_weekly_date(after_date: datetime, pub_config: Dict[str, Any],
         current_date += timedelta(days=1)
 
     raise ValueError(f"Could not find next publish date. Check days: {publish_days}")
+
+
+def _next_biweekly_date(after_date: datetime, pub_config: Dict[str, Any],
+                        hour: int, minute: int, second: int) -> datetime:
+    """Find the next date on a fixed 14-day stride from an anchor.
+
+    This cadence ignores month boundaries, so every gap is exactly two weeks.
+    That is the thing `weeks_of_month: [1, 3]` cannot express: when a month's
+    3rd Monday falls early, three weeks pass before the next month's 1st
+    Monday. Biweekly yields 26 slots a year against that scheme's 24.
+
+    The anchor is any date already on the cadence. Dates before it are still
+    on the cadence, so shifting the anchor by a multiple of 14 days is a no-op.
+    """
+    anchor_raw = pub_config.get('anchor')
+    if not anchor_raw:
+        raise ValueError(
+            "biweekly frequency requires publishing.anchor, a YYYY-MM-DD date "
+            "already on the cadence"
+        )
+
+    if isinstance(anchor_raw, datetime):
+        anchor = anchor_raw.date()
+    elif isinstance(anchor_raw, date):
+        anchor = anchor_raw
+    else:
+        try:
+            anchor = date.fromisoformat(str(anchor_raw))
+        except ValueError:
+            raise ValueError(
+                f"publishing.anchor must be a YYYY-MM-DD date, got {anchor_raw!r}"
+            )
+
+    day_name = pub_config.get('day', 'monday')
+    weekday = DAY_MAP[day_name.lower()]
+    if anchor.weekday() != weekday:
+        raise ValueError(
+            f"publishing.anchor {anchor} is a {calendar.day_name[anchor.weekday()]}, "
+            f"but publishing.day is {day_name}. A mistyped anchor would silently "
+            f"move every publish date onto the wrong weekday."
+        )
+
+    # Floor division walks backwards correctly when after_date precedes the
+    # anchor, so an old date still lands on the cadence rather than snapping
+    # forward to the anchor itself.
+    strides = (after_date.date() - anchor).days // 14 + 1
+    candidate = anchor + timedelta(days=strides * 14)
+
+    return datetime(candidate.year, candidate.month, candidate.day,
+                    hour, minute, second)
 
 
 def _next_monthly_date(after_date: datetime, pub_config: Dict[str, Any],
@@ -149,11 +202,15 @@ def format_schedule_label(pub_config: Dict[str, Any]) -> str:
 
     Examples:
         "Monday" (weekly)
+        "Every other Monday" (biweekly)
         "2nd Monday of each month" (monthly, single week)
         "1st and 3rd Monday of each month" (monthly, multiple weeks)
     """
     frequency = pub_config.get('frequency', 'weekly')
     ordinal_map = {1: '1st', 2: '2nd', 3: '3rd', 4: '4th', 5: '5th'}
+
+    if frequency == 'biweekly':
+        return f"Every other {pub_config.get('day', 'monday').capitalize()}"
 
     if frequency == 'monthly':
         day_name = pub_config.get('day', 'monday').capitalize()

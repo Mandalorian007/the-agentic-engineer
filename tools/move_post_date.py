@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Move a blog post to a new date.
+Move a blog post or newsletter issue to a new date.
 
 This script handles all necessary updates:
 - Renames MDX file with new date
@@ -17,6 +17,9 @@ Usage:
 
     # Move to a specific date/time
     uv run tools/move_post_date.py 2025-10-27 "2025-10-23T10:00:00Z"
+
+    # Move a newsletter issue (also shifts archive_date by the same delta)
+    uv run tools/move_post_date.py 2026-09-07 2026-09-21 --stream newsletter
 """
 
 import sys
@@ -28,7 +31,7 @@ from typing import Optional, Tuple
 
 # Add parent directory to path to import lib modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from lib.config import load_config
+from lib.config import load_config, get_stream_config
 from lib.frontmatter import parse_frontmatter, serialize_frontmatter, FrontmatterError
 
 
@@ -151,16 +154,18 @@ def move_post(
     old_date: str,
     new_date: str,
     dry_run: bool = False,
-    verbose: bool = True
+    verbose: bool = True,
+    stream: str = 'posts'
 ) -> None:
     """
-    Move a blog post from one date to another.
+    Move a blog post or newsletter issue from one date to another.
 
     Args:
         old_date: Current date (YYYY-MM-DD or ISO datetime)
         new_date: New date (YYYY-MM-DD or ISO datetime)
         dry_run: If True, only show what would be done
         verbose: If True, print detailed progress
+        stream: 'posts' or 'newsletter'
     """
     # Parse dates
     old_date_prefix, _ = parse_date_input(old_date)
@@ -168,8 +173,14 @@ def move_post(
 
     # Load config for paths
     config = load_config()
-    content_dir = Path(config['content_dir'])
-    images_dir = Path(config['public_images_dir'])
+    stream_cfg = get_stream_config(config, stream)
+    content_dir = stream_cfg['content_dir']
+    images_dir = stream_cfg['images_dir']   # None for streams without images
+    noun = stream_cfg['noun']
+
+    # The other stream shares these dates by design; warn if the move breaks a pair.
+    other = 'newsletter' if stream == 'posts' else 'posts'
+    other_cfg = get_stream_config(config, other)
 
     if not content_dir.exists():
         raise MoveError(f"Content directory not found: {content_dir}")
@@ -178,12 +189,12 @@ def move_post(
     old_post_path = find_post_by_date(content_dir, old_date_prefix)
     if not old_post_path:
         raise MoveError(
-            f"No post found for date {old_date_prefix}\n"
+            f"No {noun} found for date {old_date_prefix}\n"
             f"Searched in: {content_dir}"
         )
 
     if verbose:
-        print(f"📄 Found post: {old_post_path.name}")
+        print(f"📄 Found {noun}: {old_post_path.name}")
 
     # Extract slug
     slug = extract_slug_from_filename(old_post_path.name)
@@ -208,17 +219,33 @@ def move_post(
     old_fm_date = frontmatter.get('date', 'unknown')
     frontmatter['date'] = new_frontmatter_date
 
-    # Update image paths in body
-    updated_body, image_count = update_image_paths_in_content(
-        body, old_date_prefix, new_date_prefix
-    )
+    # An issue's archive_date is relative to its send date, so it has to travel
+    # the same distance. Leaving it put would publish the archive page early.
+    old_archive_date = frontmatter.get('archive_date')
+    new_archive_date = None
+    if old_archive_date:
+        delta = (datetime.strptime(new_date_prefix, '%Y-%m-%d')
+                 - datetime.strptime(old_date_prefix, '%Y-%m-%d'))
+        parsed = datetime.strptime(str(old_archive_date)[:10], '%Y-%m-%d')
+        shifted = parsed + delta
+        new_archive_date = (shifted.strftime('%Y-%m-%d')
+                            + str(old_archive_date)[10:])
+        frontmatter['archive_date'] = new_archive_date
+
+    # Update image paths in body (streams without images have nothing to rewrite)
+    if images_dir is not None:
+        updated_body, image_count = update_image_paths_in_content(
+            body, old_date_prefix, new_date_prefix
+        )
+    else:
+        updated_body, image_count = body, 0
 
     # Serialize back to markdown
     new_content = serialize_frontmatter(frontmatter, updated_body)
 
     # Determine image directories
-    old_image_dir = images_dir / f"{old_date_prefix}-{slug}"
-    new_image_dir = images_dir / f"{new_date_prefix}-{slug}"
+    old_image_dir = images_dir / f"{old_date_prefix}-{slug}" if images_dir else None
+    new_image_dir = images_dir / f"{new_date_prefix}-{slug}" if images_dir else None
 
     # Print plan
     if verbose:
@@ -233,10 +260,17 @@ def move_post(
         print(f"   {old_fm_date}")
         print(f"   → {new_frontmatter_date}")
 
+        if new_archive_date:
+            print(f"\n3. Update archive_date:")
+            print(f"   {old_archive_date}")
+            print(f"   → {new_archive_date}")
+
         if image_count > 0:
             print(f"\n3. Update {image_count} image reference(s) in content")
 
-        if old_image_dir.exists():
+        if old_image_dir is None:
+            print(f"\n4. No image directory for the {stream} stream")
+        elif old_image_dir.exists():
             print(f"\n4. Rename image directory:")
             print(f"   {old_image_dir.name}/")
             print(f"   → {new_image_dir.name}/")
@@ -265,8 +299,8 @@ def move_post(
                 print("🗑️  Removing old post file...")
             old_post_path.unlink()
 
-        # 3. Move image directory if it exists
-        if old_image_dir.exists() and old_image_dir != new_image_dir:
+        # 3. Move image directory if this stream has one
+        if old_image_dir and old_image_dir.exists() and old_image_dir != new_image_dir:
             if verbose:
                 print("📁 Moving image directory...")
 
@@ -280,7 +314,11 @@ def move_post(
             shutil.move(str(old_image_dir), str(new_image_dir))
 
         print("\n✅ Move completed successfully!")
-        print(f"   Post moved from {old_date_prefix} to {new_date_prefix}")
+        print(f"   {noun.capitalize()} moved from {old_date_prefix} to {new_date_prefix}")
+
+        if find_post_by_date(other_cfg['content_dir'], old_date_prefix):
+            print(f"\n⚠️  A {other_cfg['noun']} is still dated {old_date_prefix}. "
+                  f"That pairing is now broken.")
 
     except Exception as e:
         # Try to rollback if possible
@@ -293,7 +331,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description='Move a blog post to a new date',
+        description='Move a blog post or newsletter issue to a new date',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -305,6 +343,9 @@ Examples:
 
   # Move with specific time
   %(prog)s 2025-10-27 "2025-10-23T14:30:00Z"
+
+  # Move a newsletter issue
+  %(prog)s 2026-09-07 2026-09-21 --stream newsletter
         """
     )
 
@@ -326,6 +367,12 @@ Examples:
         action='store_true',
         help='Minimal output (only errors)'
     )
+    parser.add_argument(
+        '--stream',
+        choices=['posts', 'newsletter'],
+        default='posts',
+        help='Which content stream the entry belongs to (default: posts)'
+    )
 
     args = parser.parse_args()
 
@@ -334,7 +381,8 @@ Examples:
             old_date=args.old_date,
             new_date=args.new_date,
             dry_run=args.dry_run,
-            verbose=not args.quiet
+            verbose=not args.quiet,
+            stream=args.stream
         )
         return 0
 

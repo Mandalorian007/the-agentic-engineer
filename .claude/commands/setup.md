@@ -1,55 +1,72 @@
 # Verify Setup
 
-Run the comprehensive setup verification script using `uv run tools/setup_check.py` to validate:
-- Python dependencies installation (uv virtual environment, Vale prose linter)
-- Configuration files (.env.local, blog-config.yaml)
-- Google OAuth credentials (client ID, secret, refresh token)
-- Cloudinary credentials (cloud name, API key, secret)
-- OpenAI API key (optional, for AI image generation)
-- Blog configuration (blog name, blog ID)
-- Next.js website configuration (website/.env.local)
-  - **Clerk authentication** (publishable key, secret key) - **REQUIRED**
-  - shadcnblocks Pro API key - **REQUIRED** for Pro blocks
-  - components.json registry configuration
-- API connectivity (Blogger API and Cloudinary)
+Run `uv run tools/setup_check.py` to validate the local environment.
 
-## Required Environment Variables
+It checks:
+- Python dependencies (uv virtual environment, Vale prose linter)
+- Node dependencies and version
+- Configuration files (`.env.local`, `blog-config.yaml`)
+- OpenAI API key (optional, only for `tools/generate_embedding.py`)
+- Newsletter stream (the `newsletter:` block, the issues directory, `BUTTONDOWN_API_KEY`)
+- Blog configuration (name, domain, the 7 categories)
+- Next.js website presence and configuration
+- A build test
 
-### Root `.env.local` (Python blog automation)
+Note that it runs a production build at the end, so stop `pnpm dev` first.
+
+## Environment variables
+
+### Root `.env.local` — Python tooling
+
 ```bash
-BLOGGER_CLIENT_ID=xxx
-BLOGGER_CLIENT_SECRET=xxx
-BLOGGER_REFRESH_TOKEN=xxx
-CLOUDINARY_CLOUD_NAME=xxx
-CLOUDINARY_API_KEY=xxx
-CLOUDINARY_API_SECRET=xxx
-OPENAI_API_KEY=xxx  # Optional: for AI image generation
+# Buttondown account key: creates subscribers and emails.
+# Same value goes in website/.env.local, Vercel, and GitHub Actions.
+BUTTONDOWN_API_KEY=xxx
+
+# Buttondown newsletter key: writes newsletter settings. A different key.
+# See newsletter/buttondown-api.md.
+BUTTONDOWN_NEWSLETTER_KEY=xxx
+
+# Discord webhook for the Saturday content buffer check.
+# Sending is opt-in: only --notify actually posts.
+LOW_CONTENT_WEBHOOK=https://discord.com/api/webhooks/...
+
+# Optional: image embedding generation only.
+OPENAI_API_KEY=xxx
+
+# Twitter/X, for the daily post-to-twitter workflow.
+TWITTER_API_KEY=xxx
+TWITTER_API_KEY_SECRET=xxx
+TWITTER_ACCESS_TOKEN=xxx
+TWITTER_ACCESS_TOKEN_SECRET=xxx
 ```
 
-### `website/.env.local` (Next.js website)
-```bash
-# Clerk Authentication - REQUIRED
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxx
-CLERK_SECRET_KEY=sk_test_xxx
+### `website/.env.local` — Next.js
 
-# shadcnblocks Pro - REQUIRED for Pro blocks (blog27, navbar8, footer16, etc.)
-SHADCNBLOCKS_API_KEY=sk_live_xxx
+See `website/.env.example` for the full annotated list.
+
+```bash
+BUTTONDOWN_API_KEY=xxx      # /api/subscribe
+REVALIDATE_SECRET=xxx       # /api/revalidate, must match the GitHub secret
+PREVIEW_UNPUBLISHED=true    # show scheduled posts and unsent issues locally
 ```
 
-**Note**: Both Clerk and shadcnblocks credentials are validated by the setup check script and are required for the Next.js website to function properly.
+`SHADCNBLOCKS_API_KEY` is needed only when pulling a new Pro block through the
+registry in `website/components.json`. The site builds and runs without it.
 
-## Clerk Setup Steps
+## Deployment targets
 
-1. **Create a Clerk account** at https://clerk.com
-2. **Create a new project** in the Clerk dashboard
-3. **Configure authentication methods** (email/password, Google OAuth, etc.)
-4. **Set callback URLs**:
-   - Local development: `http://localhost:3000`
-   - Production: `https://agentic-engineer.com`
-5. **Copy API keys** from dashboard:
-   - Publishable Key → `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
-   - Secret Key → `CLERK_SECRET_KEY`
-6. **Add keys to `website/.env.local`** (create file if it doesn't exist)
-7. **Verify**: Run `cd website && pnpm dev` to test authentication
+These live outside the repo and no local check can see them.
 
-The script provides actionable guidance for each missing or misconfigured component, with specific commands to fix issues and links to detailed documentation.
+**Vercel** (Production): `BUTTONDOWN_API_KEY`, `REVALIDATE_SECRET`.
+Leave `PREVIEW_UNPUBLISHED` unset here, or scheduled content becomes public.
+
+**Vercel** (Preview): set `PREVIEW_UNPUBLISHED=true` so a preview deploy can
+render scheduled posts and unsent issues. Those pages are noindex either way.
+
+**GitHub Actions secrets**: `BUTTONDOWN_API_KEY`, `REVALIDATE_SECRET`,
+`LOW_CONTENT_WEBHOOK`, and the four Twitter values.
+
+**Buttondown dashboard**: the newsletter name, From name, reply-to address,
+description, and confirmation-page copy are set by hand. `newsletter/buttondown-settings.md`
+holds the exact strings to paste.
