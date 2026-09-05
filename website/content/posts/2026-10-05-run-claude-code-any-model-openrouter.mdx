@@ -1,38 +1,63 @@
 ---
-title: "Run Claude Code on Any Model with OpenRouter"
-description: "Claude Code is a harness, not a model. Point it at OpenRouter with five environment variables and run Qwen, Kimi, or GLM inside the same agent loop you know."
-date: "2026-09-21T11:00:00Z"
-category: "tutorials"
-hashtags: ["claude-code", "openrouter", "llm", "zsh", "vendor-lock-in"]
+title: Run Claude Code on Any Model with OpenRouter
+description: Claude Code is a harness, not a model. Point it at OpenRouter with five
+  environment variables and run Qwen, Kimi, or GLM inside the same agent loop you
+  know.
+date: '2026-10-05T11:00:00Z'
+category: tutorials
+hashtags:
+- claude-code
+- openrouter
+- llm
+- zsh
+- vendor-lock-in
 social:
   twitter:
-    text: "Claude Code never hardcoded api.anthropic.com. Point it at OpenRouter and you pick the model. Better: it runs four model slots, so subagents doing a cheap grep can hit a cheap model while your main loop stays strong."
+    text: 'Claude Code never hardcoded api.anthropic.com. Point it at OpenRouter and
+      you pick the model. Better: it runs four model slots, so subagents doing a cheap
+      grep can hit a cheap model while your main loop stays strong.'
   linkedin:
-    text: "The model and the agent harness are two different products. Most people buy them as one.
+    text: 'The model and the agent harness are two different products. Most people
+      buy them as one.
 
-The harness is the agent loop, the tool definitions, the context management, the permission system, the subagents. That is the part I actually value in Claude Code, and the part I have invested in: the Marketplace plugin I built at Airbnb combines skills, sub-agents, hooks, and commands on top of it.
+      The harness is the agent loop, the tool definitions, the context management,
+      the permission system, the subagents. That is the part I actually value in Claude
+      Code, and the part I have invested in: the Marketplace plugin I built at Airbnb
+      combines skills, sub-agents, hooks, and commands on top of it.
 
-The model underneath is a separate decision. Claude Code never hardcoded api.anthropic.com, because Anthropic needed it to reach Bedrock and Vertex. Anything speaking the same wire format works, and OpenRouter speaks it in front of roughly 400 models.
+      The model underneath is a separate decision. Claude Code never hardcoded api.anthropic.com,
+      because Anthropic needed it to reach Bedrock and Vertex. Anything speaking the
+      same wire format works, and OpenRouter speaks it in front of roughly 400 models.
 
-Five environment variables and a shell function later, you choose what runs.
+      Five environment variables and a shell function later, you choose what runs.
 
-The part most people miss is that Claude Code does not run on one model. It fills four slots, and each is a separate decision:
+      The part most people miss is that Claude Code does not run on one model. It
+      fills four slots, and each is a separate decision:
 
-→ Main, your session and the top-level loop
-→ Small and fast, which is what a subagent reaches for when it spins up to grep a repo instead of burning your main model on a search
-→ Sonnet tier and Opus tier, for /model calls and pinned subagents
+      → Main, your session and the top-level loop → Small and fast, which is what
+      a subagent reaches for when it spins up to grep a repo instead of burning your
+      main model on a search → Sonnet tier and Opus tier, for /model calls and pinned
+      subagents
 
-That is a routing table, not a config chore. Strong model on main for the reasoning, something cheap underneath for the fan-out, each job billed at a rate that matches what it needs. Beats paying one flat rate for everything.
+      That is a routing table, not a config chore. Strong model on main for the reasoning,
+      something cheap underneath for the fan-out, each job billed at a rate that matches
+      what it needs. Beats paying one flat rate for everything.
 
-It also bites if you ignore it. Leave the tier slots blank and a bare Anthropic model id goes upstream. OpenRouter answers 200, quietly normalizes it to anthropic/claude-sonnet-5, and bills you full rate inside the session you set up to be cheap. Every slot needs a value.
+      It also bites if you ignore it. Leave the tier slots blank and a bare Anthropic
+      model id goes upstream. OpenRouter answers 200, quietly normalizes it to anthropic/claude-sonnet-5,
+      and bills you full rate inside the session you set up to be cheap. Every slot
+      needs a value.
 
-The honest tradeoff: permission-mode auto stops working, because that classifier needs a Claude model. You are left running skip-permissions against a model you know less well than Claude, so put hooks under it.
+      The honest tradeoff: permission-mode auto stops working, because that classifier
+      needs a Claude model. You are left running skip-permissions against a model
+      you know less well than Claude, so put hooks under it.
 
-Curious whether others running mixed setups are routing slots deliberately, or just pointing everything at one model and moving on.
+      Curious whether others running mixed setups are routing slots deliberately,
+      or just pointing everything at one model and moving on.
 
-Full writeup:"
+      Full writeup:'
 ---
-![Hero image showing interchangeable glowing model cores hovering beside a single machine chassis](../../public/blog/2026-09-21-run-claude-code-any-model-openrouter/hero-swap-model-openrouter.webp)
+![Hero image showing interchangeable glowing model cores hovering beside a single machine chassis](../../public/blog/2026-10-05-run-claude-code-any-model-openrouter/hero-swap-model-openrouter.webp)
 
 Two things get bundled together in your head when you use Claude Code, and they are not the same thing.
 
