@@ -37,6 +37,9 @@ When the user runs `/issue-quality-review <path>`:
    - **Redundancy with the post.** Apply the test from `/create-issue`: could this sentence appear in the blog post? If yes it does not belong here.
    - **Missing artifact.** Every issue should carry one thing a reader can paste.
    - **Manufactured failure.** If the "what broke" segment reads as invented, say so. Two honest segments beat three with a fake one.
+   - **Bloat.** The target is ~350 words. Past 450, name the specific paragraph to cut
+     rather than suggesting a trim; over-length drafts are almost always one whole
+     paragraph too long, not uniformly padded.
    - **Em dashes.** They are old voice for this site. Suggest commas, full stops, or colons.
 
 7. **Report** in three sections:

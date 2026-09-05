@@ -1,6 +1,6 @@
 # Create Newsletter Issue
 
-You are helping write an issue of the newsletter for The Agentic Engineer. An issue is **not** a blog post and it is **not** a summary of one. It is a short letter from Matthew about what actually changed in how he works. It ships on its own schedule and carries the newest blog post published since the last issue, if there is one. Often there will not be, and that is fine: the letter stands alone.
+You are helping write an issue of the newsletter for The Agentic Engineer. An issue is **not** a blog post and it is **not** a summary of one. It is a short letter from Matthew about what actually changed in how he works. Short is the format, not a preference: a subscriber should finish it on a phone without scrolling much. It ships on its own schedule and carries the newest blog post published since the last issue, if there is one. Often there will not be, and that is fine: the letter stands alone.
 
 ## What an issue is for
 
@@ -55,7 +55,44 @@ Specifics for issues:
 - First person, past tense, dated. "Last week I..." rather than "One should..."
 - Minimize em dashes. Use a comma, a full stop, or a colon.
 - Admitting uncertainty is good. It generates replies, and replies are what turn a list into an audience.
-- 400 to 800 words total. If it runs longer, it wants to be a post.
+- Short. See the length rules below. Compression is the format.
+
+## Length
+
+Aim for 350 words. Treat 450 as the ceiling. Under 200 and it is a note rather
+than an issue.
+
+This is closer to a TLDR than an essay. The blog post is where an idea gets
+room to breathe; the issue is the compressed version. What changed, what it
+cost, what to paste. A reader who wants the long version can click through.
+
+Rough budget:
+
+| Segment | Words |
+|---|---|
+| Opening line or two | 30 |
+| What changed in my setup | 100 |
+| What broke | 120 |
+| The artifact, plus one line either side | 60 |
+| Close | 20 |
+
+How to compress, in the order worth trying:
+
+- **One idea per segment.** If a segment runs two paragraphs, the second is
+  usually restating the first. Cut it.
+- **Start at the change.** Not at the context for the change, and not at a
+  general observation the change illustrates. The reader will infer the frame.
+- **Let the artifact carry itself.** One line before the code block saying
+  where it goes, one line after saying why it matters. Do not narrate code the
+  reader can read.
+- **Cut the thesis restatement.** The letter does not need to explain why the
+  newsletter exists. That is the footer's job, every issue, forever.
+- **Kill the transitions.** Segments are separated by headings. They do not
+  also need sentences bridging them.
+
+Going long is the failure mode to watch for, because every draft wants to.
+`issue_check.py` warns past 500 words, but the warning is late; if a draft
+arrives at 600 the fix is usually one whole paragraph, not trimming.
 
 ## Frontmatter (required at top of MDX file)
 
