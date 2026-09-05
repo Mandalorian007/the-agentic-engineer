@@ -34,10 +34,13 @@ The Agentic Engineer is a fully automated blogging platform built with Next.js 1
 the-agentic-engineer/
 ├── .claude/                      # Claude Code commands and hooks
 │   ├── commands/                 # Slash commands for blog workflow
+│   │   ├── create-post-pipeline.md  # ENTRY POINT: end-to-end blog post
+│   │   ├── create-issue-pipeline.md # ENTRY POINT: end-to-end newsletter issue
 │   │   ├── create-post.md        # Generate new blog post with AI
 │   │   ├── generate-socials.md   # Generate social media posts
 │   │   ├── mdx-quality-review.md # SEO + Vale + Social validation
-│   │   └── create-social-quality-review.md # End-to-end workflow
+│   │   ├── create-issue.md       # Generate new newsletter issue
+│   │   └── issue-quality-review.md # Vale + issue_check + email preview
 │   ├── hooks/                    # Python hooks for safety & validation
 │   └── settings.json             # Claude Code configuration
 │
@@ -117,7 +120,7 @@ the-agentic-engineer/
 **Recommended Workflow:**
 ```bash
 # Complete workflow (create → socials → review → remind to deploy)
-/create-social-quality-review Your blog post idea goes here
+/create-post-pipeline Your blog post idea goes here
 ```
 
 This command orchestrates the entire content pipeline:

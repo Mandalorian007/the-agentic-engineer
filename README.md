@@ -129,7 +129,7 @@ Vercel automatically deploys on push! 🚀
 
 ```bash
 # Complete workflow in one command
-/create-social-quality-review Your blog post idea goes here
+/create-post-pipeline Your blog post idea goes here
 ```
 
 This runs:
@@ -144,13 +144,21 @@ This runs:
 
 ### Available Commands
 
-**End-to-End:**
-- `/create-social-quality-review <idea>` - Complete workflow (create → socials → review → remind to deploy)
+**End-to-End (the two entry points):**
+- `/create-post-pipeline <idea>` - Blog post (create → humanize → socials → review → remind to deploy)
+- `/create-issue-pipeline` - Newsletter issue (create → humanize → review → dry-run preview → remind to deploy)
 
-**Individual Steps:**
+**Individual Steps — Posts:**
 - `/create-post <idea>` - Generate MDX blog post with AI-generated images
 - `/generate-socials <path>` - Generate social media posts for Twitter & LinkedIn
 - `/mdx-quality-review <path>` - Run SEO + Vale prose linting + Social validation
+
+**Individual Steps — Issues:**
+- `/create-issue` - Generate MDX newsletter issue
+- `/issue-quality-review <path>` - Run Vale + issue_check + email preview
+
+**Both Streams:**
+- `/check-buffer` - Slot ledger showing which publish dates are still open
 
 ### Scheduling Posts
 
@@ -356,7 +364,7 @@ Humanize the post at website/content/posts/<your-post>.mdx.
 Use my writing style from website/content/posts/2026-01-19-ai-toolkit-escape-ecosystem-lock-in.mdx as a reference.
 ```
 
-**Pipeline order:** the `/create-social-quality-review` orchestrator runs humanizer **between `/create-post` and `/generate-socials`** so socials reflect the humanized body. If you run steps manually, follow the same order.
+**Pipeline order:** the `/create-post-pipeline` orchestrator runs humanizer **between `/create-post` and `/generate-socials`** so socials reflect the humanized body. If you run steps manually, follow the same order.
 
 **Style rules for this blog (override humanizer defaults):**
 - **Minimize em dashes** — em dashes are old voice for this site; apply pattern #14 aggressively.

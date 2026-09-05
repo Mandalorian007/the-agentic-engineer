@@ -1,10 +1,16 @@
-# Create with Social and Quality Review
+---
+description: Entry point for a blog post. Idea to committed, humanized, socialized, quality-reviewed MDX.
+---
+
+# Create Post Pipeline
 
 Complete end-to-end workflow from idea to quality-reviewed post with social media content.
 
+This is the entry point for the post stream. It chains `/create-post`, `/humanizer`, `/generate-socials`, and `/mdx-quality-review`; each of those still runs standalone if you want to redo one step.
+
 ## Instructions
 
-When the user runs `/create-social-quality-review <idea>`:
+When the user runs `/create-post-pipeline <idea>`:
 
 1. **Get next publish date:**
    ```bash
@@ -61,7 +67,7 @@ When the user runs `/create-social-quality-review <idea>`:
 ## Example
 
 ```bash
-/create-social-quality-review I want to write about migrating from Blogger to Next.js
+/create-post-pipeline I want to write about migrating from Blogger to Next.js
 ```
 
 This creates the post, generates social media content, runs quality review, and provides instructions for deployment.
