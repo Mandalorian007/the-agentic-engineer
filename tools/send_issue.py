@@ -59,6 +59,14 @@ SEND_STATUS = "about_to_send"
 # cleared to send.
 ACCEPTED_SEND_STATUSES = {"about_to_send", "in_flight", "sending", "sent", "scheduled"}
 
+# A finished custom sending domain. Buttondown reports "valid" here, which was
+# confirmed against the live account once the domain came up; "verified" and
+# "active" are kept because they were what this check was originally written
+# against and cost nothing to allow. Get this set wrong and the warning below
+# fires on every send forever, which is worse than not having it: an alarm that
+# is always on is an alarm nobody reads.
+VERIFIED_DOMAIN_STATUSES = {"valid", "verified", "active"}
+
 # How far back the very first issue looks for a post to attach. A little over
 # one cadence gap (14 days), so the debut issue can carry a post from the
 # previous slot without resurrecting a months-old one. The window is half-open
@@ -204,7 +212,7 @@ def warn_unverified_sending_domain(api_key: str) -> None:
         if not results:
             return
         newsletter = results[0]
-        if newsletter.get("sending_domain_status") in ("verified", "active"):
+        if newsletter.get("sending_domain_status") in VERIFIED_DOMAIN_STATUSES:
             return
         sender = newsletter.get("email_address", "")
         domain = sender.split("@")[-1] if "@" in sender else sender

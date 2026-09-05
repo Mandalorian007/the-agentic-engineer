@@ -84,20 +84,39 @@ built yet. Build it before setting the field, or confirming subscribers get a
 
 ## Sending domain
 
-**Delegated, provisioning.** Checked September 4, 2026, against the live account
-and live DNS.
+**Live.** Checked September 4, 2026, against the live account and live DNS.
 
 ```
 email_domain             "mail.agentic-engineer.com"
 email_address            "matthew.fontana@mail.agentic-engineer.com"
-sending_domain_status    "awaiting_ssl"
+sending_domain_status    "valid"
 reply_to_address         "matthew.fontana@agentic-engineer.com"
 ```
 
-`mail.agentic-engineer.com` is delegated to `ns1.onbuttondown.com` and
-`ns2.onbuttondown.com`, and Buttondown is already answering for that zone: it
-publishes `MX 10 inbound.postmarkapp.com` and its own DMARC record there at
-`p=quarantine`. `awaiting_ssl` is the certificate step, not a DNS problem.
+The status went `awaiting_ssl` to `valid` on its own within a few hours. That
+step was Buttondown provisioning a certificate for the link-tracking host, not
+anything wrong with the records. `track.mail.agentic-engineer.com` now serves
+HTTPS 200, which is the observable proof the certificate landed.
+
+All four records resolve on 1.1.1.1:
+
+```
+20260904163845pm._domainkey.mail  TXT    k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNA...
+_dmarc.mail                       TXT    v=DMARC1; p=quarantine; rua=...@inbound.postmarkapp.com
+pm-bounces.mail                   CNAME  pm.mtasv.net.
+track.mail                        CNAME  webhook-consumer.buttondown.email.
+```
+
+`dig NS mail.agentic-engineer.com` now returns nothing, so the orphaned
+`ns1.onbuttondown.com` zone left over from the torn-down managed setup has
+aged out. That zone was what made Buttondown's own checker report
+`_dmarc.mail` as invalid earlier in the day, against a record that was correct
+the whole time. No action was ever needed on it.
+
+Note the status string. Buttondown reports **`valid`**, not `verified`.
+`tools/send_issue.py` originally accepted only `("verified", "active")`, so its
+unverified-domain warning would have fired on every send forever against a
+domain that was fine. Fixed: see `VERIFIED_DOMAIN_STATUSES`.
 
 Two things about this shape are worth understanding, because they change what
 the apex still needs.
@@ -123,11 +142,12 @@ it.
 
 ### Remaining
 
-1. Wait for `sending_domain_status` to reach `verified`. `tools/send_issue.py`
-   prints a warning on every send until it does, so this cannot pass unnoticed.
-2. Send one issue to yourself and read the raw headers. You want `dkim=pass`
-   **and** `header.d=mail.agentic-engineer.com`. `dkim=pass` alone only proves
-   somebody signed it.
+One thing, and it can only be done by sending. Send the first issue to yourself
+and read the raw headers. You want `dkim=pass` **and**
+`header.d=mail.agentic-engineer.com`. `dkim=pass` alone only proves somebody
+signed it; the `d=` is what proves the signature is ours rather than
+Buttondown's shared one. This is the same check that confirmed apex DKIM, and
+it is the only way to know the delegation works end to end.
 
 ## Authenticating the apex
 
