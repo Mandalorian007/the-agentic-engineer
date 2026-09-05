@@ -1,6 +1,12 @@
-# Create and Review a Newsletter Issue
+---
+description: Entry point for a newsletter issue. Date to committed, humanized, reviewed, dry-run-previewed MDX.
+---
 
-End-to-end workflow for shipping one issue. Mirrors `/create-social-quality-review`, which does the same job for blog posts.
+# Create Issue Pipeline
+
+End-to-end workflow for shipping one issue. Mirrors `/create-post-pipeline`, which does the same job for blog posts.
+
+This is the entry point for the newsletter stream. It chains `/create-issue`, `/humanizer`, and `/issue-quality-review`; each of those still runs standalone if you want to redo one step.
 
 ## Steps
 
