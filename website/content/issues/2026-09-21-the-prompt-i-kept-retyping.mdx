@@ -1,0 +1,55 @@
+---
+title: "The prompt I kept retyping"
+subject: "The prompt I kept retyping"
+description: "Claude Code's /insights command found a prompt I'd been rewriting for weeks, why self-audit misses that, and a pasteable command for review-bot feedback."
+date: "2026-09-21T11:00:00Z"
+archive_date: "2026-10-21T11:00:00Z"
+---
+
+I ran `/insights` in Claude Code last week, mostly out of curiosity. It reads your local session logs and tells you how you actually use the thing. It caught something I'd been doing for a month.
+
+## What changed in my setup
+
+I keep writing the same prompt. CodeRabbit is an AI reviewer that drops a batch of comments on a PR on every push, and each time I type out my own version of how I want them handled: which to fix, which to argue with, what to do with the leftovers. Different wording every time. Same job every time.
+
+I templated it. It's a slash command now. I called it Rabbit Slayer, which is not a serious name. The workflow under it is: read the comments, classify them, fix the real ones, reply to the rest, hand me a summary.
+
+## What broke
+
+I didn't find this myself. I've spent months writing about encoding your workflows into commands, and a repeated prompt sat in my own history for weeks while I looked straight past it. A tool reading my logs caught it in a second.
+
+That bothers me more than the wasted typing did. The work worth automating is the work you do without thinking, and not thinking about it is exactly what keeps it invisible. You can't list what you know until somebody asks a question you can't answer out of habit.
+
+So: work for a week, run `/insights`, look for repetition, template whatever repeats. That's the loop now.
+
+## One thing you can paste
+
+Drop this in `.claude/commands/resolve-review.md`. It's the skeleton, minus my repo's opinions.
+
+```markdown
+---
+description: Triage automated PR review comments. Fix what's real, reply to what isn't.
+---
+
+# Resolve Review Bot Feedback
+
+Target PR: $ARGUMENTS (default: the PR for the current branch)
+
+1. Pull the threads with `gh pr view` and the pulls comments API.
+2. Classify every unresolved comment:
+   - Fix: a real defect, a security or access gap, an edge case.
+   - Decline: correct in isolation, wrong for this codebase.
+   - Defer: real but out of scope. Needs an issue, not a commit.
+3. Apply the Fix items. One commit per theme, not per comment.
+4. Reply in-thread to every Decline and Defer with the reason, then resolve.
+5. Report what you fixed, declined, and deferred.
+
+Rules:
+- Never resolve a thread you did not reply to.
+- Never mark something Fix because the bot sounds confident.
+- If more than half are Decline, stop and tell me. The bot is misconfigured.
+```
+
+The classification step is the whole thing. Without it the agent just does whatever the bot said.
+
+Reply and tell me what `/insights` turns up in your logs. I want to know whether the repetition is universal or just me.
