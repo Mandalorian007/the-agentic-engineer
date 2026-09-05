@@ -23,9 +23,11 @@ from lib.frontmatter import parse_frontmatter, FrontmatterError
 SUBJECT_MAX = 50
 DESCRIPTION_MIN = 150
 DESCRIPTION_MAX = 160
-# Shorter than this and it is a note, not an issue. Longer and it wants to be a post.
-BODY_MIN_WORDS = 250
-BODY_MAX_WORDS = 900
+# An issue is a TLDR, not an essay: the target is ~350 words. Shorter than the
+# minimum and it is a note; longer than the maximum and a segment is restating
+# itself, or the idea wants to be a blog post.
+BODY_MIN_WORDS = 200
+BODY_MAX_WORDS = 500
 
 REQUIRED_FIELDS = ['title', 'subject', 'description', 'date']
 
@@ -125,12 +127,12 @@ def analyze_issue(issue_path: Path, archive_delay_days: int) -> tuple[list, list
     if word_count < BODY_MIN_WORDS:
         warnings.append(
             f"Body is {word_count} words, under {BODY_MIN_WORDS}. "
-            f"Thin for an issue."
+            f"Thin for an issue. Target is ~350."
         )
     elif word_count > BODY_MAX_WORDS:
         warnings.append(
             f"Body is {word_count} words, over {BODY_MAX_WORDS}. "
-            f"This may want to be a blog post."
+            f"Target is ~350. Look for a segment that restates itself."
         )
     else:
         print(f"  Body: {word_count} words")

@@ -1,0 +1,67 @@
+---
+title: "Your agents are junior engineers"
+subject: "Your agents are junior engineers"
+description: "Issue one. Why teaching an agent works like onboarding a junior engineer, the naming bug that hid my own workflows from me, and a pasteable command template."
+date: "2026-09-07T11:00:00Z"
+archive_date: "2026-10-07T11:00:00Z"
+---
+
+Welcome. Issue one, so here's what you signed up for: agents, harnesses, and the unglamorous work of getting a machine to ship code that makes somebody's job easier. Every other Monday I send what changed in how I work, what broke, and one thing you can paste into your own repo.
+
+Here's the idea the whole list runs on. Working with an agent isn't that different from working with a junior engineer. You can't hand a junior a ticket, say "go do it," and expect the result to be good. You get good results by teaching them: the project, the standards, the process, the test harness, the way work actually moves here. Once a junior has that internalized, they start performing at a different level. Same with the agents.
+
+Everybody is selling prompt mastery right now. I think that's the wrong thing to buy. Sit down and write out what you'd teach a junior engineer in their first two weeks. Turn it into a document. That document is your prompt, and it'll beat any prompt course you could sign up for, because it holds the one thing a course can't: how your team actually works.
+
+Then your job changes. You're not the author anymore, you're the steward. You watch where the agents do well and where they fail, and you use your expertise to fix the training material. That's the loop.
+
+The compounding comes from the fact that this material composes. How we start a new project. How we add a feature. What has to pass before anything merges. Each one is a workflow. Once they exist separately you can chain them, and that's how you get agents running long chains of work on your behalf. That's the leverage.
+
+## What changed in my setup
+
+I had two of those chains sitting in `.claude/commands/`. One takes a blog post from idea to reviewed MDX. The other does the same for a newsletter issue, and it's what produced the letter you're reading. Both worked fine.
+
+This week I renamed them. `create-social-quality-review.md` became `create-post-pipeline.md`, and `create-review-issue.md` became `create-issue-pipeline.md`. No behavior changed. Not one line of the composed steps moved.
+
+## What broke
+
+The names were the bug. I'd named both files after the steps they ran instead of the job they do, and neither had a `description:` in its frontmatter, so the command picker fell back to the H1. Twelve commands in that list, and no way to tell which two were the front doors and which ten were pieces the front doors call.
+
+I wrote the workflows and then couldn't find them. I kept opening the picker, recognizing a step name, and invoking that step directly. Which quietly skips the humanizer pass and the quality review. The output got worse and I couldn't immediately say why.
+
+That one is going to keep coming up, so I'm naming it here. Composability only pays off if the entry point is obvious, and obvious includes obvious to you, six weeks later, at the end of a long day. The fix was one line of frontmatter per file, plus a first paragraph saying which sub-commands each one chains and that those still run standalone.
+
+## One thing you can paste
+
+Drop this in `.claude/commands/<thing>-pipeline.md` as the skeleton for your first composed workflow.
+
+```markdown
+---
+description: Entry point for <thing>. <Start state> to <finished state>.
+---
+
+# <Thing> Pipeline
+
+This is the entry point for <thing>. It chains `/step-one`, `/step-two`, and
+`/step-three`; each of those still runs standalone if you want to redo one step.
+
+## Steps
+
+### 1. <Name the step by its job, not by its tool>
+
+Run: `<the exact command, with real flags>`
+Then: <what to read out of the output, and what to do with it>
+
+### 2. <Next step>
+
+Run: `<the exact command>`
+Then: <if the step needs judgment, say what the judgment is>
+
+## Notes
+
+- <What happens automatically after this, so nobody re-runs it by hand>
+- <The one thing that is easy to get wrong here>
+```
+
+The `description:` line is the part everyone skips. It's also the part that decides whether you ever find this command again.
+
+Reply and tell me what your day-one document looks like. I read everything.
