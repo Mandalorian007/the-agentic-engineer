@@ -33,25 +33,40 @@ window by hand when it warns.
 ## Wiring Search Console
 
 The domain is already DNS-verified in Search Console (the
-`google-site-verification` TXT record on `agentic-engineer.com`). The API
-needs a service account added as a user on that property.
+`google-site-verification` TXT record on `agentic-engineer.com`), and the
+Google account that verified it owns the property. So locally the tool can
+just act as you. No service account, no permission grant.
 
-1. Google Cloud Console → create a project (or reuse one) → enable the
-   **Google Search Console API**.
-2. IAM → Service Accounts → create one → Keys → add a JSON key. Save it
-   outside the repo, e.g. `~/.config/gsc/agentic-engineer.json`. It is a
-   credential; `.gitignore` already blocks `client_secret.json` and
-   `.credentials.json`, but do not put it in the repo under any name.
-3. Search Console → the `agentic-engineer.com` domain property → Settings →
-   Users and permissions → add the service account's email with **Full**
-   permission (Restricted also works for reads).
-4. `.env.local`: `GSC_SERVICE_ACCOUNT_FILE=/Users/you/.config/gsc/agentic-engineer.json`
-5. `uv run tools/traffic_report.py` and confirm the Search Console section
-   populates. Data lags two to three days, so the window ends at yesterday
-   and the newest days may still be thin.
+### Local (once)
 
-For GitHub Actions, put the JSON contents in a secret and set
-`GSC_SERVICE_ACCOUNT_JSON` instead of the file path.
+```bash
+brew install --cask google-cloud-sdk        # already done on this machine
+gcloud auth login                            # browser: pick the Search Console account
+gcloud auth application-default login \
+  --scopes=openid,https://www.googleapis.com/auth/userinfo.email,https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/webmasters.readonly
+```
+
+Then a Google Cloud project has to exist with the Search Console API enabled,
+because Google bills API quota to a project even for read-only calls on your
+own data:
+
+```bash
+gcloud projects create agentic-engineer-traffic --name="agentic-engineer traffic"
+gcloud config set project agentic-engineer-traffic
+gcloud services enable searchconsole.googleapis.com
+gcloud auth application-default set-quota-project agentic-engineer-traffic
+```
+
+`uv run tools/traffic_report.py` now fills the Search Console section. Data
+lags two to three days, so the newest days in a window may be thin.
+
+### CI (later, optional)
+
+For GitHub Actions, create a service account in that project, add its email
+as a user on the Search Console property (Settings → Users and permissions,
+Restricted is enough), and put the key JSON in a secret as
+`GSC_SERVICE_ACCOUNT_JSON`. `GSC_SERVICE_ACCOUNT_FILE` takes a path instead.
+Either one takes precedence over the gcloud login.
 
 ## Options
 

@@ -24,8 +24,10 @@ Usage:
 
 Environment (all optional, read from .env.local):
     VERCEL_TOKEN               Only needed outside a logged-in `vercel` CLI (CI)
-    GSC_SERVICE_ACCOUNT_FILE   Path to a Google service-account JSON key
-    GSC_SERVICE_ACCOUNT_JSON   Same key, inline (for CI secrets)
+    GSC_SERVICE_ACCOUNT_JSON   Service-account key, inline (for CI secrets)
+    GSC_SERVICE_ACCOUNT_FILE   Same key as a file path
+    (neither set)              Application Default Credentials from gcloud; the
+                               local path, see docs/traffic-report.md
     BUTTONDOWN_API_KEY         Account key; newsletter section is skipped without it
 
 Exit codes:
@@ -175,26 +177,44 @@ RAW_FILTER = "environment eq 'production'"
 # Google Search Console (optional)
 # ---------------------------------------------------------------------------
 
+GSC_SCOPES = ["https://www.googleapis.com/auth/webmasters.readonly"]
+
+
 def gsc_client():
-    """Return a Search Console service, or None if not configured."""
-    sa_file = os.environ.get("GSC_SERVICE_ACCOUNT_FILE")
-    sa_json = os.environ.get("GSC_SERVICE_ACCOUNT_JSON")
-    if not sa_file and not sa_json:
-        return None
+    """
+    Return a Search Console service, or None if not configured.
+
+    Three ways in, checked in order:
+      1. GSC_SERVICE_ACCOUNT_JSON  (inline key, for CI)
+      2. GSC_SERVICE_ACCOUNT_FILE  (path to a key)
+      3. Application Default Credentials from `gcloud auth application-default
+         login --scopes=...` (the local path; you are the property owner, so
+         no service account and no permission grant are needed)
+    """
     try:
-        from google.oauth2 import service_account
         from googleapiclient.discovery import build
     except ImportError:
-        print("⚠️  GSC configured but google-api-python-client not installed; run: uv sync",
-              file=sys.stderr)
+        print("⚠️  google-api-python-client not installed; run: uv sync", file=sys.stderr)
         return None
 
-    scopes = ["https://www.googleapis.com/auth/webmasters.readonly"]
-    if sa_json:
-        info = json.loads(sa_json)
-        creds = service_account.Credentials.from_service_account_info(info, scopes=scopes)
+    sa_json = os.environ.get("GSC_SERVICE_ACCOUNT_JSON")
+    sa_file = os.environ.get("GSC_SERVICE_ACCOUNT_FILE")
+    creds = None
+    if sa_json or sa_file:
+        from google.oauth2 import service_account
+        if sa_json:
+            creds = service_account.Credentials.from_service_account_info(
+                json.loads(sa_json), scopes=GSC_SCOPES)
+        else:
+            creds = service_account.Credentials.from_service_account_file(
+                sa_file, scopes=GSC_SCOPES)
     else:
-        creds = service_account.Credentials.from_service_account_file(sa_file, scopes=scopes)
+        try:
+            import google.auth
+            from google.auth.exceptions import DefaultCredentialsError
+            creds, _ = google.auth.default(scopes=GSC_SCOPES)
+        except (ImportError, DefaultCredentialsError):
+            return None
     return build("searchconsole", "v1", credentials=creds, cache_discovery=False)
 
 
@@ -484,8 +504,9 @@ def render(r: Dict[str, Any]) -> str:
     elif r.get("gsc_error"):
         out.append(f"⚠️  query failed: {r['gsc_error']}")
     else:
-        out.append("Not configured. Set GSC_SERVICE_ACCOUNT_FILE (see docs/traffic-report.md). "
-                   "This is the only feed that counts real search clicks and shows the queries.")
+        out.append("Not configured. Run `gcloud auth application-default login` with the "
+                   "webmasters.readonly scope (see docs/traffic-report.md). This is the only "
+                   "feed that counts real search clicks and shows the queries.")
     out.append("")
 
     # Newsletter

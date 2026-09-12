@@ -275,9 +275,9 @@ BUTTONDOWN_API_KEY=...
 #   GET /v1/newsletters. Local tooling only. Do not deploy it anywhere.
 BUTTONDOWN_NEWSLETTER_KEY=...
 
-# Optional: Search Console feed for tools/traffic_report.py.
-# Service-account JSON key; setup steps in docs/traffic-report.md.
-GSC_SERVICE_ACCOUNT_FILE=/path/to/service-account.json
+# Optional: Search Console feed for tools/traffic_report.py. Locally it uses
+# your gcloud login (docs/traffic-report.md); these are only for CI.
+# GSC_SERVICE_ACCOUNT_JSON=...
 ```
 
 ## Quality Checks
