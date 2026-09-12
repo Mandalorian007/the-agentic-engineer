@@ -152,6 +152,7 @@ The pipeline does everything except the part that only works when a person does 
 
 **Both Streams:**
 - `/check-buffer` - Slot ledger showing which publish dates are still open
+- `/traffic` - Human-filtered traffic report (Vercel, Search Console, Buttondown), interpreted
 
 ### Scheduling Posts
 
@@ -273,6 +274,10 @@ BUTTONDOWN_API_KEY=...
 #   Newsletter key: newsletter settings. Found in the `api_key` field of
 #   GET /v1/newsletters. Local tooling only. Do not deploy it anywhere.
 BUTTONDOWN_NEWSLETTER_KEY=...
+
+# Optional: Search Console feed for tools/traffic_report.py.
+# Service-account JSON key; setup steps in docs/traffic-report.md.
+GSC_SERVICE_ACCOUNT_FILE=/path/to/service-account.json
 ```
 
 ## Quality Checks
@@ -463,6 +468,31 @@ uv run tools/move_post_date.py 2025-10-27 2025-10-23
 - Adjusting to a new publishing schedule (e.g., weekly → biweekly)
 - Filling gaps in the content calendar
 - Moving posts earlier/later based on priorities
+
+## Traffic Report
+
+The Vercel dashboard is not the source of truth for this site: roughly three
+quarters of what it counts is datacenter crawler traffic with no referrer.
+`tools/traffic_report.py` separates readers from crawlers and lays three feeds
+side by side, and `/traffic` runs it and interprets the result.
+
+```bash
+uv run tools/traffic_report.py              # last 28 days vs the prior 28
+uv run tools/traffic_report.py --days 90
+uv run tools/traffic_report.py --since 2025-10-13
+uv run tools/traffic_report.py --json
+```
+
+- **Vercel Web Analytics** through the logged-in `vercel` CLI (no token needed
+  locally). Visitors by day, page, referrer, country, device.
+- **Google Search Console** (optional): real search clicks and the queries.
+  Needs a service account; see [`docs/traffic-report.md`](docs/traffic-report.md).
+- **Buttondown**: subscriber count and new subscribers in the window.
+
+A visitor counts as human if they arrived with a referrer or came direct from
+a trusted country (`analytics.trusted_countries` in `blog-config.yaml`). The
+report also flags burst days and a low mobile share, which is how a bot fleet
+spoofing a search referrer shows up. Full notes in `docs/traffic-report.md`.
 
 ## Social Media Automation
 
