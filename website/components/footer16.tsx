@@ -13,7 +13,7 @@ const NAVIGATION = [
   {
     title: "Work",
     links: [
-      { name: "Hire me", href: "/services" },
+      { name: "Speaking", href: "/speaking" },
     ],
   },
   {

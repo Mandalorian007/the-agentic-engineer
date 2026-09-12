@@ -460,15 +460,15 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* Hire me, demoted to match the homepage */}
+      {/* Talks, demoted to match the homepage */}
       <section className="mx-auto mt-24 max-w-5xl border-t pt-8">
         <div className="flex flex-col items-start justify-between gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center">
           <p>Want me to come talk to your team?</p>
           <Link
-            href="/services"
+            href="/speaking"
             className="font-medium text-foreground underline underline-offset-4"
           >
-            Hire me
+            Talks and workshops
           </Link>
         </div>
       </section>
