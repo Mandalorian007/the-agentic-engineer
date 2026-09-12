@@ -1,8 +1,8 @@
 # Run Claude Code From Your Phone with tmux and Tailscale
 
-URL: https://agentic-engineer.com/blog/2026-09-21-run-claude-code-from-your-phone-tmux-tailscale
+URL: https://agentic-engineer.com/blog/2026-09-14-run-claude-code-from-your-phone-tmux-tailscale
 Shape: tutorial
-Post: website/content/posts/2026-09-21-run-claude-code-from-your-phone-tmux-tailscale.mdx
+Post: website/content/posts/2026-09-14-run-claude-code-from-your-phone-tmux-tailscale.mdx
 
 ## LinkedIn
 
@@ -29,7 +29,7 @@ I got rid of the desk when I moved. There is no desk in this apartment.
 
 Curious whether others running agents off-desk have landed on a permission setup they actually trust, or are still babysitting approvals from a phone.
 
-First comment: Full write-up with every command: https://agentic-engineer.com/blog/2026-09-21-run-claude-code-from-your-phone-tmux-tailscale
+First comment: Full write-up with every command: https://agentic-engineer.com/blog/2026-09-14-run-claude-code-from-your-phone-tmux-tailscale
 
 ## Reddit
 
@@ -60,4 +60,4 @@ The thing I didn't expect: voice input holds up. You're handing rough intent to 
 
 The honest limitation: permissions. Tapping approve every ninety seconds on a phone defeats the point, so you'll end up in auto permission mode or skipping them. If you skip them, put hooks and a tight allowlist underneath first. An unsupervised agent is a different risk profile.
 
-Full write-up with the rest of the setup (the harness install, the clients, what the loop actually feels like): https://agentic-engineer.com/blog/2026-09-21-run-claude-code-from-your-phone-tmux-tailscale
+Full write-up with the rest of the setup (the harness install, the clients, what the loop actually feels like): https://agentic-engineer.com/blog/2026-09-14-run-claude-code-from-your-phone-tmux-tailscale

@@ -31,7 +31,7 @@ from typing import Optional, Tuple
 
 # Add parent directory to path to import lib modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from lib.config import load_config, get_stream_config
+from lib.config import load_config, get_stream_config, get_publishing_config
 from lib.frontmatter import parse_frontmatter, serialize_frontmatter, FrontmatterError
 
 
@@ -40,7 +40,7 @@ class MoveError(Exception):
     pass
 
 
-def parse_date_input(date_str: str) -> Tuple[str, str]:
+def parse_date_input(date_str: str, default_time: str = "11:00:00") -> Tuple[str, str]:
     """
     Parse date input and return (date_prefix, frontmatter_date).
 
@@ -53,7 +53,7 @@ def parse_date_input(date_str: str) -> Tuple[str, str]:
     # If it's just a date (YYYY-MM-DD), add default time
     if re.match(r'^\d{4}-\d{2}-\d{2}$', date_str):
         date_prefix = date_str
-        frontmatter_date = f"{date_str}T10:00:00Z"
+        frontmatter_date = f"{date_str}T{default_time}Z"
     # If it's a full ISO datetime
     elif re.match(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z?$', date_str):
         date_prefix = date_str[:10]  # Extract YYYY-MM-DD part
@@ -167,12 +167,14 @@ def move_post(
         verbose: If True, print detailed progress
         stream: 'posts' or 'newsletter'
     """
-    # Parse dates
-    old_date_prefix, _ = parse_date_input(old_date)
-    new_date_prefix, new_frontmatter_date = parse_date_input(new_date)
-
-    # Load config for paths
+    # Load config for paths and the publish time
     config = load_config()
+    publish_time = str(get_publishing_config(config, stream).get('time', '11:00:00'))
+
+    # Parse dates. A bare YYYY-MM-DD gets the configured publish time so the
+    # moved entry lands on the same minute as everything else the scheduler makes.
+    old_date_prefix, _ = parse_date_input(old_date, publish_time)
+    new_date_prefix, new_frontmatter_date = parse_date_input(new_date, publish_time)
     stream_cfg = get_stream_config(config, stream)
     content_dir = stream_cfg['content_dir']
     images_dir = stream_cfg['images_dir']   # None for streams without images

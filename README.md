@@ -496,7 +496,7 @@ uv run tools/notify_surface.py --dry-run --date 2026-10-12
 
 ## Content Buffer Monitoring
 
-Get a Discord notification every Saturday showing your content pipeline status.
+A Discord message every Saturday showing which upcoming Mondays still need a `/ship`.
 
 ### Setup
 
@@ -505,35 +505,38 @@ Get a Discord notification every Saturday showing your content pipeline status.
    LOW_CONTENT_WEBHOOK=https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE
    ```
 
-2. **Add as GitHub secret:**
-   - Go to Settings → Secrets and variables → Actions
-   - Add secret: `LOW_CONTENT_WEBHOOK`
+2. **Add as GitHub secret:** Settings → Secrets and variables → Actions → `LOW_CONTENT_WEBHOOK`
 
-3. **GitHub Action runs every Saturday at 8am EST**
-   - Sends status update to Discord
-   - Shows: buffer remaining (months or weeks), scheduled posts, last post date
+3. **GitHub Action runs every Saturday at 12:00 UTC** and posts the ledger. The same webhook receives the surface kit on publish mornings.
 
 ### Manual Testing
 
 ```bash
-# Print the report. Never posts to Discord, even with a webhook configured.
+# Print the ledger. Never posts to Discord, even with a webhook configured.
 uv run tools/buffer_check.py
-
-# One stream only
-uv run tools/buffer_check.py --stream newsletter
 
 # Actually post it. Only the Saturday workflow normally does this.
 uv run tools/buffer_check.py --notify
 ```
 
-Posting is opt-in. A bare run prints and exits, so checking your buffer while
-writing never puts a message in the channel.
+### What it shows
 
-Each notification shows:
-- 🚨 Status level, rated on how many slots are filled before the first gap (0 = red, 1-2 = orange, 3+ = green), worst stream wins
-- ✍️ One unified "need content by" date, the earliest gap across both streams
-- 📝 A ledger per stream covering the next two months of slots, filled or empty
-- ⚠️ Any scheduled file that does not land on a publish day
+One `/ship` fills one Monday: a post and the issue derived from it. The report is one row per Monday for the next two months:
+
+```
+🚨 LOW · Content Buffer
+Next /ship needed for  Mon Sep 28  ·  16 days
+Monday
+──────────────────────────────────────────────────────
+2 of 9 Mondays shipped
+   Mon Sep 14   Run Claude Code From Your Phone…   ✉ The agents run, I go buy shrimp
+   Mon Sep 21   Run Claude Code on Any Model…      ✉ …
+   Mon Sep 28   —
+```
+
+- Status is how many Mondays are fully shipped before the first one that isn't: 0 = 🚨 LOW, 1-2 = ⚠️ WARN, 3+ = ✅ GOOD
+- A Monday with a post but no issue (or the reverse) is half-shipped, and the report names the command that fixes it
+- Anything scheduled off a publish day is listed separately so it cannot silently vanish
 
 ## Local Development
 

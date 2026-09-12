@@ -3,7 +3,7 @@ title: Run Claude Code From Your Phone with tmux and Tailscale
 description: A claw that props your laptop lid open solves the wrong problem. Put
   your agents on a headless Mac mini and reach them from your phone with tmux and
   Tailscale.
-date: '2026-09-21T11:00:00Z'
+date: '2026-09-14T11:00:00Z'
 category: tutorials
 hashtags:
 - claude-code
@@ -70,7 +70,7 @@ social:
 
       Full writeup:'
 ---
-![Hero image showing a headless Mac mini on a closet shelf glowing with agent activity, connected to a phone held in a hand outdoors](../../public/blog/2026-09-21-run-claude-code-from-your-phone-tmux-tailscale/hero-agents-off-the-desk.webp)
+![Hero image showing a headless Mac mini on a closet shelf glowing with agent activity, connected to a phone held in a hand outdoors](../../public/blog/2026-09-14-run-claude-code-from-your-phone-tmux-tailscale/hero-agents-off-the-desk.webp)
 
 Someone built [The OpenClaws](https://theopenclaws.com/): a little claw that holds your MacBook lid open so your agents keep running while you walk away. It's a joke on the OpenClaw crowd, and it's also a real product people are buying, which tells you something.
 
@@ -162,7 +162,7 @@ One thing worth deciding before you walk away: how the agent handles permissions
 
 Now the machine needs to be reachable. What you do not want is SSH on a forwarded port facing the open internet.
 
-![Diagram showing a phone and tablet reaching a closet server through a private VPN mesh with no public internet exposure](../../public/blog/2026-09-21-run-claude-code-from-your-phone-tmux-tailscale/diagram-tailnet-access-topology.webp)
+![Diagram showing a phone and tablet reaching a closet server through a private VPN mesh with no public internet exposure](../../public/blog/2026-09-14-run-claude-code-from-your-phone-tmux-tailscale/diagram-tailnet-access-topology.webp)
 
 [Tailscale](https://tailscale.com) builds a small WireGuard network out of your own devices. Each one authenticates to your account, they talk directly to each other, and nothing is exposed publicly. Install the macOS app, then:
 

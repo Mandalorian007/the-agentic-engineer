@@ -1,8 +1,8 @@
 # Run Claude Code on Any Model with OpenRouter
 
-URL: https://agentic-engineer.com/blog/2026-10-05-run-claude-code-any-model-openrouter
+URL: https://agentic-engineer.com/blog/2026-09-21-run-claude-code-any-model-openrouter
 Shape: tutorial
-Post: website/content/posts/2026-10-05-run-claude-code-any-model-openrouter.mdx
+Post: website/content/posts/2026-09-21-run-claude-code-any-model-openrouter.mdx
 
 ## LinkedIn
 
@@ -30,7 +30,7 @@ The honest tradeoff: permission-mode auto stops working, because that classifier
 
 Curious whether others running mixed setups are routing slots deliberately, or just pointing everything at one model and moving on.
 
-First comment: Full write-up with the complete shell block: https://agentic-engineer.com/blog/2026-10-05-run-claude-code-any-model-openrouter
+First comment: Full write-up with the complete shell block: https://agentic-engineer.com/blog/2026-09-21-run-claude-code-any-model-openrouter
 
 ## Reddit
 
@@ -74,4 +74,4 @@ Two things that bit me:
 
 The honest limitation: `permission-mode auto` stops working because that classifier needs a Claude model. So you're running skip-permissions against a model you know less well. Put hooks under it first.
 
-Full write-up with the complete shell block, credential handling, and how to pick a model: https://agentic-engineer.com/blog/2026-10-05-run-claude-code-any-model-openrouter
+Full write-up with the complete shell block, credential handling, and how to pick a model: https://agentic-engineer.com/blog/2026-09-21-run-claude-code-any-model-openrouter

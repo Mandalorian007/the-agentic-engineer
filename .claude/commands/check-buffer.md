@@ -1,54 +1,53 @@
 ---
-description: Check content buffer across both streams and optionally send a Discord notification
+description: Ledger of upcoming Mondays: shipped, half-shipped, or empty. Optionally post to Discord.
 ---
 
-Run the buffer check to see the current content pipeline status.
+Run the buffer check to see which upcoming Mondays still need a `/ship`.
 
 Usage:
-- `/check-buffer` — buffer status for both streams
-- `/check-buffer --stream posts` — blog posts only
-- `/check-buffer --stream newsletter` — newsletter issues only
+- `/check-buffer` — the ledger
+- `/check-buffer --notify` — the ledger, posted to Discord (the Saturday workflow does this; you rarely need to)
 
 Execute:
 ```
-uv run tools/buffer_check.py [--stream posts|newsletter|both]
+uv run tools/buffer_check.py
 ```
 
-**This never posts to Discord.** Reporting and notifying are separate: the tool
-only sends when given `--notify`, which is reserved for the scheduled workflow.
-A webhook in `.env.local` does not change that, so checking the buffer while
-writing cannot put a message in the channel.
+**This never posts to Discord** unless `--notify` is passed. A webhook in
+`.env.local` does not change that.
 
-## What it reports
+## How to read it
 
-One unified deadline at the top, then a ledger per stream
-(`website/content/posts/` and `website/content/issues/`) covering the next two
-months of slots. At the configured every-other-Monday cadence that is four
-slots each. Every slot is listed, filled or empty, so the shape of the gap is
-visible rather than summarised.
+One `/ship` fills one Monday: a post and the issue derived from it. The
+ledger is one row per Monday for the next two months:
 
-Each stream is rated on how many slots are filled *before its first gap*:
+```
+Mon Sep 14   Run Claude Code From Your Phone…   ✉ The agents run, I go buy shrimp
+Mon Sep 21   Run Claude Code on Any Model…      ✉ …
+Mon Sep 28   —
+```
 
-| Filled run | Status |
+| Row | Meaning |
 |---|---|
-| 0 | 🚨 LOW, the very next slot is empty |
-| 1-2 | ⚠️ WARN, a gap inside the next two or three slots |
-| 3+ | ✅ GOOD |
+| post and ✉ issue | shipped |
+| post with `⚠️ no issue`, or the reverse | half-shipped; the report says what to run |
+| — | empty; needs a `/ship` |
 
-Overall status is the worse of the two streams, so a healthy blog buffer cannot
-mask an empty newsletter buffer. "Need content by" is the earliest gap across
-both. Nothing special is needed for a post with no matching issue: it shows up
-as a gap in the issues ledger on its own.
+Status is how many Mondays are fully shipped before the first one that isn't:
+0 is 🚨 LOW (next Monday is open), 1-2 is ⚠️ WARN, 3+ is ✅ GOOD. "Next /ship
+needed for" is the first non-shipped Monday.
 
-Both streams share one cadence, and each issue carries the newest post published
-since the last issue went out, so an issue can carry a post from an earlier
-Monday. An issue with no post to carry still sends.
+Anything scheduled that does not fall on a publish day is listed under
+off-cadence so a file moved to a Tuesday cannot silently vanish.
 
-Any scheduled file that does not fall on a publish day is listed separately, so
-an entry moved to an off-cadence date cannot silently disappear from the report.
+## What to do with it
+
+If the next Monday is open: `/ship <idea>`. If a Monday is half-shipped, run
+the command the report names. To pull a later post forward into a gap:
+`uv run tools/move_post_date.py <from> <to>` for the post and again with
+`--stream newsletter` for its issue, then rename its `surface/` kit to match.
 
 ## Automation
 
-`.github/workflows/buffer-check.yml` runs this every Saturday at 12:00 UTC with
-`--force` (an alias for `--notify`) and the webhook from GitHub secrets. That is
-the only thing that posts to Discord.
+`.github/workflows/buffer-check.yml` runs this every Saturday at 12:00 UTC
+with `--force` (an alias for `--notify`) and the webhook from GitHub secrets.
