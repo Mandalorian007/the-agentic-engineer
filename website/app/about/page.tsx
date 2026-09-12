@@ -26,11 +26,12 @@ const CONTACT_EMAIL = AUTHOR.email;
 const GITHUB_URL = AUTHOR.github;
 const LINKEDIN_URL = "https://www.linkedin.com/in/matthew-fontana/";
 const TAC_URL = "https://tabletopadventurecreator.com";
+const APHORA_URL = "https://aphorahealth.com";
 const REPO_URL = "https://github.com/Mandalorian007/the-agentic-engineer";
 
 const ABOUT_TITLE = "About Matthew Fontana";
 const ABOUT_DESCRIPTION =
-  "Staff Software Engineer at Airbnb. I encode my own workflows into agents inside a large engineering org, and everything I write here is something I actually run.";
+  "Principal Engineer at Aphora Health, running AI strategy and the agentic platform. I build the systems that make a company faster. Everything I write here is something I actually run.";
 
 export const metadata: Metadata = {
   title: ABOUT_TITLE,
@@ -58,7 +59,7 @@ const PERSON_JSON_LD = {
   url: AUTHOR.url,
   image: `${SITE_URL}${AUTHOR.avatar}`,
   email: CONTACT_EMAIL,
-  jobTitle: "Staff Software Engineer",
+  jobTitle: "Principal Engineer, AI Strategy & Agentic Platform",
   homeLocation: {
     "@type": "Place",
     address: {
@@ -68,8 +69,9 @@ const PERSON_JSON_LD = {
       addressCountry: "US",
     },
   },
-  worksFor: { "@type": "Organization", name: "Airbnb" },
+  worksFor: { "@type": "Organization", name: "Aphora Health", url: APHORA_URL },
   alumniOf: [
+    { "@type": "Organization", name: "Airbnb" },
     { "@type": "Organization", name: "Spotify" },
     { "@type": "Organization", name: "UPS" },
     {
@@ -80,6 +82,8 @@ const PERSON_JSON_LD = {
   sameAs: [GITHUB_URL, LINKEDIN_URL, TAC_URL, REPO_URL],
   knowsAbout: [
     "Agentic engineering",
+    "AI strategy",
+    "Agent platforms in regulated environments",
     "Claude Code",
     "Model Context Protocol",
     "LiteLLM",
@@ -105,9 +109,17 @@ type ExperienceEntry = {
 
 const EXPERIENCE: ExperienceEntry[] = [
   {
+    org: "Aphora Health",
+    role: "Principal Engineer, AI Strategy & Agentic Platform",
+    period: "2026 – present",
+    note: "Own AI strategy and the agentic platform for the whole company, engineering and operations. Marketplace plugins, engineering platforms, automated security-vulnerability remediation, and agentic workflows for teams that don't write code. Pharmacy benefits, so PHI is in the loop.",
+    type: "employer",
+    url: APHORA_URL,
+  },
+  {
     org: "Airbnb",
     role: "Staff Software Engineer, Data Management",
-    period: "2024 – present",
+    period: "2024 – 2026",
     note: "Productionized an internal AI agent for natural-language search and discovery across the data warehouse. Claude Code Marketplace plugin combining skills, subagents, hooks, and commands. CLI + API MCP servers with internal AuthN/AuthZ. Evaluation framework that scores business outcomes, not unit pass rates.",
     type: "employer",
   },
@@ -230,7 +242,7 @@ export default function AboutPage() {
           <div className="flex flex-wrap gap-2 text-xs">
             <Badge variant="secondary" className="gap-1.5">
               <Building2 className="h-3 w-3" />
-              Staff Engineer · Airbnb
+              Principal Engineer · Aphora Health
             </Badge>
             <Badge variant="secondary" className="gap-1.5">
               <MapPin className="h-3 w-3" />
@@ -246,12 +258,12 @@ export default function AboutPage() {
               Hi, I&apos;m Matthew Fontana.
             </h1>
             <p className="text-xl text-muted-foreground">
-              Staff engineer at Airbnb. Before that Spotify, before that UPS.
-              I&apos;ve spent that whole time inside big engineering orgs
-              working out how to hand real work to machines without it going
-              badly.
+              I build the systems that make a company faster. Right now that
+              system is agents.
             </p>
             <p className="text-xl text-muted-foreground">
+              Principal Engineer at Aphora Health, where I own AI strategy and
+              the agentic platform. Before that Airbnb, Spotify, UPS.
               Everything I write here is something I actually run.
             </p>
           </div>
@@ -271,6 +283,36 @@ export default function AboutPage() {
             </Button>
           </div>
         </div>
+      </section>
+
+      {/*
+        STORY — one repeated move, one turn, one present tense. The timeline
+        below carries the dates; this carries the through-line.
+      */}
+      <section className="mx-auto mt-24 max-w-3xl">
+        <h2 className="text-3xl font-bold">The same move, four times</h2>
+        <p className="mt-4 text-lg text-muted-foreground">
+          Three times I&apos;ve built the layer an engineering org ended up
+          standing on. OpenShift at UPS, and the org moved to microservices on
+          it. Spring Boot at Spotify, then Productivity Engineering, where the
+          job was making every other team faster. The internal agent platform
+          at Airbnb: the Claude Code plugin, the MCP servers, the eval
+          framework that gated what shipped.
+        </p>
+        <p className="mt-4 text-lg text-muted-foreground">
+          Agents are the fourth, and they changed the job. A platform used to
+          serve engineers. An agent platform serves anyone with work to hand
+          off, and it acts instead of waiting to be called. So control stops
+          being a preference and becomes the whole game: what an agent may
+          touch, how you know it did the right thing, what happens when it
+          didn&apos;t.
+        </p>
+        <p className="mt-4 text-lg text-muted-foreground">
+          At Aphora Health I own that layer end to end, across engineering and
+          operations. The product is people paying less for the medicine they
+          already take, so the platform runs with PHI in the loop and no room
+          for guessing.
+        </p>
       </section>
 
       {/*

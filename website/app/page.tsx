@@ -203,7 +203,7 @@ export default function Home() {
       {/* Consulting, demoted */}
       <section className="mt-24 border-t pt-8">
         <div className="flex flex-col items-start justify-between gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center">
-          <p>Running this inside a large engineering org? I do that too.</p>
+          <p>I run this across a whole company, not just the engineering org.</p>
           <Link
             href="/services"
             className="font-medium text-foreground underline underline-offset-4"
