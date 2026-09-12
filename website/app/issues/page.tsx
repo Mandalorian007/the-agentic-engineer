@@ -101,7 +101,7 @@ export default function IssuesPage() {
         <div className="mt-16">
           <NewsletterCta
             source="issues-index"
-            body="Every other Monday, before it reaches this page."
+            body="Every Monday, before it reaches this page."
           />
         </div>
       </div>

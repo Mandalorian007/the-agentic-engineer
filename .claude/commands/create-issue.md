@@ -8,9 +8,26 @@ The blog post is the durable artifact: evergreen, structured, written to be foun
 
 Subscribers get the issue first. It becomes a public page at `/issues/{slug}` thirty days later.
 
+## Two ways in
+
+**`/create-issue --from-post <post-path>`** is the normal path, and the one
+`/ship` uses. The post is the raw material: what it changed in how Matthew
+works becomes segment 1, told in first person and past tense; segment 2 only
+if the post reports a real failure; the post's own pasteable artifact (or the
+smallest working piece of it) becomes segment 3. Use the post's `date` for
+the issue. The sender attaches the post link underneath, so the issue must
+still read as a letter, not a preamble: the test below ("could this sentence
+appear in the blog post?") applies with extra force, because the post is
+right there. Say what the post cannot: what it felt like to run, what you'd
+tell a friend, what you're still unsure about.
+
+**`/create-issue`** with no post is the hand-written letter for a week when
+something happened that is not a post. Rare now. Ask what happened, draft,
+review with `/issue-quality-review`.
+
 ## Your Task
 
-1. Ask what happened since the last issue, if the user has not already said
+1. If `--from-post` was given, read the post. Otherwise ask what happened since the last issue, if the user has not already said
 2. Draft the issue in the three-segment structure below
 3. Save it to `website/content/issues/YYYY-MM-DD-slug.mdx` with correct frontmatter
 

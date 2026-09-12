@@ -1,4 +1,4 @@
-name: Post to Twitter
+name: Publish day
 
 on:
   # Run daily at 6:30am EST (11:30 UTC)
@@ -51,3 +51,14 @@ jobs:
           if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date ${{ inputs.date }}"; fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then ARGS="$ARGS --dry-run"; fi
           uv run tools/post_to_twitter.py $ARGS
+
+      # The manual half of distribution (LinkedIn, HN, Reddit) starts from the
+      # surface kit /ship wrote. Drop it in Discord so it's a phone copy-paste.
+      - name: Post surface kit to Discord
+        if: ${{ inputs.dry_run != true }}
+        env:
+          LOW_CONTENT_WEBHOOK: ${{ secrets.LOW_CONTENT_WEBHOOK }}
+        run: |
+          ARGS=""
+          if [ -n "${{ inputs.date }}" ]; then ARGS="$ARGS --date ${{ inputs.date }}"; fi
+          uv run tools/notify_surface.py $ARGS

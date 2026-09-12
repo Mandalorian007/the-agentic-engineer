@@ -89,7 +89,7 @@ export default function Home() {
           <p className="mt-2 text-sm text-muted-foreground">
             The <span className="font-medium text-foreground">{NEWSLETTER_NAME}</span>.
             What I changed, what broke, and one thing you can paste into your own
-            repo. Every other Monday. Unsubscribe whenever. Your address goes
+            repo. Every Monday. Unsubscribe whenever. Your address goes
             to Buttondown and nowhere else, as described in the{" "}
             <Link href="/privacy" className="underline underline-offset-4">
               privacy policy

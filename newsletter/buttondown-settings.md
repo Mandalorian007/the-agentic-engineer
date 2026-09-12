@@ -40,13 +40,13 @@ you what they are stuck on, which only works if replies land somewhere you read.
 ## Description
 
 ```markdown
-I'm Matthew Fontana, a staff engineer at Airbnb. Before that Spotify, before that UPS.
+I'm Matthew Fontana. I run AI strategy and the agentic platform at Aphora Health. Before that Airbnb, Spotify, UPS.
 
 That whole time I've been working out how to hand real engineering work to machines without it going badly. I'm not done, and I don't think anyone is. This is the letter I send while I work it out.
 
-Every other Monday you get one email: what I changed in how I work, what broke, and one thing you can paste into your own repo. Real hooks, commands, and config. Not diagrams. If nothing broke, I'll say so rather than invent something.
+Every Monday you get one email: what I changed in how I work, what broke, and one thing you can paste into your own repo. Real hooks, commands, and config. Not diagrams. If nothing broke, I'll say so rather than invent something.
 
-Every other Monday. Unsubscribe whenever.
+Every Monday. Unsubscribe whenever.
 ```
 
 ---
@@ -56,7 +56,7 @@ Every other Monday. Unsubscribe whenever.
 For anywhere with a length cap (directory listings, social bios).
 
 ```
-Working out how to hand real engineering work to machines without it going badly. What I changed, what broke, one thing you can paste. Every other Monday.
+Working out how to hand real engineering work to machines without it going badly. What I changed, what broke, one thing you can paste. Every Monday.
 ```
 
 ## Confirmation page
@@ -68,7 +68,7 @@ the free plan, so this is the last thing a new subscriber sees before two weeks
 of silence. Do not promise them an email that isn't coming.
 
 ```
-You're confirmed. Every other Monday.
+You're confirmed. Every Monday.
 
 Hit reply to any issue and tell me what you're trying to get an agent to do
 reliably, and what's stopping it. I read every one.
