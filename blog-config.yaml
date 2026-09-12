@@ -23,6 +23,14 @@ publishing:
   days: ["monday"]           # One post and one issue every Monday
   time: "11:00:00"           # Publish time (UTC) - 6am EST - posts go live for ISR
 
+# Traffic report (tools/traffic_report.py)
+# Direct traffic from these countries counts as human. Referred traffic from
+# anywhere always does. Everything else with no referrer is crawler noise.
+analytics:
+  vercel_project: "agentic-engineer"
+  trusted_countries: [US, CA, GB, IE, DE, FR, NL, BE, CH, AT, SE, NO, DK, FI,
+                      ES, PT, IT, PL, CZ, AU, NZ, JP, KR, IL, BR, MX]
+
 # Newsletter issues (second content stream)
 # Issues live alongside posts and inherit the publishing schedule above, so each
 # issue ships on the same morning as its post. Uncomment `publishing:` only to

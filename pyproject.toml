@@ -9,6 +9,8 @@ dependencies = [
     "openai>=2.53.0",
     "requests>=2.31.0",
     "tweepy>=4.17.0",
+    "google-api-python-client>=2.150.0",
+    "google-auth>=2.35.0",
 ]
 
 [build-system]
