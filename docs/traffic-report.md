@@ -32,39 +32,33 @@ window by hand when it warns.
 
 ## Wiring Search Console
 
-The domain is already DNS-verified in Search Console (the
-`google-site-verification` TXT record on `agentic-engineer.com`), and the
-Google account that verified it owns the property. So locally the tool can
-just act as you. No service account, no permission grant.
+Done on 2026-09-12, and worth recording because it was not the obvious path:
 
-### Local (once)
+- The Search Console property is `sc-domain:agentic-engineer.com`, owned by
+  **mandalorian007@gmail.com**. It was added that day; before then the domain
+  was only Workspace-verified and Search Console had never seen it.
+- The tool reads it through Application Default Credentials from
+  `gcloud auth application-default login` as the gmail account, with the
+  `webmasters.readonly` scope. Quota project: `agentic-engineer-blog` (a
+  pre-existing project under the gmail account). The Workspace account
+  (matthew.fontana@agentic-engineer.com) cannot be used for this: its org
+  policy blocks gmail members, and it owns no Search Console properties.
+- Verification is a TXT record at the apex on Vercel DNS
+  (`google-site-verification=rL7V…`). Do not delete it.
+
+If the credential ever expires, redo the login as the gmail account:
 
 ```bash
-brew install --cask google-cloud-sdk        # already done on this machine
-gcloud auth login                            # browser: pick the Search Console account
 gcloud auth application-default login \
   --scopes=openid,https://www.googleapis.com/auth/userinfo.email,https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/webmasters.readonly
+gcloud auth application-default set-quota-project agentic-engineer-blog
 ```
-
-Then a Google Cloud project has to exist with the Search Console API enabled,
-because Google bills API quota to a project even for read-only calls on your
-own data:
-
-```bash
-gcloud projects create agentic-engineer-traffic --name="agentic-engineer traffic"
-gcloud config set project agentic-engineer-traffic
-gcloud services enable searchconsole.googleapis.com
-gcloud auth application-default set-quota-project agentic-engineer-traffic
-```
-
-`uv run tools/traffic_report.py` now fills the Search Console section. Data
-lags two to three days, so the newest days in a window may be thin.
 
 ### CI (later, optional)
 
-For GitHub Actions, create a service account in that project, add its email
-as a user on the Search Console property (Settings → Users and permissions,
-Restricted is enough), and put the key JSON in a secret as
+For GitHub Actions, create a service account in `agentic-engineer-blog`, add
+its email as a user on the Search Console property (Settings → Users and
+permissions, Restricted is enough), and put the key JSON in a secret as
 `GSC_SERVICE_ACCOUNT_JSON`. `GSC_SERVICE_ACCOUNT_FILE` takes a path instead.
 Either one takes precedence over the gcloud login.
 
