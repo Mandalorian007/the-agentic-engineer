@@ -27,6 +27,33 @@ newsletter issue derived from it, the social copy, the surface kit for the
 part a person does by hand, and the commit. Nothing in this repo is written
 by hand from a blank file.
 
+## The weekly routine
+
+If you are coming back to this repo after a while, this is all you need.
+
+| When | What | Command |
+|---|---|---|
+| Any day | Write next Monday's post and issue | `/ship <idea>` |
+| Publish morning (Monday) | Put the post in front of people, by hand | Open Discord, copy the surface kit: LinkedIn text post; Hacker News (claim posts) or Reddit (tutorials). Answer replies. |
+| Saturday | Discord tells you which Mondays are empty | `/check-buffer` any time to see it yourself |
+| Monthly | Real readers, not crawlers | `/traffic` |
+
+`/ship` does everything except the Monday paste: next open Monday, the post,
+the newsletter issue derived from it, Twitter and LinkedIn copy, the surface
+kit, both quality reviews, commit, push. Nothing goes live at push; Vercel,
+the issue sender, and the tweet all fire on the post's date. Say "preview
+only" to stop before the push.
+
+The cadence is weekly, Mondays, set in `blog-config.yaml`. To pull a post
+into an earlier gap: `uv run tools/move_post_date.py <from> <to>`, again with
+`--stream newsletter` for its issue, and rename its `surface/` kit.
+
+What changed on 2026-09-12, in case you remember the old shape: the two
+pipelines (`/create-post-pipeline`, `/create-issue-pipeline`) became `/ship`;
+issues are derived from posts instead of written separately; cadence went
+from every other Monday to every Monday; `surface/` and the Discord kit drop
+are new; `/traffic` is new.
+
 ## Features
 
 - ✅ **Next.js 16**: Modern static site generation with App Router
