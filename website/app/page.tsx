@@ -200,15 +200,15 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Consulting, demoted */}
+      {/* Talks, demoted */}
       <section className="mt-24 border-t pt-8">
         <div className="flex flex-col items-start justify-between gap-3 text-sm text-muted-foreground sm:flex-row sm:items-center">
-          <p>I run this across a whole company, not just the engineering org.</p>
+          <p>I run this across a whole company, not just the engineering org. I also talk about it.</p>
           <Link
-            href="/services"
+            href="/speaking"
             className="font-medium text-foreground underline underline-offset-4"
           >
-            Hire me
+            Talks and workshops
           </Link>
         </div>
       </section>

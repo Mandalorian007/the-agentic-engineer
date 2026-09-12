@@ -52,7 +52,7 @@ Humanize the post at <post-path>.
 Use my writing style from website/content/posts/2026-01-19-ai-toolkit-escape-ecosystem-lock-in.mdx as a reference.
 
 Output rules:
-- Do NOT modify image references or the closing CTA paragraph linking to /services.
+- Do NOT modify image references.
 - Preserve the YAML frontmatter exactly.
 - Minimize em dashes (apply pattern #14 — em dashes are old voice for this site).
 - Do NOT un-hyphenate technical compound modifiers like real-time, end-to-end, vendor-agnostic, plug-and-play, hands-on-keyboard.
