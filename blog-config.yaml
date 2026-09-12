@@ -19,9 +19,8 @@ image_generation:
 # or two out to 21 days. Anchoring to a fixed date keeps every gap at 14 and
 # yields 26 slots a year instead of 24.
 publishing:
-  frequency: "biweekly"
-  day: "monday"              # Publish on Mondays
-  anchor: "2026-09-07"       # any date already on the cadence; shift by 14s freely
+  frequency: "weekly"
+  days: ["monday"]           # One post and one issue every Monday
   time: "11:00:00"           # Publish time (UTC) - 6am EST - posts go live for ISR
 
 # Newsletter issues (second content stream)

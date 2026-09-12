@@ -15,7 +15,7 @@ interface NewsletterCtaProps {
 export function NewsletterCta({
   source,
   heading = NEWSLETTER_NAME,
-  body = "I\u2019m working out how to hand real engineering work to machines without it going badly. I\u2019m not done. Every other Monday: what I changed, what broke, and one thing you can paste into your own repo.",
+  body = "I\u2019m working out how to hand real engineering work to machines without it going badly. I\u2019m not done. Every Monday: what I changed, what broke, and one thing you can paste into your own repo.",
 }: NewsletterCtaProps) {
   return (
     <aside className="rounded-lg border bg-muted/40 p-6 md:p-8">
@@ -24,7 +24,7 @@ export function NewsletterCta({
       <div className="mt-5 max-w-xl">
         <NewsletterForm source={source} />
         <p className="mt-2 text-sm text-muted-foreground">
-          Every other Monday. Unsubscribe whenever. Your address goes to
+          Every Monday. Unsubscribe whenever. Your address goes to
           Buttondown and nowhere else, as described in the{" "}
           <Link href="/privacy" className="underline underline-offset-4">
             privacy policy

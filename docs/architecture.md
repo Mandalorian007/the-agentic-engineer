@@ -34,8 +34,7 @@ The Agentic Engineer is a fully automated blogging platform built with Next.js 1
 the-agentic-engineer/
 ├── .claude/                      # Claude Code commands and hooks
 │   ├── commands/                 # Slash commands for blog workflow
-│   │   ├── create-post-pipeline.md  # ENTRY POINT: end-to-end blog post
-│   │   ├── create-issue-pipeline.md # ENTRY POINT: end-to-end newsletter issue
+│   │   ├── ship.md               # ENTRY POINT: post + issue + socials + surface kit + push
 │   │   ├── create-post.md        # Generate new blog post with AI
 │   │   ├── generate-socials.md   # Generate social media posts
 │   │   ├── mdx-quality-review.md # SEO + Vale + Social validation
@@ -120,7 +119,7 @@ the-agentic-engineer/
 **Recommended Workflow:**
 ```bash
 # Complete workflow (create → socials → review → remind to deploy)
-/create-post-pipeline Your blog post idea goes here
+/ship Your blog post idea goes here
 ```
 
 This command orchestrates the entire content pipeline:
@@ -278,7 +277,7 @@ Use **relative paths** from MDX file location:
 The publishing schedule is configured in `blog-config.yaml`:
 
 ```yaml
-# Biweekly (every other Monday) - what this site uses
+# Biweekly (every other Monday)
 publishing:
   frequency: "biweekly"
   day: "monday"

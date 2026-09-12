@@ -21,10 +21,38 @@ Worth reading first:
 | [`website/content/posts/`](website/content/posts/) | Every post, as source. |
 | [`newsletter/`](newsletter/) | The newsletter's copy, and notes on the Buttondown API. |
 
-The commands in `.claude/commands/` are the interesting part. They encode the
-whole path from an idea to a shipped post: draft, humanize against a voice
-anchor, SEO and prose lint, social copy, commit. Nothing in this repo is
-written by hand from a blank file.
+The commands in `.claude/commands/` are the interesting part. One of them,
+`/ship`, encodes the whole path from an idea to a Monday: the post, the
+newsletter issue derived from it, the social copy, the surface kit for the
+part a person does by hand, and the commit. Nothing in this repo is written
+by hand from a blank file.
+
+## The weekly routine
+
+If you are coming back to this repo after a while, this is all you need.
+
+| When | What | Command |
+|---|---|---|
+| Any day | Write next Monday's post and issue | `/ship <idea>` |
+| Publish morning (Monday) | Put the post in front of people, by hand | Open Discord, copy the surface kit: LinkedIn text post; Hacker News (claim posts) or Reddit (tutorials). Answer replies. |
+| Saturday | Discord tells you which Mondays are empty | `/check-buffer` any time to see it yourself |
+| Monthly | Real readers, not crawlers | `/traffic` |
+
+`/ship` does everything except the Monday paste: next open Monday, the post,
+the newsletter issue derived from it, Twitter and LinkedIn copy, the surface
+kit, both quality reviews, commit, push. Nothing goes live at push; Vercel,
+the issue sender, and the tweet all fire on the post's date. Say "preview
+only" to stop before the push.
+
+The cadence is weekly, Mondays, set in `blog-config.yaml`. To pull a post
+into an earlier gap: `uv run tools/move_post_date.py <from> <to>`, again with
+`--stream newsletter` for its issue, and rename its `surface/` kit.
+
+What changed on 2026-09-12, in case you remember the old shape: the two
+pipelines (`/create-post-pipeline`, `/create-issue-pipeline`) became `/ship`;
+issues are derived from posts instead of written separately; cadence went
+from every other Monday to every Monday; `surface/` and the Discord kit drop
+are new; `/traffic` is new.
 
 ## Features
 
@@ -81,72 +109,36 @@ written by hand from a blank file.
    ```
    Visit http://localhost:3000
 
-### 2. Create a Post
-
-Use the `/create-post` command in Claude Code:
+### 2. Ship
 
 ```bash
-/create-post Your blog post idea goes here
+/ship Your blog post idea goes here
 ```
 
-This will:
-- Generate a complete MDX blog post with AI
-- Create hero images using `aitk image generate` (OpenAI GPT Image backend)
-- Save to `website/content/posts/YYYY-MM-DD-slug.mdx`
-- Save images to `website/public/blog/YYYY-MM-DD-slug/*.webp`
+One command, one Monday. It runs, in order:
 
-### 3. Generate Social Media Posts
+1. Next open Monday from the schedule
+2. The post: MDX with AI-generated hero images, humanized against the voice anchor
+3. The newsletter issue, derived from the post (`/create-issue --from-post`), humanized
+4. Twitter and LinkedIn copy into the post's frontmatter
+5. The surface kit: `surface/YYYY-MM-DD-slug.md`, the finished text for the part a person does by hand (LinkedIn post, Hacker News title and author comment for claim posts, Reddit text post for tutorials)
+6. Quality review of both files (SEO, Vale, social validation, email preview)
+7. Commit on `main` and push
 
-```bash
-/generate-socials website/content/posts/YYYY-MM-DD-slug.mdx
-```
+Nothing goes live at push. Vercel publishes the post at its frontmatter date, `send-issue.yml` sends the issue that morning, and `post-to-twitter.yml` tweets and drops the surface kit into Discord so the manual part is a copy-paste from a phone. Say "preview only" to stop before the push.
 
-This will:
-- Generate platform-optimized social media posts (Twitter, LinkedIn)
-- Add them to the frontmatter under `social:` key
-- Respect platform character limits
-
-### 4. Quality Review
-
-```bash
-# Run quality review (SEO + Vale prose linting + Social validation)
-/mdx-quality-review website/content/posts/YYYY-MM-DD-slug.mdx
-```
-
-### 5. Deploy
-
-```bash
-git add .
-git commit -m "Add new blog post: Your Title"
-git push origin main
-```
-
-Vercel automatically deploys on push! 🚀
+The steps are still standalone commands if one needs redoing.
 
 ## Workflow
 
-### Recommended Workflow
+### Publish morning
 
-```bash
-# Complete workflow in one command
-/create-post-pipeline Your blog post idea goes here
-```
-
-This runs:
-1. Gets next available publish date (based on configured schedule)
-2. Creates MDX post with AI-generated content
-3. Generates hero images and diagrams in WebP format
-4. Generates platform-optimized social media posts (Twitter, LinkedIn)
-5. Runs quality review (SEO + Vale + Social validation)
-6. Reminds you to commit and push to deploy
-
-**Result:** Production-ready blog post with social media content, ready for git push.
+The pipeline does everything except the part that only works when a person does it: putting the post in front of people. On publish morning the surface kit is in Discord. Post it on LinkedIn as text (link in the first comment). If it's a claim post, submit it to Hacker News and leave the author comment. If it's a tutorial, post it to r/ClaudeAI as a text post. Answer replies. That's the job.
 
 ### Available Commands
 
-**End-to-End (the two entry points):**
-- `/create-post-pipeline <idea>` - Blog post (create → humanize → socials → review → remind to deploy)
-- `/create-issue-pipeline` - Newsletter issue (create → humanize → review → dry-run preview → remind to deploy)
+**Entry point:**
+- `/ship <idea>` - Idea to pushed commit: post, issue, socials, surface kit, review
 
 **Individual Steps — Posts:**
 - `/create-post <idea>` - Generate MDX blog post with AI-generated images
@@ -154,7 +146,8 @@ This runs:
 - `/mdx-quality-review <path>` - Run SEO + Vale prose linting + Social validation
 
 **Individual Steps — Issues:**
-- `/create-issue` - Generate MDX newsletter issue
+- `/create-issue --from-post <path>` - Newsletter issue derived from a post (what `/ship` runs)
+- `/create-issue` - Hand-written issue for a week without a post (rare)
 - `/issue-quality-review <path>` - Run Vale + issue_check + email preview
 
 **Both Streams:**
@@ -364,7 +357,7 @@ Humanize the post at website/content/posts/<your-post>.mdx.
 Use my writing style from website/content/posts/2026-01-19-ai-toolkit-escape-ecosystem-lock-in.mdx as a reference.
 ```
 
-**Pipeline order:** the `/create-post-pipeline` orchestrator runs humanizer **between `/create-post` and `/generate-socials`** so socials reflect the humanized body. If you run steps manually, follow the same order.
+**Pipeline order:** the `/ship` orchestrator runs humanizer **between `/create-post` and `/generate-socials`** so socials reflect the humanized body. If you run steps manually, follow the same order.
 
 **Style rules for this blog (override humanizer defaults):**
 - **Minimize em dashes** — em dashes are old voice for this site; apply pattern #14 aggressively.
@@ -404,24 +397,24 @@ Run `aitk <subcommand> --help` for full flag details on any command.
 The publishing schedule is configurable in `blog-config.yaml`:
 
 ```yaml
-# Biweekly (every other Monday) - what this site uses
+# Weekly (every Monday) - what this site uses
+publishing:
+  frequency: "weekly"
+  days: ["monday"]
+  time: "11:00:00"       # Publish time (UTC) - 6am EST
+
+# Biweekly (every other Monday)
 publishing:
   frequency: "biweekly"
   day: "monday"
   anchor: "2026-09-07"   # any date already on the cadence
-  time: "11:00:00"       # Publish time (UTC) - 6am EST
+  time: "11:00:00"
 
 # Monthly (1st and 3rd Monday of each month)
 publishing:
   frequency: "monthly"
   day: "monday"
   weeks_of_month: [1, 3]
-  time: "11:00:00"
-
-# Weekly (every Monday)
-publishing:
-  frequency: "weekly"
-  days: ["monday"]
   time: "11:00:00"
 ```
 
@@ -473,15 +466,14 @@ uv run tools/move_post_date.py 2025-10-27 2025-10-23
 
 ## Social Media Automation
 
-Automated social media posting via GitHub Actions. Posts are automatically published to Twitter (and LinkedIn in the future) when blog posts go live.
+The publish-day workflow (`.github/workflows/post-to-twitter.yml`) does two things when a post goes live: tweets it, and drops the post's surface kit into Discord. The tweet is automated because a tweet from a small account is worth exactly what automation costs. LinkedIn, Hacker News, and Reddit are not automated on purpose: they distribute posts from people who show up in the thread, and automating them gets accounts banned.
 
 ### How It Works
 
-1. **Generate social posts** with `/generate-socials` command
-2. **Social content stored in frontmatter** under `social:` key
-3. **Posts go live daily at 6am EST** (11am UTC) via ISR
-4. **GitHub Actions runs at 6:30am EST** (11:30am UTC) to tweet them
-5. **Each platform has its own workflow** for isolated failures
+1. **`/ship` writes the social copy** into the post's frontmatter under `social:` and the surface kit into `surface/`
+2. **Posts go live daily at 6am EST** (11am UTC) via ISR
+3. **GitHub Actions runs at 6:30am EST** (11:30am UTC): `post_to_twitter.py` tweets, then `notify_surface.py` posts the surface kit to the Discord channel (`LOW_CONTENT_WEBHOOK`)
+4. **You post the kit** on LinkedIn, and on HN or Reddit depending on the post's shape
 
 This standardized daily schedule means you can publish on ANY day of the week - just schedule a post for that date!
 
@@ -492,7 +484,7 @@ This standardized daily schedule means you can publish on ANY day of the week - 
 2. **Fund Pay-Per-Use** — the X Free tier was deprecated Feb 6, 2026. The App's account needs a positive credit balance to post.
    - **Billing → Spending controls** → set a spending limit ($5/month is ~12× this pipeline's real usage).
    - **Auto-recharge** is recommended (trigger ~$2, refill $10) so the bot doesn't silently stall when credits run out.
-   - **Cost per tweet:** $0.20 (every tweet contains a URL, which puts it in the URL-rate bucket). At bi-weekly cadence that's ~$0.40/month.
+   - **Cost per tweet:** $0.20 (every tweet contains a URL, which puts it in the URL-rate bucket). At weekly cadence that's ~$0.80/month.
 
 3. **Add Twitter credentials as GitHub secrets:**
    - Go to Settings → Secrets and variables → Actions
@@ -523,12 +515,15 @@ This standardized daily schedule means you can publish on ANY day of the week - 
 
 ```bash
 # Test Twitter posting locally (uses .env.local)
-uv run tools/post_to_twitter.py
+uv run tools/post_to_twitter.py --dry-run
+
+# Preview the surface kit Discord message for a date
+uv run tools/notify_surface.py --dry-run --date 2026-10-12
 ```
 
 ## Content Buffer Monitoring
 
-Get a Discord notification every Saturday showing your content pipeline status.
+A Discord message every Saturday showing which upcoming Mondays still need a `/ship`.
 
 ### Setup
 
@@ -537,35 +532,38 @@ Get a Discord notification every Saturday showing your content pipeline status.
    LOW_CONTENT_WEBHOOK=https://discord.com/api/webhooks/YOUR_WEBHOOK_HERE
    ```
 
-2. **Add as GitHub secret:**
-   - Go to Settings → Secrets and variables → Actions
-   - Add secret: `LOW_CONTENT_WEBHOOK`
+2. **Add as GitHub secret:** Settings → Secrets and variables → Actions → `LOW_CONTENT_WEBHOOK`
 
-3. **GitHub Action runs every Saturday at 8am EST**
-   - Sends status update to Discord
-   - Shows: buffer remaining (months or weeks), scheduled posts, last post date
+3. **GitHub Action runs every Saturday at 12:00 UTC** and posts the ledger. The same webhook receives the surface kit on publish mornings.
 
 ### Manual Testing
 
 ```bash
-# Print the report. Never posts to Discord, even with a webhook configured.
+# Print the ledger. Never posts to Discord, even with a webhook configured.
 uv run tools/buffer_check.py
-
-# One stream only
-uv run tools/buffer_check.py --stream newsletter
 
 # Actually post it. Only the Saturday workflow normally does this.
 uv run tools/buffer_check.py --notify
 ```
 
-Posting is opt-in. A bare run prints and exits, so checking your buffer while
-writing never puts a message in the channel.
+### What it shows
 
-Each notification shows:
-- 🚨 Status level, rated on how many slots are filled before the first gap (0 = red, 1-2 = orange, 3+ = green), worst stream wins
-- ✍️ One unified "need content by" date, the earliest gap across both streams
-- 📝 A ledger per stream covering the next two months of slots, filled or empty
-- ⚠️ Any scheduled file that does not land on a publish day
+One `/ship` fills one Monday: a post and the issue derived from it. The report is one row per Monday for the next two months:
+
+```
+🚨 LOW · Content Buffer
+Next /ship needed for  Mon Sep 28  ·  16 days
+Monday
+──────────────────────────────────────────────────────
+2 of 9 Mondays shipped
+   Mon Sep 14   Run Claude Code From Your Phone…   ✉ The agents run, I go buy shrimp
+   Mon Sep 21   Run Claude Code on Any Model…      ✉ …
+   Mon Sep 28   —
+```
+
+- Status is how many Mondays are fully shipped before the first one that isn't: 0 = 🚨 LOW, 1-2 = ⚠️ WARN, 3+ = ✅ GOOD
+- A Monday with a post but no issue (or the reverse) is half-shipped, and the report names the command that fixes it
+- Anything scheduled off a publish day is listed separately so it cannot silently vanish
 
 ## Local Development
 

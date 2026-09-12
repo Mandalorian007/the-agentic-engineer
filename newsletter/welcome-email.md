@@ -21,11 +21,11 @@ Not managed by `tools/send_issue.py`.
 
 ---
 
-I'm Matthew Fontana, a staff engineer at Airbnb. Before that Spotify, before that UPS.
+I'm Matthew Fontana. I run AI strategy and the agentic platform at Aphora Health. Before that Airbnb, Spotify, UPS.
 
 That whole time I've been working out how to hand real engineering work to machines without it going badly. I'm not done, and I don't think anyone is. This is the letter I send while I work it out.
 
-Every other Monday you get one email: what I changed in how I work, what broke, and one thing you can paste into your own repo. Real hooks, commands, and config. Not diagrams. If nothing broke, I'll say so rather than invent something.
+Every Monday you get one email: what I changed in how I work, what broke, and one thing you can paste into your own repo. Real hooks, commands, and config. Not diagrams. If nothing broke, I'll say so rather than invent something.
 
 The first one lands on the next publishing Monday.
 
