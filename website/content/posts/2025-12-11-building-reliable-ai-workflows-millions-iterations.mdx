@@ -5,11 +5,6 @@ date: "2025-12-11T11:00:00Z"
 category: "tutorials"
 hashtags: ["ai-agents", "workflows", "llm", "engineering", "validation"]
 
-social:
-  twitter:
-    text: "99% accurate LLM doing 100 tasks? You're compounding errors.\n\nBuild workflow systems:\n→ State isolation\n→ Validation gates\n→ Parallel consensus\n→ Auto-retry\n\nScale to millions."
-  linkedin:
-    text: "LLM accuracy falls apart at scale. A 99% accurate model doing 100 sequential tasks? You're compounding that 1% error across every step.\n\nBut here's what most people miss: we're engineers, not prompt magicians. We don't just toss problems at AI and hope for the best. We build systems.\n\nI recently explored how to engineer AI agent workflows that reliably handle massive iteration counts. The key insights:\n\n→ State-based isolation: Use current state as input for each task instead of accumulated context. Maintains 99% accuracy per task instead of compounding errors.\n\n→ Structured validation: Build retry logic around LLM calls. If an error field is populated or the response doesn't match your schema, automatically retry.\n\n→ Git-based quality gates: If git status shows 12 changed files when you expected 1, rollback and retry with more specific instructions.\n\n→ Parallel consensus: Run the same prompt across 5-10 agents and vote. A 90% accurate LLM becomes 99%+ accurate with majority voting.\n\nThe meta insight? LLMs and agents are just API calls. Wrap them in workflow orchestration with validation, retry logic, and quality gates.\n\nYou can absolutely build systems that handle millions of iterations reliably. You just need to stop thinking like a prompt engineer and start thinking like a systems engineer.\n\nFull breakdown with code examples:"
 ---
 
 ![Hero image showing AI workflow system](../../public/blog/2025-12-11-building-reliable-ai-workflows-millions-iterations/hero-reliable-ai-workflows.webp)

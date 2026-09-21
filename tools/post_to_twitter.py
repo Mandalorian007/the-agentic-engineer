@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Post Twitter content from blog post frontmatter.
+"""Post the day's tweet from its surface kit.
 
 This script:
-1. Finds blog posts scheduled for today (UTC)
-2. Reads social.twitter.text from frontmatter
-3. Appends blog URL
+1. Finds the blog post scheduled for today (UTC)
+2. Reads surface/<stem>/x.md
+3. Appends the blog URL
 4. Posts to Twitter via API v2
 
 Posts are scheduled to go live at 6am EST (11am UTC) via ISR.
@@ -12,29 +12,27 @@ GitHub Actions runs at 6:30am EST (11:30am UTC) to tweet them.
 This gives ISR 30 minutes to rebuild and make posts live.
 
 Usage:
-    python tools/post_to_twitter.py                      # Post tweets for today
-    python tools/post_to_twitter.py --dry-run            # Preview today's tweets
+    python tools/post_to_twitter.py                      # Post today's tweet
+    python tools/post_to_twitter.py --dry-run            # Preview today's tweet
     python tools/post_to_twitter.py --date 2025-10-20    # Post for specific date
     python tools/post_to_twitter.py --dry-run --date 2025-10-20  # Preview specific date
 
 Exit codes:
-- 0: Success (including no posts to tweet)
-- 1: Error (API failure, missing credentials, etc.)
+- 0: Success (including no post scheduled)
+- 1: Error (API failure, missing credentials, post with no x.md, tweet too long)
 """
 
 import argparse
 import os
-import re
 import sys
-from datetime import datetime, timezone, date as date_type
+from datetime import datetime, timezone
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).parent.parent))
 from lib.config import load_config
-from lib.frontmatter import parse_frontmatter
-
-# X rewrites links through t.co at a fixed width. See lib/social_validator.py.
-TCO_URL_LENGTH = 23
-_URL_RE = re.compile(r"https?://\S+")
+from lib.content import get_entry_for_date
+from lib.social_validator import TWITTER_TOTAL_MAX, build_url, tweet_length
+from lib.surface import kit_dir, read_tweet_text
 
 
 def get_twitter_client(dry_run: bool = False):
@@ -59,7 +57,6 @@ def get_twitter_client(dry_run: bool = False):
         print("Run: uv sync")
         sys.exit(1)
 
-    # Load credentials from environment
     api_key = os.getenv("TWITTER_API_KEY")
     api_key_secret = os.getenv("TWITTER_API_KEY_SECRET")
     access_token = os.getenv("TWITTER_ACCESS_TOKEN")
@@ -82,73 +79,12 @@ def get_twitter_client(dry_run: bool = False):
     )
 
 
-def get_posts_for_today(config: dict, target_date: date_type | None = None) -> list[tuple[Path, dict]]:
-    """Get all blog posts scheduled for today (UTC).
-
-    Posts are scheduled to go live at 6am EST (11am UTC).
-    This script runs at 6:30am EST to tweet them after ISR has rebuilt.
-
-    Args:
-        config: Blog configuration
-        target_date: Date to check for posts (defaults to today UTC)
-
-    Returns:
-        List of (file_path, frontmatter) tuples
-    """
-    content_dir = Path(config["content_dir"])
-    if target_date is None:
-        target_date = datetime.now(timezone.utc).date()
-
-    posts_for_today = []
-
-    for mdx_file in content_dir.glob("*.mdx"):
-        try:
-            # Read file content and parse frontmatter
-            content = mdx_file.read_text(encoding="utf-8")
-            frontmatter, _ = parse_frontmatter(content)
-
-            # Parse post date
-            date_str = frontmatter.get("date")
-            if not date_str:
-                continue
-
-            post_date = datetime.fromisoformat(date_str.replace("Z", "+00:00")).date()
-
-            # Check if post is scheduled for today
-            if post_date == target_date:
-                posts_for_today.append((mdx_file, frontmatter))
-
-        except Exception as e:
-            print(f"⚠️  Warning: Failed to parse {mdx_file.name}: {e}")
-            continue
-
-    return posts_for_today
-
-
-def build_tweet(frontmatter: dict, slug: str, domain: str) -> str | None:
-    """Build tweet text from frontmatter.
-
-    Args:
-        frontmatter: Parsed frontmatter
-        slug: Post slug (YYYY-MM-DD-title)
-        domain: Blog domain
-
-    Returns:
-        Tweet text or None if no Twitter content
-    """
-    # Check if social.twitter.text exists
-    social = frontmatter.get("social", {})
-    twitter = social.get("twitter", {})
-    text = twitter.get("text", "").strip()
-
+def build_tweet(stem: str, domain: str) -> str | None:
+    """Tweet text plus URL from the post's surface kit, or None if there is no x.md."""
+    text = read_tweet_text(stem)
     if not text:
         return None
-
-    # Build full URL
-    url = f"https://{domain}/blog/{slug}"
-
-    # Combine text and URL
-    return f"{text}\n\n{url}"
+    return f"{text}\n\n{build_url(stem, domain)}"
 
 
 def post_tweet(client, tweet_text: str, dry_run: bool = False) -> bool:
@@ -180,23 +116,10 @@ def post_tweet(client, tweet_text: str, dry_run: bool = False) -> bool:
         return False
 
 
-def tweet_length(text: str) -> int:
-    """Length of a tweet as X counts it, with every URL billed at t.co width.
-
-    Mirrors lib/social_validator.py. Kept here rather than imported because the
-    two run at different times against different inputs, and this one has to
-    handle a fully composed tweet rather than a frontmatter field.
-    """
-    without_urls = _URL_RE.sub("", text)
-    url_count = len(_URL_RE.findall(text))
-    return len(without_urls) + url_count * TCO_URL_LENGTH
-
-
 def main():
     """Main entry point."""
-    # Parse command-line arguments
     parser = argparse.ArgumentParser(
-        description="Post Twitter content from blog post frontmatter"
+        description="Post the day's tweet from its surface kit"
     )
     parser.add_argument(
         "--dry-run",
@@ -210,7 +133,6 @@ def main():
     )
     args = parser.parse_args()
 
-    # Parse target date
     target_date = None
     if args.date:
         try:
@@ -222,7 +144,6 @@ def main():
     if args.dry_run:
         print("🔍 DRY RUN MODE - No tweets will be posted\n")
 
-    # Load blog configuration
     try:
         config = load_config()
     except Exception as e:
@@ -230,62 +151,50 @@ def main():
         sys.exit(1)
 
     domain = config.get("domain", "agentic-engineer.com")
+    date_str = target_date.strftime("%Y-%m-%d") if target_date else "today"
 
-    # Get posts scheduled for today
-    posts_today = get_posts_for_today(config, target_date)
-
-    if not posts_today:
-        date_str = target_date.strftime("%Y-%m-%d") if target_date else "today"
+    entry = get_entry_for_date(Path(config["content_dir"]), target_date)
+    if not entry:
         print(f"ℹ️  No posts scheduled for {date_str}")
         sys.exit(0)
 
-    date_str = target_date.strftime("%Y-%m-%d") if target_date else "today"
-    print(f"📅 Found {len(posts_today)} post(s) scheduled for {date_str}")
+    post_file = entry[0]
+    stem = post_file.stem
+    print(f"📅 Found 1 post(s) scheduled for {date_str}")
 
-    # Get Twitter client (skip if dry run)
     client = get_twitter_client(dry_run=args.dry_run)
 
-    # Process each post
-    posted_count = 0
+    print(f"\n📄 Processing: {stem}")
+
     error_count = 0
+    posted_count = 0
 
-    for post_file, post_frontmatter in posts_today:
-        # Extract slug from filename (remove .mdx extension)
-        slug = post_file.stem
-
-        print(f"\n📄 Processing: {slug}")
-
-        # Build tweet
-        tweet_text = build_tweet(post_frontmatter, slug, domain)
-
-        if not tweet_text:
-            print("  ⚠️  No Twitter content found in frontmatter")
-            continue
-
-        # Validate length. X charges a flat t.co width for the link rather than
-        # its literal characters, so measure it the way X will: this is the
-        # same model lib/social_validator.py uses at authoring time, and the
-        # two disagreeing is how a tweet passes review and then fails to send.
+    tweet_text = build_tweet(stem, domain)
+    if not tweet_text:
+        # Loud on purpose: a Monday with no tweet is a Monday nobody notices.
+        print(f"  ❌ Error: No tweet text at {kit_dir(stem).relative_to(Path.cwd())}/x.md")
+        error_count += 1
+    else:
+        # X charges a flat t.co width for the link rather than its literal
+        # characters. lib/social_validator uses the same model at authoring
+        # time, so a tweet that passes review cannot fail to send.
         billed_length = tweet_length(tweet_text)
-        if billed_length > 280:
+        if billed_length > TWITTER_TOTAL_MAX:
             print(
                 f"  ❌ Error: Tweet is {billed_length} chars as X counts it "
-                f"(max 280). Skipping."
+                f"(max {TWITTER_TOTAL_MAX}). Skipping."
             )
             error_count += 1
-            continue
-
-        if not args.dry_run:
-            print(f"  📝 Tweet ({len(tweet_text)} chars):")
-            print(f"     {tweet_text[:100]}{'...' if len(tweet_text) > 100 else ''}")
-
-        # Post tweet (or preview if dry run)
-        if post_tweet(client, tweet_text, dry_run=args.dry_run):
-            posted_count += 1
         else:
-            error_count += 1
+            if not args.dry_run:
+                print(f"  📝 Tweet ({len(tweet_text)} chars):")
+                print(f"     {tweet_text[:100]}{'...' if len(tweet_text) > 100 else ''}")
 
-    # Summary
+            if post_tweet(client, tweet_text, dry_run=args.dry_run):
+                posted_count += 1
+            else:
+                error_count += 1
+
     print(f"\n{'='*60}")
     if args.dry_run:
         print(f"🔍 Would post: {posted_count}")
@@ -294,7 +203,6 @@ def main():
     print(f"❌ Errors: {error_count}")
     print(f"{'='*60}")
 
-    # Exit with error if any posts failed
     if error_count > 0:
         sys.exit(1)
 

@@ -1,0 +1,1 @@
+Claude Code never hardcoded api.anthropic.com. Point it at OpenRouter and you pick the model. Better: it runs four model slots, so subagents doing a cheap grep can hit a cheap model while your main loop stays strong.

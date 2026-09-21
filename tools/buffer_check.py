@@ -36,6 +36,7 @@ from lib.config import (
     get_newsletter_config,
 )
 from lib.scheduling import get_next_publish_date, format_schedule_label
+from lib.surface import missing_files
 
 # How far ahead the ledger looks.
 LOOKAHEAD_MONTHS = 2
@@ -83,6 +84,7 @@ def get_scheduled(content_dir: Path, label_field: str) -> List[Dict]:
                 "label": label,
                 "date": entry_date,
                 "date_str": date_str,
+                "shape": extract_field_from_mdx(mdx_file, 'shape'),
             })
 
     scheduled.sort(key=lambda x: x["date"])
@@ -178,16 +180,25 @@ def rate(ledger: List[Dict]) -> Dict:
     }
 
 
+def kit_status(post: Optional[Dict]) -> str:
+    """Empty when the post's surface kit is complete, else what is missing."""
+    if not post:
+        return ""
+    missing = missing_files(post["path"].stem, post.get("shape"))
+    return f"   ⚠️ kit missing {', '.join(missing)}" if missing else ""
+
+
 def format_row(row: Dict, has_issues: bool) -> str:
     """`Mon Sep 14   Post title   ✉ Issue subject`, or a dash for an empty slot."""
     day = row["date"].strftime("%a %b %d")
     if row["state"] == "empty":
         return f"{day}   —"
     post = row["post"]["label"] if row["post"] else "⚠️ no post"
+    kit = kit_status(row["post"])
     if not has_issues:
-        return f"{day}   {post}"
+        return f"{day}   {post}{kit}"
     issue = f"✉ {row['issue']['label']}" if row["issue"] else "⚠️ no issue"
-    return f"{day}   {post}   {issue}"
+    return f"{day}   {post}   {issue}{kit}"
 
 
 def half_shipped_fixes(ledger: List[Dict]) -> List[str]:
