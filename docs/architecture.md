@@ -1,13 +1,13 @@
 # The Agentic Engineer - Architecture Documentation
 
-**Last Updated:** October 2025
-**Status:** Production - Automated content pipeline with social media distribution
+**Last Updated:** September 2026
+**Status:** Production - Transcript-driven content pipeline with social media distribution
 
 ---
 
 ## Overview
 
-The Agentic Engineer is a fully automated blogging platform built with Next.js 16. The system handles the complete content lifecycle: AI-generated blog posts with OpenAI-generated images, platform-optimized social media posts, automated quality checks, scheduled publishing, and automated social media distribution via GitHub Actions.
+The Agentic Engineer is a fully automated blogging platform built with Next.js 16. The system handles the complete content lifecycle: a spoken transcript in, then a blog post with an AI-generated hero image, a newsletter issue, per-outlet distribution copy, quality control that fixes in place, a deterministic verify gate, scheduled publishing, and automated tweeting plus a Discord drop of the hand-posted copy via GitHub Actions.
 
 ### Tech Stack
 
@@ -32,16 +32,27 @@ The Agentic Engineer is a fully automated blogging platform built with Next.js 1
 
 ```
 the-agentic-engineer/
-├── .claude/                      # Claude Code commands and hooks
-│   ├── commands/                 # Slash commands for blog workflow
-│   │   ├── ship.md               # ENTRY POINT: post + issue + socials + surface kit + push
-│   │   ├── create-post.md        # Generate new blog post with AI
-│   │   ├── generate-socials.md   # Generate social media posts
-│   │   ├── mdx-quality-review.md # SEO + Vale + Social validation
-│   │   ├── create-issue.md       # Generate new newsletter issue
-│   │   └── issue-quality-review.md # Vale + issue_check + email preview
-│   ├── hooks/                    # Python hooks for safety & validation
+├── .claude/                      # Claude Code commands, agents, skills
+│   ├── commands/
+│   │   ├── create-content.md     # ENTRY POINT: transcript → post + issue + surface kit + verify + push
+│   │   ├── check-buffer.md       # Ledger of upcoming Mondays
+│   │   ├── traffic.md            # Human-filtered traffic report
+│   │   └── setup.md              # Environment check
+│   ├── agents/                   # Subagents /create-content drives
+│   │   ├── blog-writer.md        # Post MDX + hero image, decides category and shape
+│   │   ├── newsletter-writer.md  # Issue MDX derived from post + transcript
+│   │   ├── x-writer.md           # surface/<stem>/x.md
+│   │   ├── linkedin-writer.md    # surface/<stem>/linkedin.md + hn.md | reddit.md
+│   │   ├── post-qc.md            # Fix-in-place quality control for the post
+│   │   ├── issue-qc.md           # Fix-in-place quality control for the issue
+│   │   └── social-qc.md          # Fix-in-place quality control for the kit
+│   ├── skills/
+│   │   ├── my-voice/             # The voice, defined once; every agent loads it
+│   │   └── humanizer/            # Vendored blader/humanizer
 │   └── settings.json             # Claude Code configuration
+│
+├── transcripts/                  # Cleaned transcripts, one per post, committed
+├── surface/                      # Per-post distribution copy (x, linkedin, hn | reddit)
 │
 ├── docs/                         # Architecture & setup documentation
 │   ├── architecture.md           # This file - current system architecture
@@ -114,76 +125,40 @@ the-agentic-engineer/
 
 ## Content Workflow
 
-### 1. Creating a Blog Post
+### 1. Creating a Monday
 
-**Recommended Workflow:**
 ```bash
-# Complete workflow (create → socials → review → remind to deploy)
-/ship Your blog post idea goes here
+/create-content path/to/transcript.txt
+/create-content path/to/transcript.txt --date 2026-10-05 --no-push
 ```
 
-This command orchestrates the entire content pipeline:
-1. Gets next available publish date from configured schedule
-2. Creates MDX post with AI-generated content and images
-3. Generates platform-optimized social media posts
-4. Runs comprehensive quality review (SEO + Vale + Social)
-5. Provides deployment instructions
+The command is the orchestrator. It runs, in order:
 
-**Step by Step (Manual):**
-```bash
-# 1. Create post with AI-generated content and images
-/create-post Your blog post idea goes here
+1. **Date** - `next_publish_date.py`, or `--date`
+2. **Clean the transcript** (in the orchestrator, not a subagent) - filler out, technical terms resolved, voice and order kept. A sensitivity scan lists third-party names, emails, employer internals and the like; if anything is found the command asks once, per item, whether to keep, abstract, or cut. Writes `transcripts/<stem>.md`. This is the only step that can ask.
+3. **`blog-writer`** (sequential, downstream needs its output) - `website/content/posts/<stem>.mdx` with `title, description, date, category, hashtags, shape` and a hero image via `aitk`. If `aitk` fails the run halts and reports the command and error verbatim; it resumes when the user says it is fixed.
+4. **`newsletter-writer`, `x-writer`, `linkedin-writer`** (parallel) - the issue, `surface/<stem>/x.md`, `surface/<stem>/linkedin.md` and `hn.md` (claim) or `reddit.md` (tutorial)
+5. **`post-qc`, `issue-qc`, `social-qc`** (parallel, fresh context) - run the checks, fix in place, re-check, return `clean` or the one unfixable item
+6. **`tools/verify_content.py <stem>`** - every check, one row each (see below); failed rows are handed back to the named writer, at most twice
+7. **Commit and push** - only on a clean table, and not with `--no-push`
 
-# 2. Generate social media posts (Twitter, LinkedIn)
-/generate-socials website/content/posts/YYYY-MM-DD-slug.mdx
+Every subagent prompt opens with `Load the following skills for consistency: <my-voice> <humanizer>`, so the voice is defined once in `.claude/skills/my-voice/SKILL.md`.
 
-# 3. Run quality review
-/mdx-quality-review website/content/posts/YYYY-MM-DD-slug.mdx
+### 2. The verify gate
 
-# 4. Deploy
-git add .
-git commit -m "Add new blog post: Your Title"
-git push origin main
-```
+`uv run tools/verify_content.py <stem> [--only GROUP ...] [--skip GROUP ...]` prints one row per check and exits 1 if any failed. Rows never disappear: a missing prerequisite reads as `skip` with the reason, so two runs diff cleanly.
 
-### 2. What Happens During Creation
+| Group | Owner | What it covers |
+|---|---|---|
+| transcript (T1-T5) | orchestrator | exists, length, no filler, no dashes, no emails or phone numbers |
+| post (P1-P18) | `blog-writer` | exact frontmatter keys, date matches stem and publish time, category, shape, no `social:`, title and description lengths, hero image, image references resolve, alt text, heading structure, body length, no dashes, no tenure or consulting language, vale, links |
+| issue (I1-I13) | `newsletter-writer` | keys, date matches post, subject and description lengths, archive_date, body length, code block, no local images, no dashes, no tenure or consulting language, vale, `send_issue.py --dry-run` composes with absolute links |
+| surface (S1-S8) | `x-writer`, `linkedin-writer`, `social-qc` | kit exists, tweet within the t.co budget with no URL, LinkedIn within limits with a hook line, the platform file matches the shape, hn.md title and comment, reddit.md subreddit and body and URL, no stray files, no tenure or consulting language |
+| qc (Q1-Q4) | orchestrator | image directory, no other entry on the date, date is a publish day, working tree holds only this post |
 
-When you run `/create-post`:
+The last line, `RE-RUN: <owner> (<ids>)`, is what the orchestrator uses to re-spawn exactly the writers that need to go again. Image rows are never re-run; a failure there is external breakage and goes to the user.
 
-1. **Get next Monday date** - Uses `next_publish_date.py` for consistent scheduling
-2. **Generate content** - AI creates complete blog post with proper structure
-3. **Generate images** - `aitk image generate` (OpenAI GPT Image backend) creates hero image and diagrams, writing WebP directly
-4. **Convert to WebP** - `aitk` outputs WebP directly via `-f webp`; `convert_to_webp.py` remains for converting pre-existing PNG/JPG assets
-5. **Save files**:
-   - MDX: `website/content/posts/YYYY-MM-DD-slug.mdx`
-   - Images: `website/public/blog/YYYY-MM-DD-slug/*.webp`
-6. **Validate** - Checks category, frontmatter, and image references
-
-### 3. Quality Review Process
-
-When you run `/mdx-quality-review`:
-
-1. **SEO Analysis** - `seo_check.py` validates:
-   - Title length (30-60 chars)
-   - Description (150-160 chars, required)
-   - Category (must be one of 7 options)
-   - Heading structure (single H1, proper hierarchy)
-   - Content length (300+ words)
-   - Image alt text
-   - Internal/external links
-
-2. **Vale Prose Linting** - Checks writing style:
-   - write-good rules for clarity
-   - Custom SEO rules
-   - Readability metrics
-   - Ignores code blocks and frontmatter
-
-3. **Social Media Validation** - `social_validator.py` checks:
-   - Twitter character limit (250 chars max, reserves 30 for URL)
-   - LinkedIn character limit (2970 chars max, reserves 30 for URL)
-   - Required `text` field for each platform
-   - Proper schema structure
-   - Warnings if no social posts defined
+`tools/seo_check.py` and `tools/issue_check.py` remain as human-readable reports; both are thin CLIs over `lib/post_checks.py` and `lib/issue_checks.py`, which the verify gate also uses, so the numbers agree.
 
 ### 4. Deployment
 
@@ -224,14 +199,11 @@ description: "SEO description for meta tags"     # Required, 150-160 chars
 date: "2025-10-12T10:00:00Z"                    # Required, ISO 8601 with quotes
 category: "tutorials"                            # Required, one of 7 categories
 hashtags: ["python", "automation", "ai"]         # Optional, freeform display-only
-
-social:                                          # Optional, generated by /generate-socials
-  twitter:
-    text: "🚀 Engaging tweet about the post (max 250 chars)"
-  linkedin:
-    text: "Professional LinkedIn post (max 2970 chars)"
+shape: "tutorial"                                # tutorial (Reddit) or claim (Hacker News)
 ---
 ```
+
+Social copy is not in the frontmatter. It lives in `surface/<stem>/` as `x.md`, `linkedin.md`, and `hn.md` or `reddit.md` (see `surface/README.md`).
 
 ### Categories (Required)
 
@@ -308,7 +280,7 @@ Shift the anchor by any multiple of 14 days and nothing changes.
 - `scheduling.py` - Shared date calculation for weekly/biweekly/monthly
 - `next_publish_date.py` - Calculates next available publish date
 - `buffer_check.py` - Adjusts buffer calculations (months or weeks)
-- `/create-post` command - Uses configured schedule
+- `/create-content` command - Uses configured schedule
 
 **Examples:**
 - Biweekly: `frequency: "biweekly"`, `day: "monday"`, `anchor: "2026-09-07"`
@@ -360,9 +332,9 @@ Posts appear within ~1 hour of their scheduled time without manual intervention.
 Social media posts are automatically published via GitHub Actions running daily at 6:30am EST. Posts go live at 6am EST via ISR, giving 30 minutes for Next.js to rebuild before tweeting.
 
 **Architecture:**
-1. **Content Generation** - `/generate-socials` command creates platform-optimized posts
-2. **Storage** - Social content stored in frontmatter under `social:` key
-3. **Validation** - Social validator checks character limits during quality review
+1. **Content Generation** - the `x-writer` and `linkedin-writer` agents write the copy during `/create-content`
+2. **Storage** - `surface/<stem>/x.md` (tweet text, no URL), `linkedin.md`, and `hn.md` or `reddit.md`
+3. **Validation** - `lib/social_validator.py` checks the t.co-billed tweet length and the LinkedIn limits; `verify_content.py` rows S2-S8 gate the commit
 4. **Standardized Schedule** - All posts publish at 6am EST (11am UTC)
 5. **Automated Tweeting** - GitHub Actions runs at 6:30am EST (11:30am UTC) to tweet posts from today
 
@@ -1061,7 +1033,7 @@ cd website && pnpm run build
 ### Quality Review Failures
 
 ```bash
-/mdx-quality-review website/content/posts/your-post.mdx
+uv run tools/verify_content.py YYYY-MM-DD-slug --only post
 ```
 
 **Common issues:**

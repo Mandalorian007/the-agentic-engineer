@@ -1,7 +1,7 @@
 # Social Media Automation
 
 **Date**: 2025-10-21
-**Status**: Design spec for automated social media posting with generated content
+**Status**: Historical. Superseded on 2026-09-21 by `/create-content`: social copy now lives in `surface/<stem>/` files, not frontmatter, and `/generate-socials` no longer exists.
 
 ---
 
