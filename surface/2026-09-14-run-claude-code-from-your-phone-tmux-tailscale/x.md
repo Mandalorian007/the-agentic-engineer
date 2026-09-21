@@ -1,0 +1,1 @@
+Someone sells a claw that props your MacBook lid open so your agents keep running while you walk away. Funny, and the wrong fix. Mine run on a Mac mini in a closet. tmux for persistence, Tailscale for access, attached from my phone in a checkout line.

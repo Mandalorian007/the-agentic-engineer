@@ -53,9 +53,11 @@ jobs:
           uv run tools/post_to_twitter.py $ARGS
 
       # The manual half of distribution (LinkedIn, HN, Reddit) starts from the
-      # surface kit /ship wrote. Drop it in Discord so it's a phone copy-paste.
+      # surface kit in surface/<stem>/. Drop it in Discord so it's a phone
+      # copy-paste. Runs even if the tweet step failed: a missing tweet should
+      # not also cost the LinkedIn and Reddit posts.
       - name: Post surface kit to Discord
-        if: ${{ inputs.dry_run != true }}
+        if: ${{ !cancelled() && inputs.dry_run != true }}
         env:
           LOW_CONTENT_WEBHOOK: ${{ secrets.LOW_CONTENT_WEBHOOK }}
         run: |

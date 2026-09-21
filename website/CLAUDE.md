@@ -41,8 +41,9 @@ the-agentic-engineer/
 ├── lib/                          # Python modules (config, scheduling, content, frontmatter)
 ├── specs/                        # Documentation (nextjs-migration-resources.md, etc.)
 ├── .claude/
-│   ├── commands/                 # Slash commands (/create-post, /build, /publish, etc.)
-│   ├── hooks/                    # Session and notification hooks
+│   ├── commands/                 # /create-content (the entry point), /check-buffer, /traffic, /setup
+│   ├── agents/                   # Subagents /create-content drives (writers and quality control)
+│   ├── skills/                   # my-voice (the voice rules) and humanizer
 │   └── settings.json             # Claude Code configuration
 └── posts/                        # Source markdown (being migrated to website/content/posts/)
 ```
@@ -71,7 +72,7 @@ the-agentic-engineer/
 
 **Categories:**
 - 7 hardcoded categories in `lib/categories.ts`
-- Aligned with `/create-post` command formats
+- The `blog-writer` agent classifies posts against this list by reader intent
 - Filter pages: `/blog/category/[category]`
 
 **Images:**

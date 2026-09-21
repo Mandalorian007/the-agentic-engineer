@@ -13,7 +13,7 @@ Worth reading first:
 
 | Where | What's in it |
 |---|---|
-| [`.claude/`](.claude/) | Slash commands and hooks. This is the encoded workflow. |
+| [`.claude/`](.claude/) | The `/create-content` command, the subagents it drives, and the `my-voice` skill. This is the encoded workflow. |
 | [`tools/`](tools/) | Scheduling, SEO checks, social validation, image conversion. |
 | [`lib/`](lib/) | Frontmatter parsing, publish-date math, post validators. |
 | [`.vale.ini`](.vale.ini) | Prose linting. Posts fail if the writing is sloppy. |
@@ -21,11 +21,14 @@ Worth reading first:
 | [`website/content/posts/`](website/content/posts/) | Every post, as source. |
 | [`newsletter/`](newsletter/) | The newsletter's copy, and notes on the Buttondown API. |
 
-The commands in `.claude/commands/` are the interesting part. One of them,
-`/ship`, encodes the whole path from an idea to a Monday: the post, the
-newsletter issue derived from it, the social copy, the surface kit for the
-part a person does by hand, and the commit. Nothing in this repo is written
-by hand from a blank file.
+`.claude/` is the interesting part. One command, `/create-content`, encodes
+the whole path from a spoken transcript to a Monday: the cleaned transcript,
+the post, the newsletter issue derived from it, the surface kit for the part
+a person does by hand, a verify table proving every piece landed, and the
+commit. It does the work through seven subagents in `.claude/agents/`
+(four writers, three quality-control agents that fix in place), all of which
+load one skill, `my-voice`, so the voice is defined once. Nothing in this
+repo is written by hand from a blank file.
 
 ## The weekly routine
 
@@ -33,26 +36,29 @@ If you are coming back to this repo after a while, this is all you need.
 
 | When | What | Command |
 |---|---|---|
-| Any day | Write next Monday's post and issue | `/ship <idea>` |
+| Any day | Turn a transcript into next Monday's post, issue, and surface kit | `/create-content <transcript>` |
 | Publish morning (Monday) | Put the post in front of people, by hand | Open Discord, copy the surface kit: LinkedIn text post; Hacker News (claim posts) or Reddit (tutorials). Answer replies. |
 | Saturday | Discord tells you which Mondays are empty | `/check-buffer` any time to see it yourself |
 | Monthly | Real readers, not crawlers | `/traffic` |
 
-`/ship` does everything except the Monday paste: next open Monday, the post,
-the newsletter issue derived from it, Twitter and LinkedIn copy, the surface
-kit, both quality reviews, commit, push. Nothing goes live at push; Vercel,
-the issue sender, and the tweet all fire on the post's date. Say "preview
-only" to stop before the push.
+`/create-content` does everything except the Monday paste: next open Monday,
+the cleaned transcript, the post, the newsletter issue derived from it, the
+surface kit (tweet, LinkedIn, and Hacker News or Reddit copy), quality
+control, a verify table, commit, push. Nothing goes live at push; Vercel, the
+issue sender, and the tweet all fire on the post's date. Pass `--no-push` to
+stop before the push.
 
 The cadence is weekly, Mondays, set in `blog-config.yaml`. To pull a post
-into an earlier gap: `uv run tools/move_post_date.py <from> <to>`, again with
-`--stream newsletter` for its issue, and rename its `surface/` kit.
+into an earlier gap: `uv run tools/move_post_date.py <from> <to>` (its surface
+kit moves with it), again with `--stream newsletter` for its issue.
 
-What changed on 2026-09-12, in case you remember the old shape: the two
-pipelines (`/create-post-pipeline`, `/create-issue-pipeline`) became `/ship`;
-issues are derived from posts instead of written separately; cadence went
-from every other Monday to every Monday; `surface/` and the Discord kit drop
-are new; `/traffic` is new.
+What changed on 2026-09-21, in case you remember the old shape: `/ship` and
+the five commands it chained became `/create-content` plus subagents; the
+input is a transcript rather than an idea; social copy moved out of post
+frontmatter into `surface/<stem>/` files; `tools/verify_content.py` gates the
+commit; the voice rules live in `.claude/skills/my-voice/`. Before that, on
+2026-09-12, the two pipelines became `/ship`, issues became derived from
+posts, and the cadence went weekly.
 
 ## Features
 
@@ -109,25 +115,27 @@ are new; `/traffic` is new.
    ```
    Visit http://localhost:3000
 
-### 2. Ship
+### 2. Create content
 
 ```bash
-/ship Your blog post idea goes here
+/create-content path/to/transcript.txt
+/create-content path/to/transcript.txt --date 2026-10-05 --no-push
 ```
 
-One command, one Monday. It runs, in order:
+One command, one Monday. Record yourself talking through the idea, hand it
+the transcript, and it runs, in order:
 
 1. Next open Monday from the schedule
-2. The post: MDX with AI-generated hero images, humanized against the voice anchor
-3. The newsletter issue, derived from the post (`/create-issue --from-post`), humanized
-4. Twitter and LinkedIn copy into the post's frontmatter
-5. The surface kit: `surface/YYYY-MM-DD-slug.md`, the finished text for the part a person does by hand (LinkedIn post, Hacker News title and author comment for claim posts, Reddit text post for tutorials)
-6. Quality review of both files (SEO, Vale, social validation, email preview)
-7. Commit on `main` and push
+2. The cleaned transcript, `transcripts/<stem>.md`: filler out, technical terms resolved, your voice and order kept. This is the only step that may ask you something, and only if the transcript holds something that should not be public (a name, an email, an internal system)
+3. The post, by the `blog-writer` agent: MDX with a `shape` (tutorial or claim) and an `aitk` hero image
+4. In parallel: the newsletter issue (`newsletter-writer`), the tweet (`x-writer`), and the LinkedIn post plus the Hacker News or Reddit copy (`linkedin-writer`), all into `surface/<stem>/`
+5. In parallel: `post-qc`, `issue-qc`, `social-qc`, which run the checks, fix what they find, and re-check
+6. `uv run tools/verify_content.py <stem>`: every check, one row each, and a `RE-RUN:` line naming any writer that has to go again
+7. Commit on `main` and push, only when the table is clean
 
-Nothing goes live at push. Vercel publishes the post at its frontmatter date, `send-issue.yml` sends the issue that morning, and `post-to-twitter.yml` tweets and drops the surface kit into Discord so the manual part is a copy-paste from a phone. Say "preview only" to stop before the push.
+Nothing goes live at push. Vercel publishes the post at its frontmatter date, `send-issue.yml` sends the issue that morning, and `post-to-twitter.yml` tweets `x.md` and drops the surface kit into Discord so the manual part is a copy-paste from a phone.
 
-The steps are still standalone commands if one needs redoing.
+If `aitk` fails to make the image, the run stops and tells you exactly what failed; say "fixed" and it continues. Any single writer can be re-spawned on its own by name against a transcript to redo one artifact.
 
 ## Workflow
 
@@ -137,22 +145,35 @@ The pipeline does everything except the part that only works when a person does 
 
 ### Available Commands
 
-**Entry point:**
-- `/ship <idea>` - Idea to pushed commit: post, issue, socials, surface kit, review
-
-**Individual Steps — Posts:**
-- `/create-post <idea>` - Generate MDX blog post with AI-generated images
-- `/generate-socials <path>` - Generate social media posts for Twitter & LinkedIn
-- `/mdx-quality-review <path>` - Run SEO + Vale prose linting + Social validation
-
-**Individual Steps — Issues:**
-- `/create-issue --from-post <path>` - Newsletter issue derived from a post (what `/ship` runs)
-- `/create-issue` - Hand-written issue for a week without a post (rare)
-- `/issue-quality-review <path>` - Run Vale + issue_check + email preview
-
-**Both Streams:**
-- `/check-buffer` - Slot ledger showing which publish dates are still open
+- `/create-content <transcript> [--date YYYY-MM-DD] [--no-push]` - Transcript to pushed commit: post, issue, surface kit, verify table
+- `/check-buffer` - Slot ledger showing which publish dates are still open, and whether each kit is complete
 - `/traffic` - Human-filtered traffic report (Vercel, Search Console, Buttondown), interpreted
+- `/setup` - Verify the local environment
+
+### Agents
+
+`/create-content` drives these; each can also be spawned by name to redo one artifact from a transcript:
+
+| Agent | Writes | Fixes |
+|---|---|---|
+| `blog-writer` | `website/content/posts/<stem>.mdx`, hero image | |
+| `newsletter-writer` | `website/content/issues/<stem>.mdx` | |
+| `x-writer` | `surface/<stem>/x.md` | |
+| `linkedin-writer` | `surface/<stem>/linkedin.md`, `hn.md` or `reddit.md` | |
+| `post-qc` | | the post, in place |
+| `issue-qc` | | the issue, in place |
+| `social-qc` | | the surface kit, in place |
+
+Every agent loads `.claude/skills/my-voice/SKILL.md` (byline, anchors, hard rules, per-surface notes) and the humanizer skill. The voice is defined in that one file.
+
+### Verify
+
+```bash
+uv run tools/verify_content.py 2026-10-05-my-post            # every check
+uv run tools/verify_content.py 2026-10-05-my-post --only surface
+```
+
+One row per check across transcript, post, issue, surface kit, and cross-checks. Rows never disappear; a missing prerequisite reads as `skip` with the reason. Exit 1 if any row failed. The `RE-RUN:` line names the owner of each failure.
 
 ### Scheduling Posts
 
@@ -192,14 +213,11 @@ description: "SEO description for meta tags"     # Required, 150-160 chars
 date: "2025-10-12T10:00:00Z"                    # Required, ISO 8601 with quotes
 category: "tutorials"                            # Required, one of 7 categories
 hashtags: ["python", "automation", "ai"]         # Optional, freeform display-only
-
-social:                                          # Optional, generated by /generate-socials
-  twitter:
-    text: "🚀 Engaging tweet about the post (max 250 chars)"
-  linkedin:
-    text: "Professional LinkedIn post (max 2970 chars)"
+shape: "tutorial"                                # tutorial (surfaces on Reddit) or claim (Hacker News)
 ---
 ```
+
+Social copy is not in the frontmatter. It lives in `surface/<stem>/` (see [`surface/README.md`](surface/README.md)).
 
 ### Categories (Required)
 
@@ -345,30 +363,16 @@ aitk image generate \
 - Add perspective (isometric, top-down)
 - Describe mood (professional, energetic)
 
-## Humanizing Posts (Voice Pass)
+## Voice
 
-After a post is drafted (by `/create-post` or by hand), an optional voice pass through the [`blader/humanizer`](https://github.com/blader/humanizer) Claude Code skill removes common AI tells (significance inflation, copula avoidance, AI-vocabulary, false ranges, rule-of-three filler, etc.) and re-injects the author's voice.
+Two skills in `.claude/skills/` define how everything here sounds, and every writer and quality-control agent loads both before touching a file:
 
-**Install (one-time, per machine):**
-```bash
-mkdir -p ~/.claude/skills
-git clone https://github.com/blader/humanizer.git ~/.claude/skills/humanizer
-```
+- **`my-voice`** is this blog's voice: the byline, the lived-experience anchors table, the hard rules (first-person practitioner, no tenure claims, no consulting language, no em dashes, hyphenated technical modifiers, product names verbatim, banned openers and vocabulary), the canonical cadence sample, and per-surface notes for posts, issues, X, LinkedIn, Hacker News, and Reddit. It is the single place the voice is defined; change it there and every agent follows.
+- **`humanizer`** is the vendored [`blader/humanizer`](https://github.com/blader/humanizer) skill. It catches the generic AI tells (significance inflation, copula avoidance, AI vocabulary, false ranges, rule-of-three filler). `my-voice` overrides it where they disagree, most visibly on em dashes, which are old voice for this site.
 
-**Usage — always pass a voice sample** to avoid homogenizing the blog's voice. The canonical voice sample for this blog is `website/content/posts/2026-01-19-ai-toolkit-escape-ecosystem-lock-in.mdx`:
-```
-/humanizer
-Humanize the post at website/content/posts/<your-post>.mdx.
-Use my writing style from website/content/posts/2026-01-19-ai-toolkit-escape-ecosystem-lock-in.mdx as a reference.
-```
+There is no separate humanizer pass. The patterns are applied while drafting, and `tools/verify_content.py` enforces the mechanical parts (dashes, tenure claims, consulting language) as rows.
 
-**Pipeline order:** the `/ship` orchestrator runs humanizer **between `/create-post` and `/generate-socials`** so socials reflect the humanized body. If you run steps manually, follow the same order.
-
-**Style rules for this blog (override humanizer defaults):**
-- **Minimize em dashes** — em dashes are old voice for this site; apply pattern #14 aggressively.
-- **Do not un-hyphenate technical compound modifiers** — skip pattern #26 for terms like `real-time`, `end-to-end`, `vendor-agnostic`, `plug-and-play`, `hands-on-keyboard`.
-- **Preserve product names** — Claude Code, Codex, Cursor, MCP, marketplace plugins, etc.
-- **Do not rewrite the `/services` closing CTA** — wording is load-bearing for conversion.
+To humanize a post by hand, load both skills and edit against the canonical sample, `website/content/posts/2026-01-19-ai-toolkit-escape-ecosystem-lock-in.mdx`.
 
 ## AI Toolkit (aitk)
 
@@ -392,7 +396,7 @@ aitk --help           # list all subcommands
 | Generate short video clips | `aitk video ...` |
 
 **Where this matters in the pipeline:**
-- `/create-post` (via Claude Code) calls `aitk image generate` for hero and inline images
+- The `blog-writer` agent calls `aitk image generate` for the hero image. If it fails, `/create-content` stops and reports the command and error verbatim
 - Interactive research can use `aitk search` / `aitk scrape` from the shell, or the existing MCP servers from inside Claude Code
 
 Run `aitk <subcommand> --help` for full flag details on any command.
@@ -500,7 +504,7 @@ The publish-day workflow (`.github/workflows/post-to-twitter.yml`) does two thin
 
 ### How It Works
 
-1. **`/ship` writes the social copy** into the post's frontmatter under `social:` and the surface kit into `surface/`
+1. **`/create-content` writes the surface kit** into `surface/<stem>/`: `x.md` for the tweet, `linkedin.md`, and `hn.md` or `reddit.md`
 2. **Posts go live daily at 6am EST** (11am UTC) via ISR
 3. **GitHub Actions runs at 6:30am EST** (11:30am UTC): `post_to_twitter.py` tweets, then `notify_surface.py` posts the surface kit to the Discord channel (`LOW_CONTENT_WEBHOOK`)
 4. **You post the kit** on LinkedIn, and on HN or Reddit depending on the post's shape
@@ -553,7 +557,7 @@ uv run tools/notify_surface.py --dry-run --date 2026-10-12
 
 ## Content Buffer Monitoring
 
-A Discord message every Saturday showing which upcoming Mondays still need a `/ship`.
+A Discord message every Saturday showing which upcoming Mondays still need a `/create-content`.
 
 ### Setup
 
@@ -578,11 +582,11 @@ uv run tools/buffer_check.py --notify
 
 ### What it shows
 
-One `/ship` fills one Monday: a post and the issue derived from it. The report is one row per Monday for the next two months:
+One `/create-content` fills one Monday: a post, the issue derived from it, and the surface kit. The report is one row per Monday for the next two months, with `⚠️ kit missing …` on any post whose kit is incomplete:
 
 ```
 🚨 LOW · Content Buffer
-Next /ship needed for  Mon Sep 28  ·  16 days
+Next /create-content needed for  Mon Sep 28  ·  16 days
 Monday
 ──────────────────────────────────────────────────────
 2 of 9 Mondays shipped
@@ -708,7 +712,7 @@ Check for:
 ### Quality Review Failures
 
 ```bash
-/mdx-quality-review website/content/posts/your-post.mdx
+uv run tools/verify_content.py YYYY-MM-DD-slug --only post
 ```
 
 Common issues:

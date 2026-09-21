@@ -4,11 +4,6 @@ description: "Stop rebuilding AI tools for every platform. Build a portable CLI 
 date: "2026-01-19T11:00:00Z"
 category: "tutorials"
 hashtags: ["ai-tools", "cli", "python", "uv", "portable"]
-social:
-  twitter:
-    text: "🔧 Stop rebuilding your AI tools for every new platform.\n\nBuild a portable CLI toolkit that works with ANY agent—Claude, Cursor, Copilot, anything.\n\nInstall once, use everywhere:"
-  linkedin:
-    text: "The AI tool landscape is fragmented. Your image generation workflow lives in Claude Code. Your web scraping scripts are in Cursor. Switch platforms and you're starting over.\n\nThere's a better pattern: package your AI capabilities as a standalone CLI.\n\nThe concept is simple but powerful:\n\n→ Install once via git (uv tool install git+...)\n→ Configure API keys once (~/.config/aitk/config)\n→ Access from ANY tool that can run bash commands\n\nThis works because CLIs are universal. Claude Code can run bash. Cursor can run bash. GitHub Copilot can run bash. Your custom agent can run bash.\n\nA well-designed toolkit includes:\n• Image generation and editing\n• Video creation with Sora\n• Web search via Perplexity\n• Web scraping with Firecrawl\n• Browser automation with Playwright\n\nThe key insight: make it discoverable. Use --help flags at every level so AI agents can explore capabilities programmatically.\n\nIn this article, I break down the architecture of a real implementation (AITK) and show you how to build your own portable toolkit.\n\nStop rebuilding your tools for every new platform. Build once, use anywhere:"
 ---
 ![Hero image showing a portable toolkit connecting to multiple AI platforms](../../public/blog/2026-01-19-ai-toolkit-escape-ecosystem-lock-in/hero-portable-ai-toolkit.webp)
 

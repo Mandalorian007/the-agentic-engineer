@@ -1,13 +1,24 @@
 # Surface kits
 
-One file per post, written by `/ship`, named like the post
-(`YYYY-MM-DD-slug.md`). It holds the finished copy for the part of
-distribution a person does by hand on publish morning: the LinkedIn text
-post, the Hacker News title and author comment (claim posts), or the Reddit
-text post (tutorials).
+One directory per post, written by `/create-content`, named like the post
+(`YYYY-MM-DD-slug/`). It holds the finished copy for every outlet:
 
-`tools/notify_surface.py` drops the day's kit into Discord from the
-publish-day workflow, so the routine is: open Discord on your phone, copy,
-paste, answer replies.
+| File | What | Who posts it |
+|---|---|---|
+| `x.md` | Tweet text, no URL; the workflow appends the link | `post-to-twitter.yml`, automatically |
+| `linkedin.md` | LinkedIn text post, no URL; the link goes in the first comment | a person |
+| `hn.md` | `Title:` line, blank line, author comment (claim posts) | a person |
+| `reddit.md` | `Subreddit:`, `Title:`, blank line, body ending with the URL (tutorials) | a person |
+
+No header lines inside the files. Title, URL, and shape come from the post's
+frontmatter when `tools/notify_surface.py` drops the kit into Discord on
+publish morning, one section per outlet, so the routine is: open Discord on
+your phone, copy, paste, answer replies.
+
+Posts from before the layout existed have only `x.md` and `linkedin.md`,
+migrated from their old frontmatter.
+
+`tools/move_post_date.py` moves the kit with the post.
+`tools/verify_content.py <stem>` checks a kit is complete and within limits.
 
 These are committed on purpose. They are the record of what was said where.

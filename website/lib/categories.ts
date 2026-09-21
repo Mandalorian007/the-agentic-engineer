@@ -2,7 +2,7 @@ import { Post, getPublishedPosts } from './posts';
 
 /**
  * Hardcoded category definitions
- * Aligned with /create-post command blog formats
+ * The blog-writer agent (.claude/agents/blog-writer.md) classifies against this list
  *
  * SELECTION RULE — classify by READER INTENT, not dominant wordcount.
  * Ask "what would a reader search or filter to FIND this post?" and honor the

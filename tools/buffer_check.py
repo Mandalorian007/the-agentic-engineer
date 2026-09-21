@@ -2,10 +2,10 @@
 """
 Check the content buffer and report to Discord.
 
-One `/ship` fills one Monday: a post and the issue derived from it. So the
-buffer is a ledger of upcoming Mondays, each one shipped, half-shipped, or
-empty. Half-shipped (a post with no issue, or the reverse) is called out
-because under `/ship` it should not happen.
+One `/create-content` fills one Monday: a post, the issue derived from it,
+and the surface kit. So the buffer is a ledger of upcoming Mondays, each one
+shipped, half-shipped, or empty. Half-shipped (a post with no issue, or the
+reverse) is called out because under `/create-content` it should not happen.
 
 Usage:
     uv run tools/buffer_check.py                   # print the report
@@ -36,6 +36,7 @@ from lib.config import (
     get_newsletter_config,
 )
 from lib.scheduling import get_next_publish_date, format_schedule_label
+from lib.surface import missing_files
 
 # How far ahead the ledger looks.
 LOOKAHEAD_MONTHS = 2
@@ -83,6 +84,7 @@ def get_scheduled(content_dir: Path, label_field: str) -> List[Dict]:
                 "label": label,
                 "date": entry_date,
                 "date_str": date_str,
+                "shape": extract_field_from_mdx(mdx_file, 'shape'),
             })
 
     scheduled.sort(key=lambda x: x["date"])
@@ -152,7 +154,7 @@ def find_off_cadence(slots: List[datetime], posts: List[Dict],
 # Status is rated on how many upcoming Mondays are fully shipped before the
 # first one that isn't. Counting slots keeps the rating readable straight off
 # the ledger and keeps its meaning if the cadence changes.
-LOW_MAX_RUN = 0      # the very next Monday needs a /ship
+LOW_MAX_RUN = 0      # the very next Monday needs a /create-content
 WARN_MAX_RUN = 2     # a gap inside the next two or three
 
 
@@ -178,16 +180,25 @@ def rate(ledger: List[Dict]) -> Dict:
     }
 
 
+def kit_status(post: Optional[Dict]) -> str:
+    """Empty when the post's surface kit is complete, else what is missing."""
+    if not post:
+        return ""
+    missing = missing_files(post["path"].stem, post.get("shape"))
+    return f"   ⚠️ kit missing {', '.join(missing)}" if missing else ""
+
+
 def format_row(row: Dict, has_issues: bool) -> str:
     """`Mon Sep 14   Post title   ✉ Issue subject`, or a dash for an empty slot."""
     day = row["date"].strftime("%a %b %d")
     if row["state"] == "empty":
         return f"{day}   —"
     post = row["post"]["label"] if row["post"] else "⚠️ no post"
+    kit = kit_status(row["post"])
     if not has_issues:
-        return f"{day}   {post}"
+        return f"{day}   {post}{kit}"
     issue = f"✉ {row['issue']['label']}" if row["issue"] else "⚠️ no issue"
-    return f"{day}   {post}   {issue}"
+    return f"{day}   {post}   {issue}{kit}"
 
 
 def half_shipped_fixes(ledger: List[Dict]) -> List[str]:
@@ -198,10 +209,10 @@ def half_shipped_fixes(ledger: List[Dict]) -> List[str]:
             continue
         if row["post"] and not row["issue"]:
             fixes.append(f"{row['date_str']}   post without issue → "
-                         f"/create-issue --from-post {row['post']['path']}")
+                         f"spawn newsletter-writer on transcripts/{row['post']['path'].stem}.md")
         else:
             fixes.append(f"{row['date_str']}   issue without post → "
-                         f"/ship for that Monday, or move the issue")
+                         f"/create-content for that Monday, or move the issue")
     return fixes
 
 
@@ -211,7 +222,7 @@ def create_discord_message(ledger: List[Dict], rating: Dict,
     """The Discord webhook payload: one embed, one ledger."""
     if rating["next_gap"]:
         days = (rating["next_gap"] - datetime.now(timezone.utc)).days
-        deadline = (f"**Next /ship needed for {rating['next_gap'].strftime('%a %b %d')}**"
+        deadline = (f"**Next /create-content needed for {rating['next_gap'].strftime('%a %b %d')}**"
                     f" · {days} days")
     else:
         deadline = f"**No gaps in the next {rating['total']} Mondays**"
@@ -313,7 +324,7 @@ def main():
     print(f"\n{rating['status']} · Content Buffer")
     if rating["next_gap"]:
         days = (rating["next_gap"] - datetime.now(timezone.utc)).days
-        print(f"Next /ship needed for  {rating['next_gap'].strftime('%a %b %d')}  ·  {days} days")
+        print(f"Next /create-content needed for  {rating['next_gap'].strftime('%a %b %d')}  ·  {days} days")
     else:
         print(f"No gaps in the next {rating['total']} Mondays")
     print(schedule_label)

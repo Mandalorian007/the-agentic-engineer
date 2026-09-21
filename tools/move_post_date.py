@@ -33,6 +33,8 @@ from typing import Optional, Tuple
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from lib.config import load_config, get_stream_config, get_publishing_config
 from lib.frontmatter import parse_frontmatter, serialize_frontmatter, FrontmatterError
+from lib.social_validator import build_url
+from lib.surface import rename_kit
 
 
 class MoveError(Exception):
@@ -249,6 +251,17 @@ def move_post(
     old_image_dir = images_dir / f"{old_date_prefix}-{slug}" if images_dir else None
     new_image_dir = images_dir / f"{new_date_prefix}-{slug}" if images_dir else None
 
+    # The surface kit is named after the post and reddit.md carries the URL,
+    # so it travels with the post. Issues have no kit.
+    old_stem, new_stem = f"{old_date_prefix}-{slug}", f"{new_date_prefix}-{slug}"
+    domain = config.get('domain', 'agentic-engineer.com')
+    kit_plan = []
+    if stream == 'posts':
+        kit_plan = rename_kit(
+            old_stem, new_stem, build_url(old_stem, domain), build_url(new_stem, domain),
+            dry_run=True,
+        )
+
     # Print plan
     if verbose:
         print("\n" + "=" * 60)
@@ -279,6 +292,13 @@ def move_post(
         else:
             print(f"\n4. No image directory found at:")
             print(f"   {old_image_dir}")
+
+        if kit_plan:
+            print(f"\n5. Surface kit:")
+            for line in kit_plan:
+                print(f"   {line}")
+        elif stream == 'posts':
+            print(f"\n5. No surface kit found at surface/{old_stem}/")
 
         print("\n" + "=" * 60)
 
@@ -314,6 +334,15 @@ def move_post(
                 )
 
             shutil.move(str(old_image_dir), str(new_image_dir))
+
+        # 4. Move the surface kit with it
+        if kit_plan:
+            if verbose:
+                print("📣 Moving surface kit...")
+            rename_kit(
+                old_stem, new_stem,
+                build_url(old_stem, domain), build_url(new_stem, domain),
+            )
 
         print("\n✅ Move completed successfully!")
         print(f"   {noun.capitalize()} moved from {old_date_prefix} to {new_date_prefix}")

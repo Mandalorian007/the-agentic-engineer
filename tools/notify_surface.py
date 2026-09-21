@@ -3,9 +3,9 @@
 Drop the day's surface kit into Discord.
 
 Runs from the publish-day workflow right after the tweet goes out. Finds the
-post scheduled for today, reads `surface/<date>-<slug>.md`, and posts it to
-the Discord webhook so the manual part of distribution (LinkedIn, Hacker
-News, Reddit) is a copy-paste from a phone.
+post scheduled for today, reads `surface/<stem>/`, and posts each outlet's
+copy to the Discord webhook so the manual part of distribution (LinkedIn,
+Hacker News, Reddit) is a copy-paste from a phone.
 
 Usage:
     uv run tools/notify_surface.py                       # today's post
@@ -32,15 +32,30 @@ from dotenv import load_dotenv
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from lib.config import load_config
 from lib.content import get_entry_for_date
+from lib.social_validator import build_url
+from lib.surface import kit_dir, read_file
 
 project_root = Path(__file__).parent.parent
 env_file = project_root / ".env.local"
 if env_file.exists():
     load_dotenv(env_file)
 
-SURFACE_DIR = project_root / "surface"
 # Discord caps a message at 2000 characters. Leave room for the code fence.
 CHUNK = 1900
+
+# Outlet order is the order a person works through them on the morning of.
+# X goes last because the workflow already posted it; it is there for the record.
+OUTLETS = [
+    ("linkedin.md", "LinkedIn",
+     "Paste as a text post. Put this in the first comment, not the body:\n{url}"),
+    ("hn.md", "Hacker News",
+     "Submit between 8 and 10am Eastern. Title verbatim. Post the comment yourself "
+     "right after submitting. Do not ask anyone to upvote.\nURL: {url}"),
+    ("reddit.md", "Reddit",
+     "Text post, not a link post. The link is already at the end of the body."),
+    ("x.md", "X",
+     "Already posted by the workflow this morning, unless the step above failed."),
+]
 
 
 def chunks(text: str, size: int = CHUNK):
@@ -53,6 +68,22 @@ def chunks(text: str, size: int = CHUNK):
         buf += line
     if buf:
         yield buf
+
+
+def build_messages(stem: str, frontmatter: dict, url: str) -> list:
+    """The Discord messages for one kit, in posting order."""
+    title = frontmatter.get("title", stem)
+    shape = frontmatter.get("shape") or "legacy"
+    messages = [
+        f"📣 **Surface kit for today's post**\n**{title}**\n{url}\nShape: {shape}"
+    ]
+    for name, label, instruction in OUTLETS:
+        text = read_file(stem, name)
+        if text is None:
+            continue
+        messages.append(f"## {label}\n{instruction.format(url=url)}")
+        messages.extend(f"```markdown\n{c}```" for c in chunks(text + "\n"))
+    return messages
 
 
 def main() -> int:
@@ -72,21 +103,22 @@ def main() -> int:
         print(f"ℹ️  No post scheduled for {target}; nothing to surface.")
         return 0
 
-    post_path = entry[0]
-    kit = SURFACE_DIR / f"{post_path.stem}.md"
-    if not kit.exists():
-        print(f"⚠️  {post_path.name} publishes today but surface/{kit.name} does not exist.")
-        print("   Run /ship next time, or write the kit by hand before the next publish day.")
+    post_path, frontmatter, _ = entry
+    stem = post_path.stem
+    kit = kit_dir(stem)
+    if not kit.is_dir():
+        print(f"⚠️  {post_path.name} publishes today but surface/{stem}/ does not exist.")
+        print("   Run /create-content next time, or write the kit by hand before the next publish day.")
         return 0
 
-    text = kit.read_text(encoding="utf-8")
-    header = f"📣 **Surface kit for today's post** (`{kit.name}`)\n"
-    messages = [header] + [f"```markdown\n{c}```" for c in chunks(text)]
+    url = build_url(stem, config.get("domain", "agentic-engineer.com"))
+    messages = build_messages(stem, frontmatter, url)
 
     if args.dry_run:
         print("📋 Dry run. Would post to Discord:\n")
-        print(header)
-        print(text)
+        for msg in messages:
+            print(msg)
+            print()
         return 0
 
     webhook = os.environ.get("LOW_CONTENT_WEBHOOK")
