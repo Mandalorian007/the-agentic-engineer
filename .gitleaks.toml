@@ -1,0 +1,16 @@
+# Secret scan config for .github/workflows/secret-scan.yml.
+# GitHub push protection is on but does not recognise Discord webhooks, which
+# is how one leaked in 82a5d50. This rule closes that gap.
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "discord-webhook-url"
+description = "Discord webhook URL (id + token). Keep it in env vars only."
+regex = '''https://(?:ptb\.|canary\.)?discord(?:app)?\.com/api/webhooks/\d+/[A-Za-z0-9_-]{20,}'''
+keywords = ["discord"]
+
+[allowlist]
+description = "Already-revoked webhook from 82a5d50; lives in history only."
+commits = ["82a5d50f7de9450728296bef1dc6f344dada00f7", "688a420f10938c6e92080bf9a71d860457e3ae2d"]
