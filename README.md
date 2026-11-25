@@ -73,7 +73,7 @@ are new; `/traffic` is new.
 
 **Requirements:**
 - Node.js 18+ and pnpm
-- Python 3.10+ (for content generation tools)
+- Python 3.11+ (for content generation tools)
 - [`aitk`](#ai-toolkit-aitk) CLI installed and configured (`aitk config`) — used for image generation
 - Vale (optional, for prose linting): `brew install vale`
 
